@@ -11,10 +11,8 @@ COPY assets/ /etc/kubernetes/node-feature-discovery/assets
 
 #ADD controller-manifests /manifests
 
-COPY deploy/olm-catalog/$CSV /manifests/$CSV
 COPY deploy/olm-catalog/nfd.package.yaml /manifests/
 
 RUN useradd node-feature-discovery-operator
 USER node-feature-discovery-operator
 ENTRYPOINT ["/usr/bin/node-feature-discovery-operator"]
-
