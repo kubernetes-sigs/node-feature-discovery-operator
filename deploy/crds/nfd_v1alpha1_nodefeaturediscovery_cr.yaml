@@ -1,0 +1,8 @@
+apiVersion: nfd.openshift.io/v1alpha1
+kind: NodeFeatureDiscovery
+metadata:
+  name: example-nodefeaturediscovery
+  namespace: REPLACE_NAMESPACE
+spec:
+  # Add fields here
+  size: 3

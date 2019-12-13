@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nfd-master
+  namespace: REPLACE_NAMESPACE
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nfd-master
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - nodes
+  verbs:
+  - get
+  - patch
+  - update
+--- 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nfd-master
+  annotations:
+    callback: prefix-crb-nfd-master
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nfd-master
+subjects:
+- kind: ServiceAccount
+  name: nfd-master
+  namespace: REPLACE_NAMESPACE
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: nfd-master
+  name: nfd-master
+  namespace: REPLACE_NAMESPACE
+  annotations:
+    callback: prefix-nfd-master
+spec:
+  selector:
+    matchLabels:
+      app: nfd-master 
+  template:
+    metadata:
+      labels:
+        app: nfd-master 
+    spec:
+      serviceAccount: nfd-master
+      nodeSelector: 
+        node-role.kubernetes.io/master: ""
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Equal"
+          value: ""
+          effect: "NoSchedule"
+      containers:
+        - env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+               fieldPath: spec.nodeName
+          image: $(NODE_FEATURE_DISCOVERY_IMAGE)
+          name: nfd-master
+          command: ["nfd-master", "--port=12000", "--extra-label-ns=nvidia.com,goldmansachs.com"]
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nfd-master
+  namespace: REPLACE_NAMESPACE
+spec:
+  type: ClusterIP
+  selector:
+    app: nfd-master
+  ports:
+  - protocol: TCP
+    port: 12000
+    targetPort: 12000
+    name: nfd

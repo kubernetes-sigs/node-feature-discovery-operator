@@ -1,0 +1,4 @@
+packageName: nfd
+channels:
+- name: 4.2
+  currentCSV: nfd.v4.2.0

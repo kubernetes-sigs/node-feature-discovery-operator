@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-feature-discovery-operator
+  namespace: REPLACE_NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: node-feature-discovery-operator
+  template:
+    metadata:
+      labels:
+        name: node-feature-discovery-operator
+    spec:
+      serviceAccountName: node-feature-discovery-operator
+      containers:
+        - name: node-feature-discovery-operator
+          # Replace this with the built image name
+          image: REPLACE_IMAGE
+          command:
+          - node-feature-discovery-operator
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_FEATURE_DISCOVERY_IMAGE
+              value: "quay.io/kubernetes_incubator/node-feature-discovery:v0.5.0"
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Equal"
+          value: ""
+          effect: "NoSchedule"

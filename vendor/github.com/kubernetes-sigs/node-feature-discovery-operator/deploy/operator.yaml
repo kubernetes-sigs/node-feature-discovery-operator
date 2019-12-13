@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-nfd-operator
+  namespace: REPLACE_NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: cluster-nfd-operator
+  template:
+    metadata:
+      labels:
+        name: cluster-nfd-operator
+    spec:
+      serviceAccountName: cluster-nfd-operator
+      containers:
+        - name: cluster-nfd-operator
+          # Replace this with the built image name
+          image: REPLACE_IMAGE
+          command:
+          - cluster-nfd-operator
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_FEATURE_DISCOVERY_IMAGE
+              value: "quay.io/zvonkok/node-feature-discovery:v4.2"
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Equal"
+          value: ""
+          effect: "NoSchedule"

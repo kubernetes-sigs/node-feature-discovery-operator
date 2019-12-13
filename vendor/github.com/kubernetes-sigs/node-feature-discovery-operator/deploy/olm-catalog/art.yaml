@@ -1,0 +1,16 @@
+updates:
+  - file: "{MAJOR}.{MINOR}/nfd.v{MAJOR}.{MINOR}.0.clusterserviceversion.yaml" # relative to this file
+    update_list:
+    # replace metadata.name value
+    - search: "nfd.v{MAJOR}.{MINOR}.0"
+      replace: "nfd.{FULL_VER}"
+    # replace entire version line, otherwise would replace 4.2.0 anywhere
+    - search: "version: {MAJOR}.{MINOR}.0"
+      replace: "version: {FULL_VER}"
+    - search: 'olm.skipRange: ">=4.1.0 <{MAJOR}.{MINOR}.0"'
+      replace: 'olm.skipRange: ">=4.1.0 <{FULL_VER}"'
+  - file: "nfd.package.yaml"
+    update_list:
+    - search: "currentCSV: nfd.v{MAJOR}.{MINOR}.0"
+      replace: "currentCSV: nfd.{FULL_VER}"
+

@@ -1,0 +1,196 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nfd-worker
+  namespace: openshift-nfd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: nfd-worker
+  namespace: openshift-nfd
+rules:
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+  resourceNames:
+  - nfd-worker
+- apiGroups:
+  - security.openshift.io
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+  resourceNames:
+  - nfd-worker
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nfd-worker
+  namespace: openshift-nfd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nfd-worker
+subjects:
+- kind: ServiceAccount
+  name: nfd-worker
+  namespace: openshift-nfd
+--- 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfd-worker
+  namespace: openshift-nfd
+data:
+  nfd-worker-conf: |
+    sources:
+      pci:
+        deviceLabelFields:
+          - "vendor"
+        deviceClassWhitelist:
+          - "0200"
+          - "03"
+          - "12"
+    
+    #      - "class"
+          
+    #      - "device"
+    #      - "subsystem_vendor"
+    #      - "subsystem_device"
+--- 
+allowHostDirVolumePlugin: true
+allowHostIPC: false
+allowHostNetwork: true
+allowHostPID: false
+allowHostPorts: true
+allowPrivilegeEscalation: true
+allowPrivilegedContainer: false
+allowedCapabilities: null
+apiVersion: security.openshift.io/v1
+defaultAddCapabilities: null
+fsGroup:
+  type: MustRunAs
+groups: []
+kind: SecurityContextConstraints
+metadata:
+  annotations:
+    callback: prefix-scc-nfd-worker
+    kubernetes.io/description: nfd-master allows using host networking, host ports
+      and hostPath but still requires pods to be run with a UID and SELinux 
+      context that are allocated to the namespace.
+  name: nfd-worker
+priority: null
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+- KILL
+- MKNOD
+- SETUID
+- SETGID
+runAsUser:
+  type: MustRunAsRange
+seLinuxContext:
+  type: MustRunAs
+supplementalGroups:
+  type: MustRunAs
+users: 
+- REPLACE_USERS
+#- system:serviceaccount:openshift-nfd:nfd-worker
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- persistentVolumeClaim
+- projected
+- secret
+- hostPath  
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: nfd-worker
+  name: nfd-worker
+  namespace: openshift-nfd
+  annotations:
+    callback: prefix-nfd-worker
+spec:
+  selector:
+    matchLabels:
+      app: nfd-worker
+  template:
+    metadata:
+      labels:
+        app: nfd-worker
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      tolerations:
+      - operator: Exists
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      serviceAccount: nfd-worker
+      readOnlyRootFilesystem: true
+      containers:
+        - env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          image: $(NODE_FEATURE_DISCOVERY_IMAGE)
+          name: nfd-worker
+          command:
+            - "nfd-worker"
+          args:
+            - "--sleep-interval=60s"
+            - "--server=$(NFD_MASTER_SERVICE_HOST):$(NFD_MASTER_SERVICE_PORT)"
+          volumeMounts:
+            - name: host-boot
+              mountPath: "/host-boot"
+              readOnly: true
+            - name: host-os-release
+              mountPath: "/host-etc/os-release"
+              readOnly: true
+            - name: host-sys
+              mountPath: "/host-sys"
+            - name: config
+              mountPath: "/etc/kubernetes/node-feature-discovery"
+            - name: nfd-hooks
+              mountPath: "/etc/kubernetes/node-feature-discovery/source.d"
+            - name: nfd-features
+              mountPath: "/etc/kubernetes/node-feature-discovery/features.d"
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: host-boot
+          hostPath:
+            path: "/boot"
+        - name: host-os-release
+          hostPath:
+            path: "/etc/os-release"
+        - name: host-sys
+          hostPath:
+            path: "/sys"
+        - name: nfd-hooks
+          hostPath:
+            path: "/etc/kubernetes/node-feature-discovery/source.d"
+        - name: nfd-features
+          hostPath:
+            path: "/etc/kubernetes/node-feature-discovery/features.d"
+        - name: config 
+          configMap:
+            name: nfd-worker
+            items:
+              - key: nfd-worker-conf
+                path: nfd-worker.conf
+
+

@@ -1,0 +1,12 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: node-feature-discovery-operator
+  namespace: REPLACE_NAMESPACE
+subjects:
+- kind: ServiceAccount
+  name: node-feature-discovery-operator
+roleRef:
+  kind: Role
+  name: node-feature-discovery-operator
+  apiGroup: rbac.authorization.k8s.io
