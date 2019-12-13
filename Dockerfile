@@ -4,7 +4,6 @@ COPY . .
 RUN make build
 
 FROM registry.access.redhat.com/ubi8/ubi
-ARG CSV=4.2
 COPY --from=builder /go/src/github.com/kubernetes-sigs/node-feature-discovery-operator/node-feature-discovery-operator /usr/bin/
 
 RUN mkdir -p /etc/kubernetes/node-feature-discovery/assets
@@ -18,5 +17,4 @@ COPY deploy/olm-catalog/nfd.package.yaml /manifests/
 RUN useradd node-feature-discovery-operator
 USER node-feature-discovery-operator
 ENTRYPOINT ["/usr/bin/node-feature-discovery-operator"]
-
 
