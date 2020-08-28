@@ -13,6 +13,8 @@ spec:
       labels:
         app: nfd-worker
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       hostNetwork: true
       serviceAccount: nfd-worker
       readOnlyRootFilesystem: true
@@ -71,5 +73,3 @@ spec:
             items:
               - key: nfd-worker-conf
                 path: nfd-worker.conf
-
-
