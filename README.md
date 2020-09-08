@@ -9,7 +9,7 @@ Learn how to engage with the Kubernetes community on the [community page](http:/
 
 You can reach the maintainers of this project at:
 
-- [Slack channel](https://kubernetes.slack.com/messages/sig-node)
+- [Slack channel](https://kubernetes.slack.com/messages/node-feature-discovery)
 - [Mailing list](https://groups.google.com/forum/#!forum/kubernetes-sig-node)
 
  
