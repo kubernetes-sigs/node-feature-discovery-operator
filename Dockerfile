@@ -1,5 +1,5 @@
 # Build the operator
-FROM registry.access.redhat.com/ubi8/go-toolset AS builder
+FROM golang:1.13 AS builder
 WORKDIR /go/src/github.com/kubernetes-sigs/node-feature-discovery-operator
 
 # Fetch/cache dependencies
