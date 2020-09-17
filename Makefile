@@ -38,33 +38,33 @@ go_mod:
 build: go_mod
 	@GOOS=$(GOOS) go build -o $(BIN) $(MAIN_PACKAGE)
 
-deploy-crds:  
+deploy-crds:
 	for obj in $(DEPLOY_CRDS); do \
 		$(TEMPLATE_CMD) $$obj | kubectl apply -f - ;\
 		sleep 1;\
-	done	
+	done
 
 deploy-objects: deploy-crds
 	for obj in $(DEPLOY_OBJECTS); do \
 		$(TEMPLATE_CMD) $$obj | kubectl apply -f - ;\
 		sleep 1;\
-	done	
+	done
 
 deploy: deploy-objects
 	for obj in $(DEPLOY_CRS); do \
 		$(TEMPLATE_CMD) $$obj | kubectl apply -f - ;\
 		sleep 1;\
-	done	
+	done
 
 undeploy:
 	for obj in $(DEPLOY_OBJECTS) $(DEPLOY_CRDS) $(DEPLOY_CRS); do \
 		$(TEMPLATE_CMD) $$obj | kubectl delete -f - ;\
-	done	
+	done
 
 verify:	verify-gofmt # ci-lint
 
 verify-gofmt:
-	@./scripts/verify-gofmt.sh	
+	@./scripts/verify-gofmt.sh
 
 ci-lint:
 	golangci-lint run --timeout 5m0s
@@ -76,7 +76,7 @@ clean:
 clean-labels:
 	@$(shell kubectl get no -o yaml | sed -e '/^\s*nfd.node.kubernetes.io/d' -e '/^\s*feature.node.kubernetes.io/d' | kubectl replace -f -)
 
-image: 
+image:
 	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG) \
 		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)) \
 		$(IMAGE_BUILD_EXTRA_OPTS) ./
@@ -88,5 +88,5 @@ push:
 	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)
 	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
 
-.PHONY: all build test generate verify verify-gofmt clean local-image local-image-push deploy-objects deploy-operator deploy-crds 
+.PHONY: all build test generate verify verify-gofmt clean local-image local-image-push deploy-objects deploy-operator deploy-crds
 .SILENT: go_mod

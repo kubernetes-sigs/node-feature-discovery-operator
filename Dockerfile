@@ -20,4 +20,4 @@ COPY assets /opt/nfd
 RUN useradd node-feature-discovery-operator
 USER node-feature-discovery-operator
 ENTRYPOINT ["/usr/bin/node-feature-discovery-operator"]
-LABEL io.k8s.display-name="node-feature-discovery-operator" 
+LABEL io.k8s.display-name="node-feature-discovery-operator"

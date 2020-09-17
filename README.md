@@ -12,7 +12,7 @@ You can reach the maintainers of this project at:
 - [Slack channel](https://kubernetes.slack.com/messages/node-feature-discovery)
 - [Mailing list](https://groups.google.com/forum/#!forum/kubernetes-sig-node)
 
- 
+
 ## Building the operator
 
 Checkout the sources
@@ -27,7 +27,7 @@ Build the operator image
 make image IMAGE=<my repo>:<my tag>
 ```
 
-Optionally you can push it to your image repo 
+Optionally you can push it to your image repo
 
 ```bash
 make image-push IMAGE=<my repo>:<my tag>
@@ -46,7 +46,7 @@ $ make deploy IMAGE=<my repo>:<my tag>
 
 The operator will use the operand node-feature-discovery image built from: https://github.com/kubernetes-sigs/node-feature-discovery
 
-To uninstall the operator run 
+To uninstall the operator run
 
 ```bash
 $ make undeploy
@@ -54,16 +54,16 @@ $ make undeploy
 
 ## Extending Node-feature-discovery with sidecar containers and hooks
 
-First see upstream documentation of the hook feature and how to create a correct hook file: 
+First see upstream documentation of the hook feature and how to create a correct hook file:
 
 https://github.com/kubernetes-sigs/node-feature-discovery#local-user-specific-features.
 
 The DaemonSet running on the workers will mount the `hostPath: /etc/kubernetes/node-feature-discovery/source.d`.
-Additional hooks can than be provided by a sidecar container that is as well running on the workers and mounting the same hostpath and writing the hook executable (shell-script, compiled code, ...) to this directory. 
+Additional hooks can than be provided by a sidecar container that is as well running on the workers and mounting the same hostpath and writing the hook executable (shell-script, compiled code, ...) to this directory.
 
-NFD will execute any file in this directory, if one needs any configuration for the hook, 
-a separate configuration directory can be created under `/etc/kubernetes/node-feature-discovery/source.d` 
-e.g. `/etc/kubernetes/node-feature-discovery/source.d/own-hook-conf`, NFD will not recurse deeper into the file hierarchy. 
+NFD will execute any file in this directory, if one needs any configuration for the hook,
+a separate configuration directory can be created under `/etc/kubernetes/node-feature-discovery/source.d`
+e.g. `/etc/kubernetes/node-feature-discovery/source.d/own-hook-conf`, NFD will not recurse deeper into the file hierarchy.
 
 ### Code of conduct
 

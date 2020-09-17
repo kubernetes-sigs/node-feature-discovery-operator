@@ -7,14 +7,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: nfd-master 
+      app: nfd-master
   template:
     metadata:
       labels:
-        app: nfd-master 
+        app: nfd-master
     spec:
       serviceAccount: nfd-master
-      nodeSelector: 
+      nodeSelector:
         node-role.kubernetes.io/master: ""
       tolerations:
         - key: "node-role.kubernetes.io/master"
