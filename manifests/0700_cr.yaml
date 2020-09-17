@@ -1,7 +1,7 @@
 apiVersion: nfd.kubernetes.io/v1alpha1
 kind: NodeFeatureDiscovery
 metadata:
-  name: nfd-master-server 
+  name: nfd-master-server
   namespace: REPLACE_NAMESPACE
 spec:
   namespace: node-feature-discovery-operator
