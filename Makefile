@@ -61,7 +61,7 @@ undeploy:
 		$(TEMPLATE_CMD) $$obj | kubectl delete -f - ;\
 	done	
 
-verify:	verify-gofmt ci-lint
+verify:	verify-gofmt # ci-lint
 
 verify-gofmt:
 	@./scripts/verify-gofmt.sh	
