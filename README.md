@@ -24,13 +24,15 @@ $ git clone https://github.com/kubernetes-sigs/node-feature-discovery-operator
 Build the operator image
 
 ```bash
-make image IMAGE=<my repo>:<my tag>
+IMAGE_REGISTRY=<my registry>
+make image 
 ```
 
 Optionally you can push it to your image repo
 
 ```bash
-make image-push IMAGE=<my repo>:<my tag>
+IMAGE_REGISTRY=<my registry>
+make push
 ```
 
 Alternatively, instead of specifying variables on the command line, you can edit the Makefile to permanently change parameter defaults like name of the image or namespace where the operator is deployed.
@@ -41,7 +43,8 @@ The default CR will create the operand (NFD) in the `node-feature-discovery-oper
 the CR can be edited to choose another namespace and image. See the `manifests/0700_cr.yaml` for the default values.
 
 ```bash
-$ make deploy IMAGE=<my repo>:<my tag>
+IMAGE_REGISTRY=<my registry>
+make deploy 
 ```
 
 The operator will use the operand node-feature-discovery image built from: https://github.com/kubernetes-sigs/node-feature-discovery
@@ -49,7 +52,7 @@ The operator will use the operand node-feature-discovery image built from: https
 To uninstall the operator run
 
 ```bash
-$ make undeploy
+make undeploy
 ```
 
 ## Extending Node-feature-discovery with sidecar containers and hooks
