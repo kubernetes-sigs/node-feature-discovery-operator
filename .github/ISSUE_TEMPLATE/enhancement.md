@@ -1,6 +1,6 @@
 ---
 name: Enhancement Request
-about: Suggest an enhancement to the Node-Feature-Discovery-Operator project
+about: Suggest an enhancement to the Node Feature Discovery Operator project
 labels: kind/feature
 
 ---
