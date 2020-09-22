@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	nodeFeautreDiscoveryImageDefault string = "quay.io/kubernetes_incubator/node-feature-discovery:latest"
+	nodeFeautreDiscoveryImageDefault string = "k8s.gcr.io/nfd/node-feature-discovery:v0.6.0"
 )
 
 var log = logf.Log.WithName("config")
