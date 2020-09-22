@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug encountered while operating the Node-Feature-Discovery-Operator
+about: Report a bug encountered while using Node Feature Discovery Operator
 labels: kind/bug
 
 ---
