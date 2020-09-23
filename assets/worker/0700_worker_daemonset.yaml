@@ -13,8 +13,13 @@ spec:
       labels:
         app: nfd-worker
     spec:
-      nodeSelector:
-        node-role.kubernetes.io/worker: ""
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key:  node-role.kubernetes.io/master
+                operator: DoesNotExist
       hostNetwork: true
       serviceAccount: nfd-worker
       readOnlyRootFilesystem: true
