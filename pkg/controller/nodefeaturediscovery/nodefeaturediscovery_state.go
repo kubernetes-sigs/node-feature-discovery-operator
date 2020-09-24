@@ -30,32 +30,25 @@ type NFD struct {
 	idx       int
 }
 
-func addState(n *NFD, path string) error {
-
+func (n *NFD) addState(path string) {
 	res, ctrl := addResourcesControls(path)
-
 	n.controls = append(n.controls, ctrl)
 	n.resources = append(n.resources, res)
-
-	return nil
 }
 
-func (n *NFD) init(r *ReconcileNodeFeatureDiscovery,
-	i *nfdv1alpha1.NodeFeatureDiscovery) error {
+func (n *NFD) init(
+	r *ReconcileNodeFeatureDiscovery,
+	i *nfdv1alpha1.NodeFeatureDiscovery,
+) {
 	n.rec = r
 	n.ins = i
 	n.idx = 0
-
-	addState(n, "/opt/nfd/master")
-	addState(n, "/opt/nfd/worker")
-
-	return nil
+	n.addState("/opt/nfd/master")
+	n.addState("/opt/nfd/worker")
 }
 
 func (n *NFD) step() error {
-
 	for _, fs := range n.controls[n.idx] {
-
 		stat, err := fs(*n)
 		if err != nil {
 			return err
@@ -64,19 +57,10 @@ func (n *NFD) step() error {
 			return errors.New("ResourceNotReady")
 		}
 	}
-
 	n.idx = n.idx + 1
-
 	return nil
 }
 
-func (n NFD) validate() {
-	// TODO add custom validation functions
-}
-
-func (n NFD) last() bool {
-	if n.idx == len(n.controls) {
-		return true
-	}
-	return false
+func (n *NFD) last() bool {
+	return n.idx == len(n.controls)
 }

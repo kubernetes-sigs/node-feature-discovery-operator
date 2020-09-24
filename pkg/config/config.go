@@ -18,15 +18,11 @@ package config
 
 import (
 	"os"
-
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 const (
 	nodeFeautreDiscoveryImageDefault string = "quay.io/kubernetes_incubator/node-feature-discovery:latest"
 )
-
-var log = logf.Log.WithName("config")
 
 // NodeFeatureDiscoveryImage returns the operator's operand/nfd image path.
 func NodeFeatureDiscoveryImage() string {

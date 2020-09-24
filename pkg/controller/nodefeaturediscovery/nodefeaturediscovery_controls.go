@@ -35,8 +35,8 @@ type controlFunc []func(n NFD) (ResourceStatus, error)
 type ResourceStatus int
 
 const (
-	Ready    ResourceStatus = 0
-	NotReady ResourceStatus = 1
+	Ready ResourceStatus = iota
+	NotReady
 )
 
 func (s ResourceStatus) String() string {
