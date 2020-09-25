@@ -18,15 +18,11 @@ package config
 
 import (
 	"os"
-
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 const (
 	nodeFeautreDiscoveryImageDefault string = "k8s.gcr.io/nfd/node-feature-discovery:v0.6.0"
 )
-
-var log = logf.Log.WithName("config")
 
 // NodeFeatureDiscoveryImage returns the operator's operand/nfd image path.
 func NodeFeatureDiscoveryImage() string {

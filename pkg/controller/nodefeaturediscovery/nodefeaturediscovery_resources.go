@@ -35,8 +35,6 @@ import (
 
 type assetsFromFile []byte
 
-var manifests []assetsFromFile
-
 type Resources struct {
 	Namespace                  corev1.Namespace
 	ServiceAccount             corev1.ServiceAccount
