@@ -74,7 +74,7 @@ clean:
 	rm -f $(BIN)
 
 clean-labels:
-	@$(shell kubectl get no -o yaml | sed -e '/^\s*nfd.node.kubernetes.io/d' -e '/^\s*feature.node.kubernetes.io/d' | kubectl replace -f -)
+	kubectl get no -o yaml | sed -e '/^\s*nfd.node.kubernetes.io/d' -e '/^\s*feature.node.kubernetes.io/d' | kubectl replace -f -
 
 image:
 	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG) \
