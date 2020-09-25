@@ -16,7 +16,6 @@ spec:
       tolerations:
       - operator: "Exists"
         effect: "NoSchedule"
-
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
