@@ -14,7 +14,7 @@ IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
 
 NAMESPACE      := node-feature-discovery-operator
 PULLPOLICY     ?= Always
-TEMPLATE_CMD    = sed 's+REPLACE_IMAGE+$(IMAGE)+g; s+REPLACE_NAMESPACE+$(NAMESPACE)+g; s+IfNotPresent+$(PULLPOLICY)+'
+TEMPLATE_CMD    = sed 's+REPLACE_IMAGE+$(IMAGE_TAG)+g; s+REPLACE_NAMESPACE+$(NAMESPACE)+g; s+IfNotPresent+$(PULLPOLICY)+'
 GOFMT_CHECK=$(shell find . -not \( \( -wholename './.*' -o -wholename '*/vendor/*' \) -prune \) -name '*.go' | sort -u | xargs gofmt -s -l)
 
 DEPLOY_OBJECTS  = manifests/0100_namespace.yaml manifests/0200_service_account.yaml manifests/0300_cluster_role.yaml manifests/0400_cluster_role_binding.yaml manifests/0600_operator.yaml
@@ -88,5 +88,5 @@ push:
 	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)
 	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
 
-.PHONY: all build test generate verify verify-gofmt clean local-image local-image-push deploy-objects deploy-operator deploy-crds
+.PHONY: all build test generate verify verify-gofmt clean deploy-objects deploy-operator deploy-crds push image
 .SILENT: go_mod
