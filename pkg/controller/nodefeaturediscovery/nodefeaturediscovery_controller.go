@@ -60,6 +60,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	// Watch for changes to ConfigMap nfd-worker.conf
+	if err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForObject{}); err != nil {
+		return err
+	}
+
 	// Watch for changes to secondary resource Pods and requeue the owner NodeFeatureDiscovery
 	cache := &handler.EnqueueRequestForOwner{
 		IsController: true,
@@ -79,10 +84,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	if err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, cache); err != nil {
-		return err
-	}
-
-	if err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, cache); err != nil {
 		return err
 	}
 
