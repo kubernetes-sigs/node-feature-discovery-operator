@@ -14,15 +14,18 @@ spec:
         app: nfd-worker
     spec:
       tolerations:
-      - operator: "Exists"
-        effect: "NoSchedule"
+        - operator: "Exists"
+          effect: "NoSchedule"
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key:  node-role.kubernetes.io/master
-                operator: DoesNotExist
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: DoesNotExist
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/node
+                    operator: Exists
       hostNetwork: true
       serviceAccount: nfd-worker
       readOnlyRootFilesystem: true
