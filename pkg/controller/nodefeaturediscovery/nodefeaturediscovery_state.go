@@ -19,14 +19,15 @@ package nodefeaturediscovery
 import (
 	"errors"
 
-	nfdv1alpha1 "github.com/kubernetes-sigs/node-feature-discovery-operator/pkg/apis/nfd/v1alpha1"
+	nfdv1 "github.com/kubernetes-sigs/node-feature-discovery-operator/pkg/apis/nfd/v1"
 )
 
+// NFD holds the needed information toi watch from the Controller
 type NFD struct {
 	resources []Resources
 	controls  []controlFunc
 	rec       *ReconcileNodeFeatureDiscovery
-	ins       *nfdv1alpha1.NodeFeatureDiscovery
+	ins       *nfdv1.NodeFeatureDiscovery
 	idx       int
 }
 
@@ -38,7 +39,7 @@ func (n *NFD) addState(path string) {
 
 func (n *NFD) init(
 	r *ReconcileNodeFeatureDiscovery,
-	i *nfdv1alpha1.NodeFeatureDiscovery,
+	i *nfdv1.NodeFeatureDiscovery,
 ) {
 	n.rec = r
 	n.ins = i

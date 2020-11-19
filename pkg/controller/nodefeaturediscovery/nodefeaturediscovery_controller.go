@@ -19,7 +19,7 @@ package nodefeaturediscovery
 import (
 	"context"
 
-	nfdv1alpha1 "github.com/kubernetes-sigs/node-feature-discovery-operator/pkg/apis/nfd/v1alpha1"
+	nfdv1 "github.com/kubernetes-sigs/node-feature-discovery-operator/pkg/apis/nfd/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -56,14 +56,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource NodeFeatureDiscovery
-	if err = c.Watch(&source.Kind{Type: &nfdv1alpha1.NodeFeatureDiscovery{}}, &handler.EnqueueRequestForObject{}); err != nil {
+	if err = c.Watch(&source.Kind{Type: &nfdv1.NodeFeatureDiscovery{}}, &handler.EnqueueRequestForObject{}); err != nil {
 		return err
 	}
 
 	// Watch for changes to secondary resource Pods and requeue the owner NodeFeatureDiscovery
 	cache := &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &nfdv1alpha1.NodeFeatureDiscovery{},
+		OwnerType:    &nfdv1.NodeFeatureDiscovery{},
 	}
 
 	if err = c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, cache); err != nil {
@@ -125,7 +125,7 @@ func (r *ReconcileNodeFeatureDiscovery) Reconcile(request reconcile.Request) (re
 	reqLogger.Info("Reconciling NodeFeatureDiscovery")
 
 	// Fetch the NodeFeatureDiscovery instance
-	instance := &nfdv1alpha1.NodeFeatureDiscovery{}
+	instance := &nfdv1.NodeFeatureDiscovery{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
