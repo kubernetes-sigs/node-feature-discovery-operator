@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	nodeFeautreDiscoveryImageDefault string = "k8s.gcr.io/nfd/node-feature-discovery:v0.6.0"
+	nodeFeautreDiscoveryImageDefault string = "k8s.gcr.io/nfd/node-feature-discovery:v0.7.0"
 )
 
 // NodeFeatureDiscoveryImage returns the operator's operand/nfd image.
