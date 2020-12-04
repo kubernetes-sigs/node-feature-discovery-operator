@@ -39,8 +39,9 @@ Alternatively, instead of specifying variables on the command line, you can edit
 
 ## Manual deploy of the operator
 
-The default CR will create the operand (NFD) in the `node-feature-discovery-operator` namespace,
-the CR can be edited to choose another namespace and image. See the `manifests/0700_cr.yaml` for the default values.
+The default `NodeFeatureDiscovery` CR will create the operand (NFD) in the `node-feature-discovery-operator` namespace,
+also an empty [nfd-worker-conf](https://kubernetes-sigs.github.io/node-feature-discovery/v0.6/get-started/deployment-and-usage.html#configuration),
+the CR can be edited to choose another namespace, image, imagePullPolicy and nfd-worker-conf. See the `manifests/0700_cr.yaml` for the default values.
 
 ```bash
 IMAGE_REGISTRY=<my registry>

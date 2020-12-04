@@ -24,7 +24,7 @@ const (
 	nodeFeautreDiscoveryImageDefault string = "k8s.gcr.io/nfd/node-feature-discovery:v0.6.0"
 )
 
-// NodeFeatureDiscoveryImage returns the operator's operand/nfd image path.
+// NodeFeatureDiscoveryImage returns the operator's operand/nfd image.
 func NodeFeatureDiscoveryImage() string {
 	nodeFeatureDiscoveryImage := os.Getenv("NODE_FEATURE_DISCOVERY_IMAGE")
 

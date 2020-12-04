@@ -26,8 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	nfdconfig "github.com/kubernetes-sigs/node-feature-discovery-operator/pkg/config"
 )
 
 type controlFunc []func(n NFD) (ResourceStatus, error)
@@ -259,6 +257,10 @@ func ConfigMap(n NFD) (ResourceStatus, error) {
 
 	obj.SetNamespace(n.ins.GetNamespace())
 
+	// Update ConfigMap
+	obj.ObjectMeta.Name = "nfd-worker-conf"
+	obj.Data["nfd-worker-conf"] = n.ins.Spec.WorkerConfig.Data()
+
 	found := &corev1.ConfigMap{}
 	logger := log.WithValues("ConfigMap", obj.Name, "Namespace", obj.Namespace)
 
@@ -295,10 +297,12 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 	state := n.idx
 	obj := n.resources[state].DaemonSet
 
-	obj.Spec.Template.Spec.Containers[0].Image = nfdconfig.NodeFeatureDiscoveryImage()
+	// update the image
+	obj.Spec.Template.Spec.Containers[0].Image = n.ins.Spec.Operand.ImagePath()
 
-	if len(n.ins.Spec.OperandImage) != 0 {
-		obj.Spec.Template.Spec.Containers[0].Image = n.ins.Spec.OperandImage
+	// update image pull policy
+	if n.ins.Spec.Operand.ImagePullPolicy != "" {
+		obj.Spec.Template.Spec.Containers[0].ImagePullPolicy = n.ins.Spec.Operand.ImagePolicy(n.ins.Spec.Operand.ImagePullPolicy)
 	}
 
 	obj.SetNamespace(n.ins.GetNamespace())
