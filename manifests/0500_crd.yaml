@@ -55,13 +55,13 @@ spec:
                   namespace:
                     pattern: '[a-zA-Z0-9\.\-\/]+'
                     type: string
-              nfd-worker:
+              workerConfig:
                 description: NFD configuration files
                 type: object
                 required:
-                  - config
+                  - configData
                 properties:
-                  config:
+                  configData:
                     description: NFD Worker configuration file
                     type: string
           status:
