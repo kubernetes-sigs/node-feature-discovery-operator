@@ -27,6 +27,7 @@ spec:
                   - key: node-role.kubernetes.io/node
                     operator: Exists
       hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       serviceAccount: nfd-worker
       readOnlyRootFilesystem: true
       containers:
@@ -41,7 +42,7 @@ spec:
             - "nfd-worker"
           args:
             - "--sleep-interval=60s"
-            - "--server=$(NFD_MASTER_SERVICE_HOST):$(NFD_MASTER_SERVICE_PORT)"
+            - "--server=nfd-master:$(NFD_MASTER_SERVICE_PORT)"
           volumeMounts:
             - name: host-boot
               mountPath: "/host-boot"
