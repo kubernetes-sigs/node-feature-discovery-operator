@@ -25,7 +25,7 @@ Build the operator image
 
 ```bash
 IMAGE_REGISTRY=<my registry>
-make image 
+make image
 ```
 
 Optionally you can push it to your image repo
@@ -45,7 +45,7 @@ the CR can be edited to choose another namespace, image, imagePullPolicy and nfd
 
 ```bash
 IMAGE_REGISTRY=<my registry>
-make deploy 
+make deploy
 ```
 
 The operator will use the operand node-feature-discovery image built from: https://github.com/kubernetes-sigs/node-feature-discovery
