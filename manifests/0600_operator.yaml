@@ -55,4 +55,3 @@ spec:
           operator: "Equal"
           value: ""
           effect: "NoSchedule"
-

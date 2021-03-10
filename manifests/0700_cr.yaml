@@ -9,7 +9,7 @@ spec:
     image: k8s.gcr.io/nfd/node-feature-discovery:v0.7.0
     imagePullPolicy: Always
   workerConfig:
-    configData: |    
+    configData: |
     #sources:
     #  cpu:
     #    cpuid:
@@ -95,4 +95,3 @@ spec:
     #            vendor: ["15b3"]
     #            device: ["1014", "1017"]
     #          loadedKMod : ["vendor_kmod1", "vendor_kmod2"]
-      
