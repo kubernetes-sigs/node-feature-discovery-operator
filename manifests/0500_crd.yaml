@@ -13,7 +13,7 @@ spec:
     singular: nodefeaturediscovery
   scope: Namespaced
   preserveUnknownFields: false
-  versions: 
+  versions:
   - name: v1
     served: true
     storage: true
@@ -43,7 +43,7 @@ spec:
               operand:
                 type: object
                 description: OperandSpec describes configuration options for the NFD operand
-                required: 
+                required:
                 - image
                 properties:
                   image:

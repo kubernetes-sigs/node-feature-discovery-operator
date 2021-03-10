@@ -11,4 +11,3 @@ spec:
     port: 12000
     targetPort: 12000
     name: nfd
-
