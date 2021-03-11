@@ -1,6 +1,24 @@
 IMAGE_BUILD_CMD ?= docker build
 IMAGE_BUILD_EXTRA_OPTS ?=
 IMAGE_PUSH_CMD ?= docker push
+CONTAINER_RUN_CMD ?= docker run
+
+MDL ?= mdl
+
+# Docker base command for working with html documentation.
+# Use host networking because 'jekyll serve' is stupid enough to use the
+# same site url than the "host" it binds to. Thus, all the links will be
+# broken if we'd bind to 0.0.0.0
+JEKYLL_VERSION := 3.8
+JEKYLL_ENV ?= development
+SITE_BUILD_CMD := $(CONTAINER_RUN_CMD) --rm -i -u "`id -u`:`id -g`" \
+	-e JEKYLL_ENV=$(JEKYLL_ENV) \
+	--volume="$$PWD/docs:/srv/jekyll" \
+	--volume="$$PWD/docs/vendor/bundle:/usr/local/bundle" \
+	--network=host jekyll/jekyll:$(JEKYLL_VERSION)
+SITE_BASEURL ?=
+SITE_DESTDIR ?= _site
+JEKYLL_OPTS := -d '$(SITE_DESTDIR)' $(if $(SITE_BASEURL),-b '$(SITE_BASEURL)',)
 
 VERSION := $(shell git describe --tags --dirty --always)
 
@@ -69,6 +87,9 @@ verify-gofmt:
 ci-lint:
 	golangci-lint run --timeout 5m0s
 
+mdlint:
+	find docs/ -path docs/vendor -prune -false -o -name '*.md' | xargs $(MDL) -s docs/mdl-style.rb
+
 clean:
 	go clean
 	rm -f $(BIN)
@@ -87,6 +108,14 @@ test:
 push:
 	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)
 	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
+
+site-build:
+	@mkdir -p docs/vendor/bundle
+	$(SITE_BUILD_CMD) sh -c "bundle install && jekyll build $(JEKYLL_OPTS)"
+
+site-serve:
+	@mkdir -p docs/vendor/bundle
+	$(SITE_BUILD_CMD) sh -c "bundle install && jekyll serve $(JEKYLL_OPTS) -H 127.0.0.1"
 
 .PHONY: all build test generate verify verify-gofmt clean deploy-objects deploy-operator deploy-crds push image
 .SILENT: go_mod
