@@ -13,13 +13,14 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-title: Node Feature Discovery
+title: Node Feature Discovery Operator
 description: >- # this means to ignore newlines until "baseurl:"
-  Documentation of Node Feature Discovery - a Kubernetes add-on for discovering
-  and advertising hardware features and system configuration in the cluster.
+  Documentation of Node Feature Discovery Operator - an operator for managing
+  detection of hardware features and configuration in a kubernetes cluster.
+
 url: "https://kubernetes-sigs.github.com" # the base hostname & protocol for your site, e.g. http://example.com
 
-repository: kubernetes-sigs/node-feature-discovery
+repository: kubernetes-sigs/node-feature-discovery-operator
 
 # Build settings
 markdown: kramdown
@@ -49,4 +50,4 @@ display_version_list: true
 release: master
 
 # Container image which to point to in the documentation
-container_image: gcr.io/k8s-staging-nfd/node-feature-discovery:master
+container_image: gcr.io/k8s-staging-nfd/node-feature-discovery-operator:master
