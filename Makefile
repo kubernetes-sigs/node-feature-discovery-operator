@@ -1,7 +1,7 @@
 IMAGE_BUILD_CMD ?= docker build
 IMAGE_BUILD_EXTRA_OPTS ?=
 IMAGE_PUSH_CMD ?= docker push
-CONTAINER_RUN_CMD ?= docker run
+CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 
 MDL ?= mdl
 
@@ -11,10 +11,10 @@ MDL ?= mdl
 # broken if we'd bind to 0.0.0.0
 JEKYLL_VERSION := 3.8
 JEKYLL_ENV ?= development
-SITE_BUILD_CMD := $(CONTAINER_RUN_CMD) --rm -i -u "`id -u`:`id -g`" \
+SITE_BUILD_CMD := $(CONTAINER_RUN_CMD) --rm -i \
 	-e JEKYLL_ENV=$(JEKYLL_ENV) \
-	--volume="$$PWD/docs:/srv/jekyll" \
-	--volume="$$PWD/docs/vendor/bundle:/usr/local/bundle" \
+	--volume="$$PWD/docs:/srv/jekyll":Z \
+	--volume="$$PWD/docs/vendor/bundle:/usr/local/bundle":Z \
 	--network=host jekyll/jekyll:$(JEKYLL_VERSION)
 SITE_BASEURL ?=
 SITE_DESTDIR ?= _site
@@ -111,11 +111,11 @@ push:
 
 site-build:
 	@mkdir -p docs/vendor/bundle
-	$(SITE_BUILD_CMD) sh -c "bundle install && jekyll build $(JEKYLL_OPTS)"
+	$(SITE_BUILD_CMD) sh -c '/usr/local/bin/bundle install && "$$BUNDLE_BIN/jekyll" build $(JEKYLL_OPTS)'
 
 site-serve:
 	@mkdir -p docs/vendor/bundle
-	$(SITE_BUILD_CMD) sh -c "bundle install && jekyll serve $(JEKYLL_OPTS) -H 127.0.0.1"
+	$(SITE_BUILD_CMD) sh -c '/usr/local/bin/bundle install && "$$BUNDLE_BIN/jekyll" serve $(JEKYLL_OPTS) -H 127.0.0.1'
 
 .PHONY: all build test generate verify verify-gofmt clean deploy-objects deploy-operator deploy-crds push image
 .SILENT: go_mod
