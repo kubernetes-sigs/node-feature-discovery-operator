@@ -26,7 +26,6 @@ spec:
               - matchExpressions:
                   - key: node-role.kubernetes.io/node
                     operator: Exists
-      hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccount: nfd-worker
       readOnlyRootFilesystem: true
