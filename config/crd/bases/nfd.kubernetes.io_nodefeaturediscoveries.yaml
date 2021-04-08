@@ -38,6 +38,16 @@ spec:
           spec:
             description: NodeFeatureDiscoverySpec defines the desired state of NodeFeatureDiscovery
             properties:
+              customConfig:
+                description: ConfigMap describes configuration options for the NFD
+                  worker
+                properties:
+                  configData:
+                    description: BinaryData holds the NFD configuration file
+                    type: string
+                required:
+                - configData
+                type: object
               operand:
                 description: OperandSpec describes configuration options for the operand
                 properties:
@@ -52,7 +62,7 @@ spec:
                     type: string
                 type: object
               workerConfig:
-                description: ConfigSpec describes configuration options for the NFD
+                description: ConfigMap describes configuration options for the NFD
                   worker
                 properties:
                   configData:

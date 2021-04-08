@@ -260,6 +260,7 @@ func ConfigMap(n NFD) (ResourceStatus, error) {
 	// Update ConfigMap
 	obj.ObjectMeta.Name = "nfd-worker"
 	obj.Data["nfd-worker-conf"] = n.ins.Spec.WorkerConfig.ConfigData
+	obj.Data["custom-conf"] = n.ins.Spec.CustomConfig.ConfigData
 
 	found := &corev1.ConfigMap{}
 	logger := log.WithValues("ConfigMap", obj.Name, "Namespace", obj.Namespace)

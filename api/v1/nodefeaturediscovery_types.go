@@ -26,7 +26,8 @@ import (
 // +k8s:openapi-gen=true
 type NodeFeatureDiscoverySpec struct {
 	Operand      OperandSpec `json:"operand"`
-	WorkerConfig ConfigSpec  `json:"workerConfig"`
+	WorkerConfig ConfigMap   `json:"workerConfig"`
+	CustomConfig ConfigMap   `json:"customConfig"`
 }
 
 // OperandSpec describes configuration options for the operand
@@ -42,8 +43,8 @@ type OperandSpec struct {
 	ImagePullPolicy string `json:"imagePullPolicy,omitempty"`
 }
 
-// ConfigSpec describes configuration options for the NFD worker
-type ConfigSpec struct {
+// ConfigMap describes configuration options for the NFD worker
+type ConfigMap struct {
 	// BinaryData holds the NFD configuration file
 	ConfigData string `json:"configData"`
 }
@@ -100,6 +101,6 @@ func (o *OperandSpec) ImagePolicy(pullPolicy string) corev1.PullPolicy {
 }
 
 // Data returns a valid ConfigMap name
-func (c *ConfigSpec) Data() string {
+func (c *ConfigMap) Data() string {
 	return c.ConfigData
 }
