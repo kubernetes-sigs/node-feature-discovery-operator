@@ -1,23 +1,27 @@
-# Build the operator
-FROM golang:1.15.4 AS builder
-WORKDIR /go/src/github.com/kubernetes-sigs/node-feature-discovery-operator
+# Build the manager binary
+FROM golang:1.15.4 as builder
 
-# Fetch/cache dependencies
+WORKDIR /workspace
+# Copy the Go Modules manifests
 COPY go.mod go.sum ./
+
+# cache deps before building and copying source so that we don't need to re-download as much
+# and so that source changes don't invalidate our downloaded layer
 RUN go mod download
 
-# do the actual build
+# Build
 COPY . .
 RUN make build
 
 # Create production image for running the operator
 FROM registry.access.redhat.com/ubi8/ubi
-COPY --from=builder /go/src/github.com/kubernetes-sigs/node-feature-discovery-operator/node-feature-discovery-operator /usr/bin/
+COPY --from=builder /workspace/node-feature-discovery-operator /
 
 RUN mkdir -p /opt/nfd
-COPY assets /opt/nfd
+COPY build/assets /opt/nfd
 
-RUN useradd node-feature-discovery-operator
-USER node-feature-discovery-operator
-ENTRYPOINT ["/usr/bin/node-feature-discovery-operator"]
+RUN useradd nfd-operator
+USER nfd-operator
+
+ENTRYPOINT ["/node-feature-discovery-operator"]
 LABEL io.k8s.display-name="node-feature-discovery-operator"
