@@ -44,8 +44,10 @@ func (n *NFD) init(
 	n.rec = r
 	n.ins = i
 	n.idx = 0
-	n.addState("/opt/nfd/master")
-	n.addState("/opt/nfd/worker")
+	if len(n.controls) == 0 {
+		n.addState("/opt/nfd/master")
+		n.addState("/opt/nfd/worker")
+	}
 }
 
 func (n *NFD) step() error {
