@@ -45,6 +45,7 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 BUNDLE_IMG ?= controller-bundle:$(VERSION)
 
 # Image URL to use all building/pushing image targets
+CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 IMAGE_BUILD_CMD ?= docker build
 IMAGE_PUSH_CMD ?= docker push
 IMAGE_BUILD_EXTRA_OPTS ?=
