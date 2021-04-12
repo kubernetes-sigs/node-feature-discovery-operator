@@ -1,6 +1,9 @@
-IMAGE_BUILD_CMD ?= docker build
-IMAGE_BUILD_EXTRA_OPTS ?=
-IMAGE_PUSH_CMD ?= docker push
+.PHONY: all build test generate verify verify-gofmt clean deploy-objects deploy-operator deploy-crds push image
+.SILENT: go_mod
+.FORCE:
+
+GO_CMD ?= go
+GO_FMT ?= gofmt
 CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 
 MDL ?= mdl
@@ -66,10 +69,10 @@ IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
+ifeq (,$(shell $(GO_CMD) env GOBIN))
+GOBIN=$(shell $(GO_CMD) env GOPATH)/bin
 else
-GOBIN=$(shell go env GOBIN)
+GOBIN=$(shell $(GO_CMD) env GOBIN)
 endif
 
 GOOS=linux
@@ -85,17 +88,17 @@ ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
 test: generate fmt vet manifests
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.0/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); $(GO_CMD) test ./... -coverprofile cover.out
 go_mod:
-	@go mod download
+	@$(GO_CMD) mod download
 
 # Build binary
 build: go_mod
-	@GOOS=$(GOOS) GO111MODULE=on CGO_ENABLED=0 go build -o $(BIN) $(MAIN_PACKAGE)
+	@GOOS=$(GOOS) GO111MODULE=on CGO_ENABLED=0 $(GO_CMD) build -o $(BIN) $(MAIN_PACKAGE)
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
-	go run ./main.go
+	$(GO_CMD) run ./main.go
 
 # Install CRDs into a cluster
 install: manifests kustomize
@@ -120,11 +123,11 @@ manifests: controller-gen
 
 # Run go fmt against code
 fmt:
-	go fmt ./...
+	@$(GO_FMT) -w -l $$(find . -name '*.go')
 
 # Run go vet against code
 vet:
-	go vet ./...
+	$(GO_CMD)  vet ./...
 
 verify:	verify-gofmt ci-lint
 
@@ -138,7 +141,7 @@ mdlint:
 	find docs/ -path docs/vendor -prune -false -o -name '*.md' | xargs $(MDL) -s docs/mdl-style.rb
 
 clean:
-	go clean
+	$(GO_CMD)  clean
 	rm -f $(BIN)
 
 # clean NFD labels on all nodes
@@ -169,8 +172,6 @@ site-serve:
 	@mkdir -p docs/vendor/bundle
 	$(SITE_BUILD_CMD) sh -c '/usr/local/bin/bundle install && "$$BUNDLE_BIN/jekyll" serve $(JEKYLL_OPTS) -H 127.0.0.1'
 
-.PHONY: all build test generate verify verify-gofmt clean deploy-objects deploy-operator deploy-crds push image
-.SILENT: go_mod
 # Download controller-gen locally if necessary
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 controller-gen:
