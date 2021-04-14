@@ -40,7 +40,6 @@ spec:
           command:
             - "nfd-worker"
           args:
-            - "--sleep-interval=60s"
             - "--server=nfd-master:$(NFD_MASTER_SERVICE_PORT)"
           volumeMounts:
             - name: host-boot
@@ -51,7 +50,7 @@ spec:
               readOnly: true
             - name: host-sys
               mountPath: "/host-sys"
-            - name: config
+            - name: nfd-worker-config
               mountPath: "/etc/kubernetes/node-feature-discovery"
             - name: nfd-hooks
               mountPath: "/etc/kubernetes/node-feature-discovery/source.d"
@@ -78,10 +77,9 @@ spec:
         - name: nfd-features
           hostPath:
             path: "/etc/kubernetes/node-feature-discovery/features.d"
-        - name: config
+        - name: nfd-worker-config
           configMap:
             name: nfd-worker
             items:
               - key: nfd-worker-conf
                 path: nfd-worker.conf
-
