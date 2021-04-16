@@ -29,7 +29,7 @@ spec:
                 fieldPath: spec.nodeName
           image: $(NODE_FEATURE_DISCOVERY_IMAGE)
           name: nfd-master
-          command: ["nfd-master", "--port=12000"]
+          command: ["nfd-master"]
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
