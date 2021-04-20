@@ -310,13 +310,15 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 	}
 
 	// update nfd-master service port
-	if n.ins.Spec.Operand.ServicePort != 0 && obj.ObjectMeta.Name == "nfd-master" {
-		portFlag := fmt.Sprintf("--port=%d", n.ins.Spec.Operand.ServicePort)
-		obj.Spec.Template.Spec.Containers[0].Args = []string{portFlag}
-	} else if obj.ObjectMeta.Name == "nfd-master" {
-		portFlag := fmt.Sprintf("--port=%d", defaultServicePort)
-		obj.Spec.Template.Spec.Containers[0].Args = []string{portFlag}
-	}
+        if obj.ObjectMeta.Name == "nfd-master" {
+                port := defaultServicePort
+                if n.ins.Spec.Operand.ServicePort != 0 {
+                        port = n.ins.Spec.Operand.ServicePort
+                }
+                portFlag := fmt.Sprintf("--port=%d", port)
+                obj.Spec.Template.Spec.Containers[0].Args = []string{portFlag}
+        }
+
 
 	obj.SetNamespace(n.ins.GetNamespace())
 
