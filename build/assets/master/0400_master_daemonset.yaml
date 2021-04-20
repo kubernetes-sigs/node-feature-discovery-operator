@@ -35,4 +35,3 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-

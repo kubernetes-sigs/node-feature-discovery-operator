@@ -311,12 +311,20 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 
 	// update nfd-master service port
 	if obj.ObjectMeta.Name == "nfd-master" {
+		var args []string
 		port := defaultServicePort
 		if n.ins.Spec.Operand.ServicePort != 0 {
 			port = n.ins.Spec.Operand.ServicePort
 		}
-		portFlag := fmt.Sprintf("--port=%d", port)
-		obj.Spec.Template.Spec.Containers[0].Args = []string{portFlag}
+		args = append(args, fmt.Sprintf("--port=%d", port))
+
+		// check if running as instance
+		// https://kubernetes-sigs.github.io/node-feature-discovery/v0.8/advanced/master-commandline-reference.html#-instance
+		if n.ins.Spec.Instance != "" {
+			args = append(args, fmt.Sprintf("--instance=%s", n.ins.Spec.Instance))
+		}
+
+		obj.Spec.Template.Spec.Containers[0].Args = args
 	}
 
 	obj.SetNamespace(n.ins.GetNamespace())
