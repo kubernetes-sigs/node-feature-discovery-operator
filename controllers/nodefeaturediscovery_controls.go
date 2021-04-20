@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	secv1 "github.com/openshift/api/security/v1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -25,6 +26,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
@@ -35,6 +37,8 @@ type ResourceStatus int
 const (
 	Ready ResourceStatus = iota
 	NotReady
+
+	defaultServicePort int = 12000
 )
 
 func (s ResourceStatus) String() string {
@@ -305,6 +309,16 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 		obj.Spec.Template.Spec.Containers[0].ImagePullPolicy = n.ins.Spec.Operand.ImagePolicy(n.ins.Spec.Operand.ImagePullPolicy)
 	}
 
+	// update nfd-master service port
+	if obj.ObjectMeta.Name == "nfd-master" {
+		port := defaultServicePort
+		if n.ins.Spec.Operand.ServicePort != 0 {
+			port = n.ins.Spec.Operand.ServicePort
+		}
+		portFlag := fmt.Sprintf("--port=%d", port)
+		obj.Spec.Template.Spec.Containers[0].Args = []string{portFlag}
+	}
+
 	obj.SetNamespace(n.ins.GetNamespace())
 
 	found := &appsv1.DaemonSet{}
@@ -342,6 +356,15 @@ func Service(n NFD) (ResourceStatus, error) {
 
 	state := n.idx
 	obj := n.resources[state].Service
+
+	// update ports
+	if n.ins.Spec.Operand.ServicePort != 0 {
+		obj.Spec.Ports[0].Port = int32(n.ins.Spec.Operand.ServicePort)
+		obj.Spec.Ports[0].TargetPort = intstr.FromInt(n.ins.Spec.Operand.ServicePort)
+	} else {
+		obj.Spec.Ports[0].Port = int32(defaultServicePort)
+		obj.Spec.Ports[0].TargetPort = intstr.FromInt(defaultServicePort)
+	}
 
 	obj.SetNamespace(n.ins.GetNamespace())
 
