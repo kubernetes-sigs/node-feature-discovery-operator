@@ -32,6 +32,7 @@ import (
 	"k8s.io/kubectl/pkg/scheme"
 )
 
+// assetsFromFile is the content of an asset file as raw data
 type assetsFromFile []byte
 
 // Resources holds objects owned by NFD
@@ -58,7 +59,10 @@ func Add3dpartyResourcesToScheme(scheme *runtime.Scheme) error {
 	return nil
 }
 
+// filePathWalkDir finds all non-directory files under the given path recursively,
+// i.e. including its subdirectories
 func filePathWalkDir(root string) ([]string, error) {
+
 	var files []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -69,34 +73,49 @@ func filePathWalkDir(root string) ([]string, error) {
 	return files, err
 }
 
+// getAssetsFrom recursively reads all manifest files under a given path
 func getAssetsFrom(path string) []assetsFromFile {
 
+	// All assets (manifests) as raw data
 	manifests := []assetsFromFile{}
 	assets := path
+
+	// For the given path, find a list of all the files
 	files, err := filePathWalkDir(assets)
 	if err != nil {
 		panic(err)
 	}
+
+	// For each file in the 'files' list, read the file
+	// and store its contents in 'manifests'
 	for _, file := range files {
 		buffer, err := ioutil.ReadFile(file)
 		if err != nil {
 			panic(err)
 		}
+
 		manifests = append(manifests, buffer)
 	}
 	return manifests
 }
 
 func addResourcesControls(path string) (Resources, controlFunc) {
+
+	// Information about the manifest
 	res := Resources{}
+
+	// A list of control functions for checking the status of a resource
 	ctrl := controlFunc{}
 
+	// Get the list of manifests from the given path
 	manifests := getAssetsFrom(path)
 
+	// s and reg are used later on to parse the manifest YAML
 	s := json.NewYAMLSerializer(json.DefaultMetaFactory, scheme.Scheme,
 		scheme.Scheme)
 	reg, _ := regexp.Compile(`\b(\w*kind:\w*)\B.*\b`)
 
+	// Append the appropriate control function depending on the kind
 	for _, m := range manifests {
 		kind := reg.FindString(string(m))
 		slce := strings.Split(kind, ":")
@@ -153,6 +172,7 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 	return res, ctrl
 }
 
+// panicIfError panics in case of an error
 func panicIfError(err error) {
 	if err != nil {
 		panic(err)
