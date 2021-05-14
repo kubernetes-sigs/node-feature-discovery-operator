@@ -41,6 +41,8 @@ var log = logf.Log.WithName("controller_nodefeaturediscovery")
 
 var nfd NFD
 
+const finalizer = "foreground-deletion"
+
 // NodeFeatureDiscoveryReconciler reconciles a NodeFeatureDiscovery object
 type NodeFeatureDiscoveryReconciler struct {
 	client.Client
@@ -134,6 +136,18 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 
 		r.Log.Error(err, "requeueing event since there was an error reading object")
 		return ctrl.Result{Requeue: true}, err
+	}
+
+	// If the resources are to be deleted, first check to see if the
+	// deletion timestamp pointer is not nil. A non-nil value indicates
+	// someone or something has triggered the deletion.
+	if instance.DeletionTimestamp != nil {
+		return r.finalizeNFDOperator(ctx, instance, finalizer)
+	}
+
+	// If the finalizer doesn't exist, add it.
+	if !r.hasFinalizer(instance, finalizer) {
+		return r.addFinalizer(ctx, instance, finalizer)
 	}
 
 	// apply components
