@@ -36,7 +36,7 @@ import (
 
 var (
 	// scheme holds a new scheme for the operator
-	scheme   = runtime.NewScheme()
+	scheme = runtime.NewScheme()
 
 	// setupLog will be used for logging the operator "setup" process so that users know
 	// what parts of the logging are associated with the setup of the manager and
@@ -59,14 +59,14 @@ func main() {
 	// The bind address tells Prometheus which port to scrape this data's metrics from.
 	var metricsAddr string
 
-        // enableLeaderElection should be set to 'disable' by default If we enable leader
-        // election, then only one node can run the controller manager and we will not
-        // have NFD Operator running on all nodes.
+	// enableLeaderElection should be set to 'disable' by default If we enable leader
+	// election, then only one node can run the controller manager and we will not
+	// have NFD Operator running on all nodes.
 	var enableLeaderElection bool
 
-        // probeAddr is responsible for the health probe bind address, where the health
-        // probe is responsible for determining liveness, readiness, and configuration 
-        // of the operator pods.
+	// probeAddr is responsible for the health probe bind address, where the health
+	// probe is responsible for determining liveness, readiness, and configuration
+	// of the operator pods.
 	var probeAddr string
 
 	// The following 3 lines setup the CLI arguments that are used upon initilization of

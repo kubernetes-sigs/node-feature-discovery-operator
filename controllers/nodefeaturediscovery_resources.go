@@ -118,7 +118,6 @@ func getAssetsFrom(path string) []assetsFromFile {
 	return manifests
 }
 
-
 func addResourcesControls(path string) (Resources, controlFunc) {
 
 	// res is a Resources object that contains information about

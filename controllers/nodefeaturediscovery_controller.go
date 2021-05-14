@@ -54,15 +54,15 @@ type NodeFeatureDiscoveryReconciler struct {
 	client.Client
 
 	// Log is used to log the reconciliation. Every controllers needs this.
-	Log       logr.Logger
+	Log logr.Logger
 
 	// Scheme is used by the kubebuilder library to set OwnerReferences. Every
 	// controller needs this.
-	Scheme    *runtime.Scheme
+	Scheme *runtime.Scheme
 
 	// Recorder defines interfaces for working with OCP event recorders. This
 	// field is needed by NFD in order for NFD to write events.
-	Recorder  record.EventRecorder
+	Recorder record.EventRecorder
 
 	// AssetsDir defines the directory with assets under the operator image
 	AssetsDir string
@@ -74,7 +74,7 @@ type NodeFeatureDiscoveryReconciler struct {
 // struct.
 func (r *NodeFeatureDiscoveryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
-	// The predicate package is used by the controller to filter events before 
+	// The predicate package is used by the controller to filter events before
 	// they are sent to event handlers. When "UpdateFunc" is used, it will
 	// return "true" if a given update event should be processed. In this case,
 	// the "validateUpdateEvent" function is used with UpdateFunc to initate the
@@ -162,7 +162,6 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 	r.Log.Info("Fetch the NodeFeatureDiscovery instance")
 	instance := &nfdv1.NodeFeatureDiscovery{}
 	err := r.Get(ctx, req.NamespacedName, instance)
-
 
 	// If an error occurs because "r.Get" cannot get the NFD instance
 	// (e.g., due to timeouts, aborts, etc. defined by ctx), the

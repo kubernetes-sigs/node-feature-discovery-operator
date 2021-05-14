@@ -50,7 +50,7 @@ func (s ResourceStatus) String() string {
 		"Ready",
 		"NotReady"}
 
-	// Ideally, 's' should be either Ready (=0) or NotReady (=1), but 
+	// Ideally, 's' should be either Ready (=0) or NotReady (=1), but
 	// we may run into a case where we get an unknown status, so return
 	// information stating that the resource status is unknown
 	if s < Ready || s > NotReady {
@@ -75,7 +75,7 @@ func Namespace(n NFD) (ResourceStatus, error) {
 	logger := log.WithValues("Namespace", obj.Name, "Namespace", "Cluster")
 
 	// Look for the Namespace to see if it exists, and if so, check if
-	// it's Ready/NotReady. If the Namespace does not exist, then 
+	// it's Ready/NotReady. If the Namespace does not exist, then
 	// attempt to create it
 	logger.Info("Looking for")
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
@@ -126,7 +126,7 @@ func ServiceAccount(n NFD) (ResourceStatus, error) {
 	}
 
 	// Look for the ServiceAccount to see if it exists, and if so, check if
-	// it's Ready/NotReady. If the ServiceAccount does not exist, then 
+	// it's Ready/NotReady. If the ServiceAccount does not exist, then
 	// attempt to create it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
@@ -165,7 +165,7 @@ func ClusterRole(n NFD) (ResourceStatus, error) {
 	logger.Info("Looking for")
 
 	// Look for the ClusterRole to see if it exists, and if so, check
-	// if it's Ready/NotReady. If the ClusterRole does not exist, then 
+	// if it's Ready/NotReady. If the ClusterRole does not exist, then
 	// attempt to create it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: "", Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
@@ -306,7 +306,7 @@ func RoleBinding(n NFD) (ResourceStatus, error) {
 	obj := n.resources[state].RoleBinding
 
 	// The Namespace should already be defined, so let's set the
-	// namespace to the namespace defined in the 
+	// namespace to the namespace defined in the
 	obj.SetNamespace(n.ins.GetNamespace())
 
 	// found states if the RoleBinding was found
@@ -558,7 +558,6 @@ func Service(n NFD) (ResourceStatus, error) {
 
 	logger.Info("Found, updating")
 
-
 	// Copy the Service object
 	required := obj.DeepCopy()
 
@@ -566,7 +565,6 @@ func Service(n NFD) (ResourceStatus, error) {
 	// for the existing Service. Do the same for ClusterIP
 	required.ResourceVersion = found.ResourceVersion
 	required.Spec.ClusterIP = found.Spec.ClusterIP
-
 
 	// If we found the Service, let's attempt to update it with the
 	// resource version and cluster IP that was just found
