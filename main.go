@@ -44,10 +44,8 @@ var (
 	setupLog = ctrl.Log.WithName("setup")
 )
 
-// init sets up the Go client and NFD schemes. The function "utilruntime.Must" is used to
-// panic on non-nil errors that could occur when adding the scheme, as opposed to just letting
-// an error occur without properly handling it.
 func init() {
+	//Set up the Go client and NFD schemes. Panic on errors.
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(nfdkubernetesiov1.AddToScheme(scheme))
@@ -55,33 +53,26 @@ func init() {
 }
 
 func main() {
-	// metricsAddr is used by Prometheus to gather the NFD Operator resource usage data.
-	// The bind address tells Prometheus which port to scrape this data's metrics from.
+
 	var metricsAddr string
-
-	// enableLeaderElection should be set to 'disable' by default If we enable leader
-	// election, then only one node can run the controller manager and we will not
-	// have NFD Operator running on all nodes.
 	var enableLeaderElection bool
-
-	// probeAddr is responsible for the health probe bind address, where the health
-	// probe is responsible for determining liveness, readiness, and configuration
-	// of the operator pods.
 	var probeAddr string
 
-	// The following 3 lines setup the CLI arguments that are used upon initilization of
-	// the operator
-	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
-	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	// Setup CLI arguments
+	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the Prometheus "+
+		"metric endpoint binds to for scraping NFD resource usage data.")
+	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe "+
+		"endpoint binds to for determining liveness, readiness, and configuration of"+
+		"operator pods.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 
-	// opts is created using zap to set the operator's logging to "development mode".
-	// This mode makes DPanic-level logs panic instead of just logging error events as
-	// errors. The settings are then bound to the CLI flag args and the flag args are
-	// then parsed.
+	// opts is created using zap to set the operator's logging
 	opts := zap.Options{
+		// This mode makes DPanic-level logs panic instead of just logging error events as
+		// errors. The settings are then bound to the CLI flag args and the flag args are
+		// then parsed.
 		Development: true,
 	}
 	opts.BindFlags(flag.CommandLine)
@@ -89,7 +80,7 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
-	// Create a new manager to manage the operator and bind its address to port 9443.
+	// Create a new manager to manage the operator
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
@@ -99,18 +90,11 @@ func main() {
 		LeaderElectionID:       "39f5e5c3.nodefeaturediscoveries.nfd.kubernetes.io",
 	})
 
-	// If the manager could not be started, then log the error as an operator setup error
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
-	// Try to create an NFD reconciler using the manager we just created. Note that we do
-	// create a different logger for the NFD reconciler with the name "NodeFeatureDiscovery"
-	// and "controllers" in the name to let users know which step in the operator setup is
-	// occurring. If this step succeeds, then everything related to controllers will be logged
-	// in reference to  "controllers." If this step fails, everything will be logged to the
-	// "setup" logger defined at the top of this file.
 	if err = (&controllers.NodeFeatureDiscoveryReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("NodeFeatureDiscovery"),
@@ -135,9 +119,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Now that the manager and controller are all setup, it's time to start the manager.
-	// TheSetupSignalHandler registers for SIGINT and SIGTERM, which can be used to
-	// terminate the manager if they are both called.
+	// Register signal handler for SIGINT and SIGTERM to terminate the manager
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")

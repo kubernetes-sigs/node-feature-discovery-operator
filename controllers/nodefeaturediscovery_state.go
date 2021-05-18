@@ -72,15 +72,15 @@ func (n *NFD) init(
 
 // step steps through the list of functions stored in 'n.controls',
 // then attempts to determine if the given resource is Ready or
-// NotReady. (See the following file for a list of functions that
-// 'n.controls' can take on: ./nodefeaturediscovery_resources.go.)
+// NotReady.
 func (n *NFD) step() error {
 
 	// For each function in n.controls, attempt to check the status of
-	// the relevant resource. If no error occurs and the resource is
-	// defined as being "NotReady," then return an error saying it's not
-	// ready. Otherwise, return the status as being ready, then increment
-	// the index for n.controls so that we can parse the next resource.
+	// the relevant resource. If the resource is defined as being
+	// "NotReady," then return an error saying it's not ready. Otherwise,
+	// return the status as being ready, then increment the index for
+	// n.controls so that we can parse the next resource the next time
+	// the step() function is called.
 	for _, fs := range n.controls[n.idx] {
 		stat, err := fs(*n)
 		if err != nil {
