@@ -15,7 +15,7 @@ git clone https://github.com/kubernetes-sigs/node-feature-discovery-operator
 Deploy the operator
 
 ```bash
-IMAGE_TAG=k8s.gcr.io/nfd/node-feature-discovery-operator:v0.2.0
+IMAGE_TAG=k8s.gcr.io/nfd/node-feature-discovery-operator:{{ site.operator_version }}
 make deploy
 ```
 
