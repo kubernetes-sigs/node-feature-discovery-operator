@@ -132,4 +132,6 @@ spec:
 ```
 
 For more information about how to setup the `WorkerConfig` stanza,
-see [worker config reference](https://kubernetes-sigs.github.io/node-feature-discovery/v0.8/advanced/worker-configuration-reference.html)
+see [worker config reference](
+  https://kubernetes-sigs.github.io/node-feature-discovery/
+  {{ site.operand_version }}/advanced/worker-configuration-reference.html)
