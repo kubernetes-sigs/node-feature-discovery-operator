@@ -9,7 +9,7 @@ sort: 2
 Get the source code
 
 ```bash
-git clone https://github.com/kubernetes-sigs/node-feature-discovery-operator
+git clone -b {{ site.release }} https://github.com/kubernetes-sigs/node-feature-discovery-operator
 ```
 
 Deploy the operator
