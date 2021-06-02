@@ -103,7 +103,7 @@ site_subdir=${site_subdir:-master}
 
 # Check if this ref is for a released version
 if [ "$site_subdir" != "master" ]; then
-    _base_tag=`git describe --abbrev=0 || :`
+    _base_tag=`git describe --tags --abbrev=0 || :`
     case "$_base_tag" in
         $site_subdir*)
             ;;
