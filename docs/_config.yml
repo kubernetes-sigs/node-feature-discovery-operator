@@ -51,5 +51,5 @@ display_version_list: true
 release: master
 
 # Container image which to point to in the documentation
-container_image: gcr.io/k8s-staging-nfd/node-feature-discovery-operator:master
+container_image: k8s.gcr.io/nfd/node-feature-discovery-operator:master
 operand_release: v0.8
