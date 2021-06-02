@@ -20,4 +20,4 @@ You can reach the maintainers of this project at:
 
 Participation in the Kubernetes community is governed by the [Kubernetes Code of Conduct](code-of-conduct.md).
 
-[documentation]: https://kubernetes-sigs.github.io/node-feature-discovery-operator
+[documentation]: https://kubernetes-sigs.github.io/node-feature-discovery-operator/master/
