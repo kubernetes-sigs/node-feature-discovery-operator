@@ -1,0 +1,98 @@
+<!DOCTYPE html> <html lang="en" dir="auto"> <head><meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> <meta name="description" content="The NodeFeatureDiscovery CR The NodeFeatureDiscovery CustomResource defines operational variables to define the behaviour of the Node Feature Disco..."> <meta name="revised" content=""> <meta name="author" content="Kubernetes SIGs"> <meta name="generator" content="jekyll-rtd-theme v2.0.9"> <meta property="og:title" content="NodeFeatureDiscovery · Node Feature Discovery Operator"> <meta property="og:description" content="The NodeFeatureDiscovery CR The NodeFeatureDiscovery CustomResource defines operational variables to define the behaviour of the Node Feature Disco..."> <meta property="og:locale" content="en"> <meta property="og:url" content="https://kubernetes-sigs.github.com/node-feature-discovery-operator/v0.2/advanced/nodefeaturediscovery.html"> <meta property="og:type" content="article"> <meta property="article:author" content="Kubernetes SIGs"> <meta property="article:published_time" content="2019-06-26T01:15:19-05:00"> <meta property="article:modified_time" content="2021-06-02T22:37:50-05:00"> <meta name="twitter:title" content="NodeFeatureDiscovery · Node Feature Discovery Operator"> <meta name="twitter:description" content="The NodeFeatureDiscovery CR The NodeFeatureDiscovery CustomResource defines operational variables to define the behaviour of the Node Feature Disco..."> <meta name="twitter:card" content="summary"> <meta name="twitter:site" content="@Kubernetes SIGs"> <meta name="twitter:url" content="https://kubernetes-sigs.github.com/node-feature-discovery-operator/v0.2/advanced/nodefeaturediscovery.html"> <meta name="twitter:creator" content="@jekyll-rtd-theme v2.0.9"> <title>NodeFeatureDiscovery · Node Feature Discovery Operator</title> <link rel="dns-prefetch" href="https://rundocs-analytics.glitch.me"> <link rel="dns-prefetch" href="https://cdn.jsdelivr.net"> <link rel="canonical" href="https://kubernetes-sigs.github.com/node-feature-discovery-operator/v0.2/advanced/nodefeaturediscovery.html"><link rel="prev" href="https://kubernetes-sigs.github.com/node-feature-discovery-operator/v0.2/advanced/developer-guide.html"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rundocs/jekyll-rtd-theme@2.0.9/assets/css/theme.min.css"> <link rel="icon" type="image/svg+xml" href="/node-feature-discovery-operator/v0.2/assets/images/favicon.svg"> <link rel="icon" type="image/png" href="/node-feature-discovery-operator/v0.2/assets/images/favicon-16x16.png" sizes="16x16"> <link rel="icon" type="image/png" href="/node-feature-discovery-operator/v0.2/assets/images/favicon-32x32.png" sizes="32x32"> <link rel="icon" type="image/png" href="/node-feature-discovery-operator/v0.2/assets/images/favicon-96x96.png" sizes="96x96"> <link rel="mask-icon" href="/node-feature-discovery-operator/v0.2/assets/images/favicon.svg" color="#2980b9"> <link rel="apple-touch-icon" href="/node-feature-discovery-operator/v0.2/assets/images/apple-touch-icon-300x300.jpg"> <script type="application/ld+json"> { "@context": "https://schema.org", "@type": "Article", "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kubernetes-sigs.github.com/node-feature-discovery-operator/v0.2/advanced/nodefeaturediscovery.html" }, "headline": "NodeFeatureDiscovery · Node Feature Discovery Operator", "image": [], "author": { "@type": "Person", "name": "Kubernetes SIGs" }, "datePublished": "2019-06-26T01:15:19-05:00", "dateModified": "2021-06-02T22:37:50-05:00", "publisher": { "@type": "Organization", "name": "Kubernetes SIGs", "logo": { "@type": "ImageObject", "url": "https://avatars.githubusercontent.com/u/36015203?v=4" } }, "description": "The NodeFeatureDiscovery CR The NodeFeatureDiscovery CustomResource defines operational variables to define the behaviour of the Node Feature Disco..." } </script> </head> <body class="container"><div class="sidebar-wrap overflow-hidden"> <div class="sidebar height-full overflow-y-scroll overflow-x-hidden"> <div class="header d-flex flex-column p-3 text-center"> <div class="title pb-1"> <a class="h4 no-underline py-1 px-2 rounded-1" href="/node-feature-discovery-operator/v0.2/" title="Documentation of Node Feature Discovery Operator - an operator for managing detection of hardware features and configuration in a kubernetes cluster."> <i class="fa fa-home"></i> Node Feature Discovery Operator </a> </div> <span class="version">v0.2.0</span> <form class="search pt-2" action="/node-feature-discovery-operator/v0.2/search.html" method="get" autocomplete="off"> <input class="form-control input-block input-sm" type="text" name="q" placeholder="Search docs..."> </form> </div> <div class="toctree py-2" data-spy="affix" role="navigation" aria-label="main navigation"> <ul> </ul> <a class="caption d-block text-uppercase no-wrap px-2 py-0" href="/node-feature-discovery-operator/v0.2/get-started/"> Get Started </a><ul> <li class="toc level-1 " data-sort="1" data-level="1"> <a class="d-flex flex-items-baseline " href="/node-feature-discovery-operator/v0.2/get-started/introduction.html">1. Introduction</a> </li> <li class="toc level-1 " data-sort="2" data-level="1"> <a class="d-flex flex-items-baseline " href="/node-feature-discovery-operator/v0.2/get-started/quick-start.html">2. Quick start</a> </li></ul> <a class="caption d-block text-uppercase no-wrap px-2 py-0" href="/node-feature-discovery-operator/v0.2/advanced/"> Advanced </a><ul> <li class="toc level-1 " data-sort="1" data-level="1"> <a class="d-flex flex-items-baseline " href="/node-feature-discovery-operator/v0.2/advanced/developer-guide.html">1. Developer guide</a> </li> <li class="toc level-1 current" data-sort="2" data-level="1"> <a class="d-flex flex-items-baseline current" href="/node-feature-discovery-operator/v0.2/advanced/nodefeaturediscovery.html">2. NodeFeatureDiscovery</a> </li></ul> <a class="caption d-block text-uppercase no-wrap px-2 py-0" href="/node-feature-discovery-operator/v0.2/contributing/"> Contributing </a><ul> </ul> <a class="caption d-block text-uppercase no-wrap px-2 py-0" href="https://kubernetes-sigs.github.io/node-feature-discovery"> Node Feature Discovery </a> </div> </div> </div> <div class="content-wrap"> <div class="header d-flex flex-justify-between p-2 hide-lg hide-xl" aria-label="top navigation"> <button id="toggle" class="btn-octicon p-2 m-0 text-white" type="button"> <i class="fa fa-bars"></i> </button> <div class="title flex-1 d-flex flex-justify-center"> <a class="h4 no-underline py-1 px-2 rounded-1" href="/node-feature-discovery-operator/v0.2/">Node Feature Discovery Operator</a> </div> </div> <div class="content p-3 p-sm-5"> <div class="navigation-top d-flex flex-justify-between"> <ul class="breadcrumb" role="navigation" aria-label="breadcrumbs navigation"> <li class="breadcrumb-item"> <a class="no-underline" href="/node-feature-discovery-operator/v0.2/" title="/"> <i class="fa fa-home"></i> </a> </li><li class="breadcrumb-item" ><a href="/node-feature-discovery-operator/v0.2/advanced/">advanced</a></li><li class="breadcrumb-item" aria-current="page">nodefeaturediscovery.md</li></ul> <a class="edit" href="https://github.com/kubernetes-sigs/node-feature-discovery-operator/edit/gh-pages/advanced/nodefeaturediscovery.md" title="Edit on GitHub" rel="noreferrer" target="_blank"> <i class="fa fa-edit"></i> </a> </div> <hr> <div role="main" itemscope="itemscope" itemtype="http://schema.org/Article"> <div class="markdown-body" itemprop="articleBody"> <h1 id="the-nodefeaturediscovery-cr">The NodeFeatureDiscovery CR</h1> <p>The <code class="language-plaintext highlighter-rouge notranslate">NodeFeatureDiscovery</code> CustomResource defines operational variables to define the behaviour of the Node Feature Discovery Operand, an example of the CustomResource:</p> <div class="language-yaml highlighter-rouge notranslate"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">nfd.kubernetes.io/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">NodeFeatureDiscovery</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">nfd-master-server</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">node-feature-discovery-operator</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">operand</span><span class="pi">:</span>
+    <span class="na">namespace</span><span class="pi">:</span> <span class="s">node-feature-discovery-operator</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">k8s.gcr.io/nfd/node-feature-discovery:v0.7.0</span>
+    <span class="na">imagePullPolicy</span><span class="pi">:</span> <span class="s">Always</span>
+  <span class="na">workerConfig</span><span class="pi">:</span>
+    <span class="na">configData</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">#sources:</span>
+    <span class="s">#  cpu:</span>
+    <span class="s">#    cpuid:</span>
+    <span class="s">##     NOTE: whitelist has priority over blacklist</span>
+    <span class="s">#      attributeBlacklist:</span>
+    <span class="s">#        - "BMI1"</span>
+    <span class="s">#        - "BMI2"</span>
+    <span class="s">#        - "CLMUL"</span>
+    <span class="s">#        - "CMOV"</span>
+    <span class="s">#        - "CX16"</span>
+    <span class="s">#        - "ERMS"</span>
+    <span class="s">#        - "F16C"</span>
+    <span class="s">#        - "HTT"</span>
+    <span class="s">#        - "LZCNT"</span>
+    <span class="s">#        - "MMX"</span>
+    <span class="s">#        - "MMXEXT"</span>
+    <span class="s">#        - "NX"</span>
+    <span class="s">#        - "POPCNT"</span>
+    <span class="s">#        - "RDRAND"</span>
+    <span class="s">#        - "RDSEED"</span>
+    <span class="s">#        - "RDTSCP"</span>
+    <span class="s">#        - "SGX"</span>
+    <span class="s">#        - "SSE"</span>
+    <span class="s">#        - "SSE2"</span>
+    <span class="s">#        - "SSE3"</span>
+    <span class="s">#        - "SSE4.1"</span>
+    <span class="s">#        - "SSE4.2"</span>
+    <span class="s">#        - "SSSE3"</span>
+    <span class="s">#      attributeWhitelist:</span>
+    <span class="s">#  kernel:</span>
+    <span class="s">#    kconfigFile: "/path/to/kconfig"</span>
+    <span class="s">#    configOpts:</span>
+    <span class="s">#      - "NO_HZ"</span>
+    <span class="s">#      - "X86"</span>
+    <span class="s">#      - "DMI"</span>
+    <span class="s">#  pci:</span>
+    <span class="s">#    deviceClassWhitelist:</span>
+    <span class="s">#      - "0200"</span>
+    <span class="s">#      - "03"</span>
+    <span class="s">#      - "12"</span>
+    <span class="s">#    deviceLabelFields:</span>
+    <span class="s">#      - "class"</span>
+    <span class="s">#      - "vendor"</span>
+    <span class="s">#      - "device"</span>
+    <span class="s">#      - "subsystem_vendor"</span>
+    <span class="s">#      - "subsystem_device"</span>
+    <span class="s">#  usb:</span>
+    <span class="s">#    deviceClassWhitelist:</span>
+    <span class="s">#      - "0e"</span>
+    <span class="s">#      - "ef"</span>
+    <span class="s">#      - "fe"</span>
+    <span class="s">#      - "ff"</span>
+    <span class="s">#    deviceLabelFields:</span>
+    <span class="s">#      - "class"</span>
+    <span class="s">#      - "vendor"</span>
+    <span class="s">#      - "device"</span>
+    <span class="s">#  custom:</span>
+    <span class="s">#    - name: "my.kernel.feature"</span>
+    <span class="s">#      matchOn:</span>
+    <span class="s">#        - loadedKMod: ["example_kmod1", "example_kmod2"]</span>
+    <span class="s">#    - name: "my.pci.feature"</span>
+    <span class="s">#      matchOn:</span>
+    <span class="s">#        - pciId:</span>
+    <span class="s">#            class: ["0200"]</span>
+    <span class="s">#            vendor: ["15b3"]</span>
+    <span class="s">#            device: ["1014", "1017"]</span>
+    <span class="s">#        - pciId :</span>
+    <span class="s">#            vendor: ["8086"]</span>
+    <span class="s">#            device: ["1000", "1100"]</span>
+    <span class="s">#    - name: "my.usb.feature"</span>
+    <span class="s">#      matchOn:</span>
+    <span class="s">#        - usbId:</span>
+    <span class="s">#          class: ["ff"]</span>
+    <span class="s">#          vendor: ["03e7"]</span>
+    <span class="s">#          device: ["2485"]</span>
+    <span class="s">#        - usbId:</span>
+    <span class="s">#          class: ["fe"]</span>
+    <span class="s">#          vendor: ["1a6e"]</span>
+    <span class="s">#          device: ["089a"]</span>
+    <span class="s">#    - name: "my.combined.feature"</span>
+    <span class="s">#      matchOn:</span>
+    <span class="s">#        - pciId:</span>
+    <span class="s">#            vendor: ["15b3"]</span>
+    <span class="s">#            device: ["1014", "1017"]</span>
+    <span class="s">#          loadedKMod : ["vendor_kmod1", "vendor_kmod2"]</span>
+</code></pre>  </div></div> <p>For more information about how to setup the <code class="language-plaintext highlighter-rouge notranslate">WorkerConfig</code> stanza, see <a href="https://kubernetes-sigs.github.io/node-feature-discovery/v0.7/advanced/worker-configuration-reference.html">worker config reference</a></p> </div> </div> <div class="navigation-bottom d-flex flex-justify-between py-3" role="navigation" aria-label="footer navigation"> <div class="prev"><a href="/node-feature-discovery-operator/v0.2/advanced/developer-guide.html" class="btn" title="Developer guide" accesskey="p" rel="prev"> <i class="fa fa-arrow-circle-left"></i> Previous </a></div> <div class="next"></div> </div><hr> <div class="copyright text-center text-gray" role="contentinfo"> <i class="fa fa-copyright"></i> <span class="time">2019-2021,</span> <a class="text-gray" href="https://github.com/kubernetes-sigs" rel="noreferrer" target="_blank">Kubernetes SIGs</a> Revision <a class="text-gray" href="https://github.com/kubernetes-sigs/node-feature-discovery-operator/commit/" title="" rel="noreferrer" target="_blank"></a> <br> <div class="generator"> Built with <a href="https://jekyllrb.com" rel="noreferrer" target="_blank">Jekyll</a> using a <a href="https://github.com/rundocs/jekyll-rtd-theme" rel="noreferrer" target="_blank" title="remote theme: jekyll-rtd-theme v2.0.9">theme</a> provided by <a href="https://rundocs.io" rel="noreferrer" target="_blank">RunDocs</a>. </div> </div> </div> </div> <div class="addons-wrap d-flex flex-column overflow-y-auto"> <div class="status d-flex flex-justify-between p-2"> <div class="title p-1"> <i class="fa fa-book"></i> Node Feature Discovery Operator </div> <div class="branch p-1"> <span class="name"> v0.2 </span> <i class="fa fa-caret-down"></i> </div> </div> <div class="addons d-flex flex-column height-full p-2 d-none"> <dl id="versions"> <dt>Versions</dt> <script src="/node-feature-discovery-operator/versions.js"></script> <script> var dt = document.getElementById('versions'); var items = getVersionListItems(); for (var i=0; i < items.length; i++) { var dd = document.createElement('dd'); var a = dd.appendChild(document.createElement('a')); a.appendChild(document.createTextNode(items[i].name)); a.href = items[i].url; dt.appendChild(dd); } </script> </dl> <dl> <dt>GitHub</dt> <dd> <a href="https://github.com/kubernetes-sigs/node-feature-discovery-operator" title="Stars: 27"> <i class="fa fa-github"></i> Homepage </a> </dd> <dd> <a href="https://github.com/kubernetes-sigs/node-feature-discovery-operator/issues" title="Open issues: 7"> <i class="fa fa-question-circle-o"></i> Issues </a> </dd> <dd> <a href="https://github.com/kubernetes-sigs/node-feature-discovery-operator/zipball/gh-pages" title="Size: 3232 Kb"> <i class="fa fa-download"></i> Download </a> </dd> </dl> <hr> <div class="license f6 pb-2"> The <a href="/node-feature-discovery-operator/v0.2/">software</a> is under the terms of <a href="https://github.com/kubernetes-sigs/node-feature-discovery-operator">Apache License 2.0</a>. </div> </div> </div> <script> window.ui = { title: "Node Feature Discovery Operator", baseurl: "/node-feature-discovery-operator/v0.2", i18n: { search_results: "Search Results", search_results_found: "Search finished, found # page(s) matching the search query.", search_results_not_found: "Your search did not match any documents, please make sure that all characters are spelled correctly!" } }; </script> <script src="https://cdn.jsdelivr.net/gh/rundocs/jekyll-rtd-theme@2.0.9/assets/js/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/gh/rundocs/jekyll-rtd-theme@2.0.9/assets/js/theme.min.js"></script> </body> </html>
