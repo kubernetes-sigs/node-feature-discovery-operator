@@ -61,9 +61,11 @@ IMAGE_REGISTRY ?= k8s.gcr.io/nfd
 IMAGE_NAME := node-feature-discovery-operator
 IMAGE_TAG_NAME ?= $(VERSION)
 IMAGE_EXTRA_TAG_NAMES ?=
-IMAGE_REPO := $(IMAGE_REGISTRY)/$(IMAGE_NAME)
-IMAGE_TAG := $(IMAGE_REPO):$(IMAGE_TAG_NAME)
+IMAGE_REPO ?= $(IMAGE_REGISTRY)/$(IMAGE_NAME)
+IMAGE_TAG ?= $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
+
+IMAGE_TAG_RBAC_PROXY ?= gcr.io/kubebuilder/kube-rbac-proxy:v0.5.0
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
@@ -110,7 +112,9 @@ uninstall: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: kustomize
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMAGE_TAG}
+	cd config/manager && \
+		$(KUSTOMIZE) edit set image controller=${IMAGE_TAG} && \
+		$(KUSTOMIZE) edit set image kube-rbac-proxy=${IMAGE_TAG_RBAC_PROXY}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 # UnDeploy controller from the configured Kubernetes cluster in ~/.kube/config
