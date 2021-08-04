@@ -64,6 +64,7 @@ IMAGE_EXTRA_TAG_NAMES ?=
 IMAGE_REPO := $(IMAGE_REGISTRY)/$(IMAGE_NAME)
 IMAGE_TAG := $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
+BASE_IMAGE_FULL ?= debian:buster-slim
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
@@ -156,6 +157,7 @@ generate: controller-gen
 # Build the docker image
 image:
 	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG) \
+		--build-arg BASE_IMAGE_FULL=$(BASE_IMAGE_FULL) \
 		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)) \
 		$(IMAGE_BUILD_EXTRA_OPTS) ./
 

@@ -1,4 +1,5 @@
-# Build the manager binary
+ARG BASE_IMAGE_FULL
+# Build the manager biinary
 FROM golang:1.16.6-buster as builder
 
 WORKDIR /workspace
@@ -14,7 +15,7 @@ COPY . .
 RUN make build
 
 # Create production image for running the operator
-FROM registry.access.redhat.com/ubi8/ubi
+FROM ${BASE_IMAGE_FULL}
 COPY --from=builder /workspace/node-feature-discovery-operator /
 
 RUN mkdir -p /opt/nfd
