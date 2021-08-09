@@ -208,3 +208,8 @@ bundle: manifests kustomize
 .PHONY: bundle-build
 bundle-build:
 	$(IMAGE_BUILD_CMD)  -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+
+# push the bundle image.
+.PHONY: bundle-push
+bundle-push:
+	$(IMAGE_PUSH_CMD) $(BUNDLE_IMG)

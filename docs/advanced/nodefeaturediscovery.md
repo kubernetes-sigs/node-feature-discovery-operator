@@ -1,10 +1,22 @@
+---
+title: "NodeFeatureDiscovery"
+layout: default
+sort: 2
+---
+
+# The NodeFeatureDiscovery CR
+
+The `NodeFeatureDiscovery` CustomResource defines operational variables
+to define the behaviour of the Node Feature Discovery Operand,
+an example of the CustomResource:
+
+```yaml
 apiVersion: nfd.kubernetes.io/v1
 kind: NodeFeatureDiscovery
 metadata:
   name: nfd-master-server
   namespace: node-feature-discovery-operator
 spec:
-  instance: "" # instance is empty by default
   operand:
     namespace: node-feature-discovery-operator
     image: gcr.io/k8s-staging-nfd/node-feature-discovery:master
@@ -117,3 +129,8 @@ spec:
       #            vendor: ["15b3"]
       #            device: ["1014", "1017"]
       #          loadedKMod : ["vendor_kmod1", "vendor_kmod2"]
+```
+
+For more information about how to setup the `WorkerConfig` stanza,
+see
+[worker config reference](https://kubernetes-sigs.github.io/node-feature-discovery/{{site.operand_version}}/advanced/worker-configuration-reference.html)
