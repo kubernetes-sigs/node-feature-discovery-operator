@@ -1,6 +1,6 @@
 ARG BASE_IMAGE_FULL
 # Build the manager biinary
-FROM golang:1.16.6-buster as builder
+FROM golang:1.16.7-buster as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
