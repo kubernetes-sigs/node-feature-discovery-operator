@@ -30,11 +30,25 @@ IMAGE_REGISTRY=<my registry>
 make image
 ```
 
+Or for the `minimal` variant
+
+```bash
+IMAGE_REGISTRY=<my registry>
+make image-minimal
+```
+
 #### Push the container image
 
 ```bash
 IMAGE_REGISTRY=<my registry>
 make push
+```
+
+Or for the `minimal` variant
+
+```bash
+IMAGE_REGISTRY=<my registry>
+make push-minimal
 ```
 
 Alternatively, instead of specifying variables on the command line,

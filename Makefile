@@ -65,6 +65,7 @@ IMAGE_REPO ?= $(IMAGE_REGISTRY)/$(IMAGE_NAME)
 IMAGE_TAG ?= $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
 BASE_IMAGE_FULL ?= debian:buster-slim
+BASE_IMAGE_MINIMAL ?= gcr.io/distroless/base
 
 IMAGE_TAG_RBAC_PROXY ?= gcr.io/kubebuilder/kube-rbac-proxy:v0.5.0
 
@@ -161,16 +162,30 @@ clean-labels:
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="utils/boilerplate.go.txt" paths="./..."
 
-# Build the docker image
+# Build the container image
 image:
 	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG) \
+		--target full \
 		--build-arg BASE_IMAGE_FULL=$(BASE_IMAGE_FULL) \
+		--build-arg BASE_IMAGE_MINIMAL=$(BASE_IMAGE_MINIMAL) \
 		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)) \
 		$(IMAGE_BUILD_EXTRA_OPTS) ./
 
-# Push the docker image
-push:
+image-minimal:
+	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG)-minimal \
+		--target minimal \
+		--build-arg BASE_IMAGE_FULL=$(BASE_IMAGE_FULL) \
+		--build-arg BASE_IMAGE_MINIMAL=$(BASE_IMAGE_MINIMAL) \
+		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)-minimal) \
+		$(IMAGE_BUILD_EXTRA_OPTS) ./
+
+# Push the container image
+push: 
 	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)
+	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
+
+push-minimal:
+	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)-minimal
 	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
 
 site-build:

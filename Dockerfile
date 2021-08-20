@@ -1,4 +1,5 @@
 ARG BASE_IMAGE_FULL
+ARG BASE_IMAGE_MINIMAL
 # Build the manager biinary
 FROM golang:1.16.7-buster as builder
 
@@ -15,14 +16,21 @@ COPY . .
 RUN make build
 
 # Create production image for running the operator
-FROM ${BASE_IMAGE_FULL}
+FROM ${BASE_IMAGE_FULL} as full
 COPY --from=builder /workspace/node-feature-discovery-operator /
-
-RUN mkdir -p /opt/nfd
-COPY build/assets /opt/nfd
+COPY --from=builder /workspace/build/assets /opt/nfd
 
 RUN useradd nfd-operator
 USER nfd-operator
 
 ENTRYPOINT ["/node-feature-discovery-operator"]
 LABEL io.k8s.display-name="node-feature-discovery-operator"
+
+# Create a minimal image for running the operator
+FROM ${BASE_IMAGE_MINIMAL} as minimal
+COPY --from=builder /workspace/node-feature-discovery-operator /
+COPY --from=builder /workspace/build/assets /opt/nfd
+
+ENTRYPOINT ["/node-feature-discovery-operator"]
+LABEL io.k8s.display-name="node-feature-discovery-operator"
+
