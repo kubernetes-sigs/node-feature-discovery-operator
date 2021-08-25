@@ -22,16 +22,13 @@ import (
 	nfdv1 "github.com/kubernetes-sigs/node-feature-discovery-operator/api/v1"
 )
 
-// NFD holds the needed information to watch from the Controller. The
-// following descriptions elaborate on each field in this struct:
+// NFD holds the needed information to watch from the Controller.
 type NFD struct {
 
-	// resources contains information about NFD's resources. For more
-	// information, see ./nodefeaturediscovery_resources.go
+	// resources contains information about NFD's resources.
 	resources []Resources
 
-	// controls is a list that contains the status of an NFD resource
-	// as being Ready (=0) or NotReady (=1)
+	// controls contains a list of functions for determining if a NFD resource is ready
 	controls []controlFunc
 
 	// rec represents the NFD reconciler struct used for reconciliation
@@ -46,9 +43,8 @@ type NFD struct {
 	idx int
 }
 
-// addState takes a given path and finds resources in that path, then
-// appends a list of ctrl's functions to the NFD object's 'controls'
-// field and adds the list of resources found to 'n.resources'
+// addState finds resources in a given path and adds them and their control
+// functions to the NFD instance.
 func (n *NFD) addState(path string) {
 	res, ctrl := addResourcesControls(path)
 	n.controls = append(n.controls, ctrl)
@@ -70,17 +66,11 @@ func (n *NFD) init(
 	}
 }
 
-// step steps through the list of functions stored in 'n.controls',
-// then attempts to determine if the given resource is Ready or
-// NotReady.
+// step performs one step of the resource reconciliation loop, iterating over
+// one set of resource control functions n order to determine if the related
+// resources are ready.
 func (n *NFD) step() error {
 
-	// For each function in n.controls, attempt to check the status of
-	// the relevant resource. If the resource is defined as being
-	// "NotReady," then return an error saying it's not ready. Otherwise,
-	// return the status as being ready, then increment the index for
-	// n.controls so that we can parse the next resource the next time
-	// the step() function is called.
 	for _, fs := range n.controls[n.idx] {
 		stat, err := fs(*n)
 		if err != nil {
@@ -90,12 +80,13 @@ func (n *NFD) step() error {
 			return errors.New("ResourceNotReady")
 		}
 	}
+
+	// Increment the index to handle the next set of control functions
 	n.idx = n.idx + 1
 	return nil
 }
 
-// last checks if the last index equals the number of functions
-// stored in n.controls.
+// last checks if all control functions have been processed.
 func (n *NFD) last() bool {
 	return n.idx == len(n.controls)
 }

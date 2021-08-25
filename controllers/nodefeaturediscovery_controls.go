@@ -33,7 +33,7 @@ import (
 type controlFunc []func(n NFD) (ResourceStatus, error)
 
 // ResourceStatus defines the status of the resource as being
-// Ready (=0) or NotReady (=1)
+// Ready or NotReady
 type ResourceStatus int
 
 const (
@@ -43,24 +43,21 @@ const (
 	defaultServicePort int = 12000
 )
 
-// String returns the status of the resource as being Ready,
-// NotReady, or Unknown Resource Status
+// String implements the fmt.Stringer interface and returns describes
+// ResourceStatus as a string.
 func (s ResourceStatus) String() string {
 	names := [...]string{
 		"Ready",
 		"NotReady"}
 
-	// Ideally, 's' should be either Ready (=0) or NotReady (=1), but
-	// we may run into a case where we get an unknown status, so return
-	// information stating that the resource status is unknown
 	if s < Ready || s > NotReady {
 		return "Unkown Resources Status"
 	}
 	return names[s]
 }
 
-// Namespace checks if the Namespace for NFD exists and attempts to
-// create it if it doesn't exist
+// Namespace checks if the Namespace for NFD exists and creates it
+// if it doesn't exist
 func Namespace(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -96,8 +93,7 @@ func Namespace(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// ServiceAccount checks if the ServiceAccount for NFD exists and attempts to
-// create it if it doesn't exist.
+// ServiceAccount checks the readiness of the NFD ServiceAccount and creates it if it doesn't exist
 func ServiceAccount(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -146,8 +142,7 @@ func ServiceAccount(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// ClusterRole attempts to create a ClusterRole in a given Namespace.
-// If the ClusterRole already exists, then attempt to update it.
+// ClusterRole checks if the ClusterRole exists, and creates it if it doesn't
 func ClusterRole(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -190,9 +185,7 @@ func ClusterRole(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// ClusterRoleBinding attempts to create a ClusterRoleBinding in a given
-// Namespace. If the ClusterRoleBinding already exists, then attempt to
-// update it.
+// ClusterRoleBinding checks if a ClusterRoleBinding exists and creates one if it doesn't
 func ClusterRoleBinding(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -239,8 +232,7 @@ func ClusterRoleBinding(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// Role attempts to create a Role in a given Namespace. If the Role
-// already exists, then attempt to update it.
+// Role checks if a Role exists and creates a Role if it doesn't
 func Role(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -293,8 +285,7 @@ func Role(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// RoleBinding attempts to create a RoleBinding in a given Namespace. If
-// the RoleBinding already exists, then attempt to update it.
+// RoleBinding checks if a RoleBinding exists and creates a RoleBinding if it doesn't
 func RoleBinding(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -348,8 +339,7 @@ func RoleBinding(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// ConfigMap attempts to create a ConfigMap in a given Namespace. If
-// the ConfigMap already exists, then attempt to update it.
+// ConfigMap checks if a ConfigMap exists and creates one if it doesn't
 func ConfigMap(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -407,8 +397,7 @@ func ConfigMap(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// DaemonSet attempts to create a DaemonSet in a given Namespace. If
-// the DaemonSet already exists, then attempt to update it.
+// DaemonSet checks the readiness of a DaemonSet and creates one if it doesn't exist
 func DaemonSet(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -499,8 +488,7 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// Service attempts to create a Service in a given Namespace. If the
-// Service already exists, then attempt to update it.
+// Service checks if a Service exists and creates one if it doesn't exist
 func Service(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index
@@ -577,8 +565,8 @@ func Service(n NFD) (ResourceStatus, error) {
 	return Ready, nil
 }
 
-// SecurityContextConstraints attempts to create SecurityContextConstraints
-// in a given Namespace. If the scc already exists, then attempt to update it.
+// SecurityContextConstraints checks if a SecurityContextConstraints exists and
+// creates one if it doesn't exist
 func SecurityContextConstraints(n NFD) (ResourceStatus, error) {
 
 	// state represents the resource's 'control' function index

@@ -32,13 +32,10 @@ import (
 	"k8s.io/kubectl/pkg/scheme"
 )
 
-// assetsFromFile is a list where each item in the list contains the
-// contents of a given file as a list of bytes
+// assetsFromFile is the content of an asset file as raw data
 type assetsFromFile []byte
 
-// Resources holds objects owned by NFD. This struct is used with the
-// 'NFD' struct to assist in the process of checking if NFD's resources
-// are 'Ready' or 'NotReady'.
+// Resources holds objects owned by NFD
 type Resources struct {
 	Namespace                  corev1.Namespace
 	ServiceAccount             corev1.ServiceAccount
@@ -62,17 +59,11 @@ func Add3dpartyResourcesToScheme(scheme *runtime.Scheme) error {
 	return nil
 }
 
-// filePathWalkDir takes a path as an input and finds all files
-// in that path, but not directories
+// filePathWalkDir finds all non-directory files under the given path recursively,
+// i.e. including its subdirectories
 func filePathWalkDir(root string) ([]string, error) {
 
-	// files contains the list of files found in the path
-	// 'root'
 	var files []string
-
-	// Walk through the files in 'path', and if the os.FileInfo object
-	// states that the item is not a directory, append it to the list
-	// of files
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			files = append(files, path)
@@ -82,13 +73,10 @@ func filePathWalkDir(root string) ([]string, error) {
 	return files, err
 }
 
-// getAssetsFrom takes a path as an input and grabs all of the
-// file names in that path, then returns a list of the manifests
-// it found in that path.
+// getAssetsFrom recursively reads all manifest files under a given path
 func getAssetsFrom(path string) []assetsFromFile {
 
-	// manifests is a list type where each item in the list
-	// contains the contents of a given asset (manifest)
+	// All assets (manifests) as raw data
 	manifests := []assetsFromFile{}
 	assets := path
 
@@ -101,18 +89,11 @@ func getAssetsFrom(path string) []assetsFromFile {
 	// For each file in the 'files' list, read the file
 	// and store its contents in 'manifests'
 	for _, file := range files {
-
-		// Read the file and return its contents in 'buffer'
 		buffer, err := ioutil.ReadFile(file)
-
-		// If we have an error, then something unexpectedly went
-		// wrong when reading the file's contents
 		if err != nil {
 			panic(err)
 		}
 
-		// If the reading goes smoothly, then append the buffer
-		// (the file's contents) to the list of manifests
 		manifests = append(manifests, buffer)
 	}
 	return manifests
@@ -120,14 +101,10 @@ func getAssetsFrom(path string) []assetsFromFile {
 
 func addResourcesControls(path string) (Resources, controlFunc) {
 
-	// res is a Resources object that contains information about
-	// a given manifest, such as the Namespace and ServiceAccount
-	// being used
+	// Information about the manifest
 	res := Resources{}
 
-	// ctrl is a controlFunc object that contains a function
-	// that returns information about the status of a resource
-	// (i.e., Ready or NotReady)
+	// A list of control functions for checking the status of a resource
 	ctrl := controlFunc{}
 
 	// Get the list of manifests from the given path
@@ -138,9 +115,7 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 		scheme.Scheme)
 	reg, _ := regexp.Compile(`\b(\w*kind:\w*)\B.*\b`)
 
-	// For each manifest, find its kind, then append the appropriate
-	// function (e.g., 'Namespace' or 'Role') to ctrl so that the
-	// Namespace, Role, etc. can be parsed
+	// Append the appropriate control function depending on the kind
 	for _, m := range manifests {
 		kind := reg.FindString(string(m))
 		slce := strings.Split(kind, ":")
@@ -197,7 +172,7 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 	return res, ctrl
 }
 
-// Trigger a panic if an error occurs
+// panicIfError panics in case of an error
 func panicIfError(err error) {
 	if err != nil {
 		panic(err)

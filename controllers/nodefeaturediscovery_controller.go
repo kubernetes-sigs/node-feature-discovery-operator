@@ -47,13 +47,11 @@ var nfd NFD
 // NodeFeatureDiscoveryReconciler reconciles a NodeFeatureDiscovery object
 type NodeFeatureDiscoveryReconciler struct {
 
-	// client.Client reads and writes directly from/to the OCP API server. This
-	// field needs to be added to the reconciler because it is responsible for
-	// fetching objects from the server, which the NFD operator needs to do in
-	// order to add its labels to each node in the cluster.
+	// Client interface to communicate with the API server. Reconciler needs this for
+	// fetching objects.
 	client.Client
 
-	// Log is used to log the reconciliation. Every controllers needs this.
+	// Log is used to log the reconciliation. Every controller needs this.
 	Log logr.Logger
 
 	// Scheme is used by the kubebuilder library to set OwnerReferences. Every
@@ -61,36 +59,29 @@ type NodeFeatureDiscoveryReconciler struct {
 	Scheme *runtime.Scheme
 
 	// Recorder defines interfaces for working with OCP event recorders. This
-	// field is needed by NFD in order for NFD to write events.
+	// field is needed by the operator in order for the operator to write events.
 	Recorder record.EventRecorder
 
 	// AssetsDir defines the directory with assets under the operator image
 	AssetsDir string
 }
 
-// SetupWithManager sets up the controller with the Manager to create the controller.
-// The Manager serves the purpose of initializing shared dependencies (like caches
-// and clients) from the 'client.Client' field in the NodeFeatureDiscoveryReconciler
-// struct.
+// SetupWithManager sets up the controller with a specified manager responsible for
+// initializing shared dependencies (like caches and clients)
 func (r *NodeFeatureDiscoveryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	// The predicate package is used by the controller to filter events before
-	// they are sent to event handlers. In this case, the "validateUpdateEvent"
-	// function is used with UpdateFunc to initate the reconcile loop only on a
-	// spec change of the runtime object. (Refer to the "validateUpdateEvent"
-	// function in this file for more info.)
+	// they are sent to event handlers. Use it to initate the reconcile loop only
+	// on a spec change of the runtime object.
 	p := predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			return validateUpdateEvent(&e)
 		},
 	}
 
-	// To create a new controller, it must be managed by a manager that has
-	// already been created. The "For" function is used to to define the type of
-	// object being reconciled as "NFD". The "Owns" defines the types of objects
-	// being generated: DaemonSet, a Service, a ServiceAccount, some Pods, and
-	// some ConfigMaps. Finally, the "Complete" function builds the application
-	// controller using the NFD reconciler object.
+	// Create a new controller.  "For" specifies the type of object being
+	// reconciled whereas "Owns" specify the types of objects being
+	// generated and "Complete" specifies the reconciler object.
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&nfdv1.NodeFeatureDiscovery{}).
 		Owns(&appsv1.DaemonSet{}, builder.WithPredicates(p)).
@@ -150,10 +141,7 @@ func validateUpdateEvent(e *event.UpdateEvent) bool {
 func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("nodefeaturediscovery", req.NamespacedName)
 
-	// Fetch the NodeFeatureDiscovery instance on the cluster. ctx is
-	// used to carry a deadline (timeout), a cancellation/abort signal,
-	// and similar values across API boundaries so that the
-	// reconciliation process can halt if it needs to.
+	// Fetch the NodeFeatureDiscovery instance on the cluster
 	r.Log.Info("Fetch the NodeFeatureDiscovery instance")
 	instance := &nfdv1.NodeFeatureDiscovery{}
 	err := r.Get(ctx, req.NamespacedName, instance)
@@ -175,15 +163,10 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return ctrl.Result{Requeue: true}, err
 	}
 
-	// Apply NFD components upon initializing NFD
 	r.Log.Info("Ready to apply components")
 	nfd.init(r, instance)
 
-	// For each resource function stored in "nfd.controls", it is
-	// necessary to determine if the relevant resource is Ready or
-	// NotReady. This loop stops when either a resource is returned
-	// as NotReady or when the loop has reached the last element of
-	// the nfd.controls list -- determined by nfd.last()
+	// Run through all control functions, return an error on any NotReady resource.
 	for {
 		err := nfd.step()
 		if err != nil {
