@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	secv1 "github.com/openshift/api/security/v1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -322,6 +323,18 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 		// https://kubernetes-sigs.github.io/node-feature-discovery/v0.8/advanced/master-commandline-reference.html#-instance
 		if n.ins.Spec.Instance != "" {
 			args = append(args, fmt.Sprintf("--instance=%s", n.ins.Spec.Instance))
+		}
+
+		if len(n.ins.Spec.ExtraLabelNs) != 0 {
+			args = append(args, fmt.Sprintf("--extra-label-ns=%s", strings.Join(n.ins.Spec.ExtraLabelNs, ",")))
+		}
+
+		if len(n.ins.Spec.ResourceLabels) != 0 {
+			args = append(args, fmt.Sprintf("--resource-labels=%s", strings.Join(n.ins.Spec.ResourceLabels, ",")))
+		}
+
+		if strings.TrimSpace(n.ins.Spec.LabelWhiteList) != "" {
+			args = append(args, fmt.Sprintf("--label-whitelist=%s", n.ins.Spec.LabelWhiteList))
 		}
 
 		obj.Spec.Template.Spec.Containers[0].Args = args
