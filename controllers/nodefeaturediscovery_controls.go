@@ -314,6 +314,8 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 	if obj.ObjectMeta.Name == "nfd-master" {
 		var args []string
 		port := defaultServicePort
+
+		// update ports
 		if n.ins.Spec.Operand.ServicePort != 0 {
 			port = n.ins.Spec.Operand.ServicePort
 		}
@@ -378,7 +380,6 @@ func Service(n NFD) (ResourceStatus, error) {
 	state := n.idx
 	obj := n.resources[state].Service
 
-	// update ports
 	if n.ins.Spec.Operand.ServicePort != 0 {
 		obj.Spec.Ports[0].Port = int32(n.ins.Spec.Operand.ServicePort)
 		obj.Spec.Ports[0].TargetPort = intstr.FromInt(n.ins.Spec.Operand.ServicePort)
