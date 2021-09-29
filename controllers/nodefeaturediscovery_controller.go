@@ -37,29 +37,51 @@ import (
 	nfdv1 "github.com/kubernetes-sigs/node-feature-discovery-operator/api/v1"
 )
 
+// log is used to set the logger with a name that describes the actions of
+// functions and arguments in this file
 var log = logf.Log.WithName("controller_nodefeaturediscovery")
 
+// nfd is an NFD object that will be used to initialize the NFD operator
 var nfd NFD
 
 // NodeFeatureDiscoveryReconciler reconciles a NodeFeatureDiscovery object
 type NodeFeatureDiscoveryReconciler struct {
+
+	// Client interface to communicate with the API server. Reconciler needs this for
+	// fetching objects.
 	client.Client
-	Log       logr.Logger
-	Scheme    *runtime.Scheme
-	Recorder  record.EventRecorder
+
+	// Log is used to log the reconciliation. Every controller needs this.
+	Log logr.Logger
+
+	// Scheme is used by the kubebuilder library to set OwnerReferences. Every
+	// controller needs this.
+	Scheme *runtime.Scheme
+
+	// Recorder defines interfaces for working with OCP event recorders. This
+	// field is needed by the operator in order for the operator to write events.
+	Recorder record.EventRecorder
+
+	// AssetsDir defines the directory with assets under the operator image
 	AssetsDir string
 }
 
-// SetupWithManager sets up the controller with the Manager.
+// SetupWithManager sets up the controller with a specified manager responsible for
+// initializing shared dependencies (like caches and clients)
 func (r *NodeFeatureDiscoveryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
-	// we want to initate reconcile loop only on spec change of the object
+	// The predicate package is used by the controller to filter events before
+	// they are sent to event handlers. Use it to initate the reconcile loop only
+	// on a spec change of the runtime object.
 	p := predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			return validateUpdateEvent(&e)
 		},
 	}
 
+	// Create a new controller.  "For" specifies the type of object being
+	// reconciled whereas "Owns" specify the types of objects being
+	// generated and "Complete" specifies the reconciler object.
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&nfdv1.NodeFeatureDiscovery{}).
 		Owns(&appsv1.DaemonSet{}, builder.WithPredicates(p)).
@@ -70,6 +92,8 @@ func (r *NodeFeatureDiscoveryReconciler) SetupWithManager(mgr ctrl.Manager) erro
 		Complete(r)
 }
 
+// validateUpdateEvent looks at an update event and returns true or false
+// depending on whether the update event has runtime objects to update.
 func validateUpdateEvent(e *event.UpdateEvent) bool {
 	if e.ObjectOld == nil {
 		klog.Error("Update event has no old runtime object to update")
@@ -112,22 +136,25 @@ func validateUpdateEvent(e *event.UpdateEvent) bool {
 // +kubebuilder:rbac:groups=monitoring.coreos.com,resources=prometheusrules,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
+// Reconcile is part of the main kubernetes reconciliation loop which aims
+// to move the current state of the cluster closer to the desired state.
 func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("nodefeaturediscovery", req.NamespacedName)
 
-	// Fetch the NodeFeatureDiscovery instance
+	// Fetch the NodeFeatureDiscovery instance on the cluster
 	r.Log.Info("Fetch the NodeFeatureDiscovery instance")
 	instance := &nfdv1.NodeFeatureDiscovery{}
 	err := r.Get(ctx, req.NamespacedName, instance)
-	// Error reading the object - requeue the request.
+
+	// If an error occurs because "r.Get" cannot get the NFD instance
+	// (e.g., due to timeouts, aborts, etc. defined by ctx), the
+	// request likely needs to be requeued.
 	if err != nil {
 		// handle deletion of resource
 		if k8serrors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
+			// Owned objects are automatically garbage collected. For additional cleanup
+			// logic use finalizers. Return and don't requeue.
 			r.Log.Info("resource has been deleted", "req", req.Name, "got", instance.Name)
 			return ctrl.Result{Requeue: false}, nil
 		}
@@ -136,11 +163,10 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return ctrl.Result{Requeue: true}, err
 	}
 
-	// apply components
 	r.Log.Info("Ready to apply components")
-
 	nfd.init(r, instance)
 
+	// Run through all control functions, return an error on any NotReady resource.
 	for {
 		err := nfd.step()
 		if err != nil {
