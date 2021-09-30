@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"strings"
 
-	secv1 "github.com/openshift/api/security/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -571,57 +570,6 @@ func Service(n NFD) (ResourceStatus, error) {
 	// resource version and cluster IP that was just found
 	err = n.rec.Client.Update(context.TODO(), required)
 
-	if err != nil {
-		return NotReady, err
-	}
-
-	return Ready, nil
-}
-
-// SecurityContextConstraints checks if a SecurityContextConstraints exists and
-// creates one if it doesn't exist
-func SecurityContextConstraints(n NFD) (ResourceStatus, error) {
-
-	// state represents the resource's 'control' function index
-	state := n.idx
-
-	// It is assumed that the index has already been verified to be an
-	// scc object, so let's get the resource's scc object
-	obj := n.resources[state].SecurityContextConstraints
-
-	// Set the correct namespace for SCC when installed in non default namespace
-	obj.Users[0] = "system:serviceaccount:" + n.ins.GetNamespace() + ":" + obj.GetName()
-
-	// found states if the scc was found
-	found := &secv1.SecurityContextConstraints{}
-	logger := log.WithValues("SecurityContextConstraints", obj.Name, "Namespace", "default")
-
-	logger.Info("Looking for")
-
-	// Look for the scc to see if it exists, and if so, check if it's
-	// Ready/NotReady. If the scc does not exist, then attempt to create
-	// it
-	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: "", Name: obj.Name}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating")
-		err = n.rec.Client.Create(context.TODO(), &obj)
-		if err != nil {
-			logger.Info("Couldn't create", "Error", err)
-			return NotReady, err
-		}
-		return Ready, nil
-	} else if err != nil {
-		return NotReady, err
-	}
-
-	logger.Info("Found, updating")
-
-	// If we found the scc, let's attempt to update it with the resource
-	// version we found
-	required := obj.DeepCopy()
-	required.ResourceVersion = found.ResourceVersion
-
-	err = n.rec.Client.Update(context.TODO(), required)
 	if err != nil {
 		return NotReady, err
 	}

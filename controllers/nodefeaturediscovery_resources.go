@@ -23,11 +23,9 @@ import (
 	"regexp"
 	"strings"
 
-	secv1 "github.com/openshift/api/security/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"k8s.io/kubectl/pkg/scheme"
 )
@@ -37,26 +35,16 @@ type assetsFromFile []byte
 
 // Resources holds objects owned by NFD
 type Resources struct {
-	Namespace                  corev1.Namespace
-	ServiceAccount             corev1.ServiceAccount
-	Role                       rbacv1.Role
-	RoleBinding                rbacv1.RoleBinding
-	ClusterRole                rbacv1.ClusterRole
-	ClusterRoleBinding         rbacv1.ClusterRoleBinding
-	ConfigMap                  corev1.ConfigMap
-	DaemonSet                  appsv1.DaemonSet
-	Pod                        corev1.Pod
-	Service                    corev1.Service
-	SecurityContextConstraints secv1.SecurityContextConstraints
-}
-
-// Add3dpartyResourcesToScheme Adds 3rd party resources To the operator
-func Add3dpartyResourcesToScheme(scheme *runtime.Scheme) error {
-
-	if err := secv1.AddToScheme(scheme); err != nil {
-		return err
-	}
-	return nil
+	Namespace          corev1.Namespace
+	ServiceAccount     corev1.ServiceAccount
+	Role               rbacv1.Role
+	RoleBinding        rbacv1.RoleBinding
+	ClusterRole        rbacv1.ClusterRole
+	ClusterRoleBinding rbacv1.ClusterRoleBinding
+	ConfigMap          corev1.ConfigMap
+	DaemonSet          appsv1.DaemonSet
+	Pod                corev1.Pod
+	Service            corev1.Service
 }
 
 // filePathWalkDir finds all non-directory files under the given path recursively,
@@ -158,10 +146,6 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 			_, _, err := s.Decode(m, nil, &res.Service)
 			panicIfError(err)
 			ctrl = append(ctrl, Service)
-		case "SecurityContextConstraints":
-			_, _, err := s.Decode(m, nil, &res.SecurityContextConstraints)
-			panicIfError(err)
-			ctrl = append(ctrl, SecurityContextConstraints)
 
 		default:
 			log.Info("Unknown Resource: ", "Kind", kind)
