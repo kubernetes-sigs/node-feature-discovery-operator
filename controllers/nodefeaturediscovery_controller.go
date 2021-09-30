@@ -61,9 +61,6 @@ type NodeFeatureDiscoveryReconciler struct {
 	// Recorder defines interfaces for working with OCP event recorders. This
 	// field is needed by the operator in order for the operator to write events.
 	Recorder record.EventRecorder
-
-	// AssetsDir defines the directory with assets under the operator image
-	AssetsDir string
 }
 
 // SetupWithManager sets up the controller with a specified manager responsible for
