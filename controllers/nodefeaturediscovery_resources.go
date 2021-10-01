@@ -148,7 +148,7 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 			ctrl = append(ctrl, Service)
 
 		default:
-			log.Info("Unknown Resource: ", "Kind", kind)
+			r.Log.Infof("Unknown Resource: ", "Kind", kind)
 		}
 
 	}

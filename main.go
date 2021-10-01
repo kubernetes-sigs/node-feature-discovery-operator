@@ -97,7 +97,6 @@ func main() {
 
 	if err = (&controllers.NodeFeatureDiscoveryReconciler{
 		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("NodeFeatureDiscovery"),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NodeFeatureDiscovery")

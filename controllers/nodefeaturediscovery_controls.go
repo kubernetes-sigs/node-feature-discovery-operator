@@ -30,6 +30,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
+// Used for logging purposes
+var r NodeFeatureDiscoveryReconciler
+
 type controlFunc []func(n NFD) (ResourceStatus, error)
 
 // ResourceStatus defines the status of the resource as being
@@ -69,18 +72,17 @@ func Namespace(n NFD) (ResourceStatus, error) {
 
 	// found states if the Namespace was found
 	found := &corev1.Namespace{}
-	logger := log.WithValues("Namespace", obj.Name, "Namespace", "Cluster")
 
 	// Look for the Namespace to see if it exists, and if so, check if
 	// it's Ready/NotReady. If the Namespace does not exist, then
 	// attempt to create it
-	logger.Info("Looking for")
+	r.Log.Info("Looking for Namespace '", obj.Name, "'")
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating ")
+		r.Log.Info("Not found, creating ")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -88,7 +90,7 @@ func Namespace(n NFD) (ResourceStatus, error) {
 		return NotReady, err
 	}
 
-	logger.Info("Found, skipping update")
+	r.Log.Info("Found, skipping update")
 
 	return Ready, nil
 }
@@ -109,9 +111,8 @@ func ServiceAccount(n NFD) (ResourceStatus, error) {
 
 	// found states if the ServiceAccount was found
 	found := &corev1.ServiceAccount{}
-	logger := log.WithValues("ServiceAccount", obj.Name, "Namespace", obj.Namespace)
 
-	logger.Info("Looking for")
+	r.Log.Info("Looking for ServiceAccount '", obj.Name, "' in Namespace '", obj.Namespace, "'")
 
 	// SetControllerReference sets the owner as a Controller OwnerReference
 	// and is used for garbage collection of the controlled object. It is
@@ -126,10 +127,10 @@ func ServiceAccount(n NFD) (ResourceStatus, error) {
 	// attempt to create it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating ")
+		r.Log.Info("Not found, creating ")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -137,7 +138,7 @@ func ServiceAccount(n NFD) (ResourceStatus, error) {
 		return NotReady, err
 	}
 
-	logger.Info("Found, skipping update")
+	r.Log.Info("Found, skipping update")
 
 	return Ready, nil
 }
@@ -155,19 +156,18 @@ func ClusterRole(n NFD) (ResourceStatus, error) {
 
 	// found states if the ClusterRole was found
 	found := &rbacv1.ClusterRole{}
-	logger := log.WithValues("ClusterRole", obj.Name, "Namespace", obj.Namespace)
 
-	logger.Info("Looking for")
+	r.Log.Info("Looking for ClusterRole '", obj.Name, "'")
 
 	// Look for the ClusterRole to see if it exists, and if so, check
 	// if it's Ready/NotReady. If the ClusterRole does not exist, then
 	// attempt to create it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: "", Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating")
+		r.Log.Info("Not found, creating")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -176,7 +176,7 @@ func ClusterRole(n NFD) (ResourceStatus, error) {
 	}
 
 	// If we found the ClusterRole, let's attempt to update it
-	logger.Info("Found, updating")
+	r.Log.Info("Found, updating")
 	err = n.rec.Client.Update(context.TODO(), &obj)
 	if err != nil {
 		return NotReady, err
@@ -198,23 +198,22 @@ func ClusterRoleBinding(n NFD) (ResourceStatus, error) {
 
 	// found states if the ClusterRoleBinding was found
 	found := &rbacv1.ClusterRoleBinding{}
-	logger := log.WithValues("ClusterRoleBinding", obj.Name, "Namespace", obj.Namespace)
 
 	// It is also assumed that our ClusterRoleBinding has a defined
 	// Namespace
 	obj.Subjects[0].Namespace = n.ins.GetNamespace()
 
-	logger.Info("Looking for")
+	r.Log.Info("Looking for ClusterRoleBinding '", obj.Name, "'")
 
 	// Look for the ClusterRoleBinding to see if it exists, and if so,
 	// check if it's Ready/NotReady. If the ClusterRoleBinding does not
 	// exist, then attempt to create it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: "", Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating")
+		r.Log.Info("Not found, creating")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -223,7 +222,7 @@ func ClusterRoleBinding(n NFD) (ResourceStatus, error) {
 	}
 
 	// If we found the ClusterRoleBinding, let's attempt to update it
-	logger.Info("Found, updating")
+	r.Log.Info("Found, updating")
 	err = n.rec.Client.Update(context.TODO(), &obj)
 	if err != nil {
 		return NotReady, err
@@ -248,9 +247,8 @@ func Role(n NFD) (ResourceStatus, error) {
 
 	// found states if the Role was found
 	found := &rbacv1.Role{}
-	logger := log.WithValues("Role", obj.Name, "Namespace", obj.Namespace)
 
-	logger.Info("Looking for")
+	r.Log.Info("Looking for Role '", obj.Name, "' in Namespace '", obj.Namespace, "'")
 
 	// SetControllerReference sets the owner as a Controller OwnerReference
 	// and is used for garbage collection of the controlled object. It is
@@ -264,10 +262,10 @@ func Role(n NFD) (ResourceStatus, error) {
 	// Ready/NotReady. If the Role does not exist, then attempt to create it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating")
+		r.Log.Info("Not found, creating")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -276,7 +274,7 @@ func Role(n NFD) (ResourceStatus, error) {
 	}
 
 	// If we found the Role, let's attempt to update it
-	logger.Info("Found, updating")
+	r.Log.Info("Found, updating")
 	err = n.rec.Client.Update(context.TODO(), &obj)
 	if err != nil {
 		return NotReady, err
@@ -302,9 +300,8 @@ func RoleBinding(n NFD) (ResourceStatus, error) {
 
 	// found states if the RoleBinding was found
 	found := &rbacv1.RoleBinding{}
-	logger := log.WithValues("RoleBinding", obj.Name, "Namespace", obj.Namespace)
 
-	logger.Info("Looking for")
+	r.Log.Info("Looking for RoleBinding", obj.Name, "in Namespace", obj.Namespace)
 
 	// SetControllerReference sets the owner as a Controller OwnerReference
 	// and is used for garbage collection of the controlled object. It is
@@ -318,10 +315,10 @@ func RoleBinding(n NFD) (ResourceStatus, error) {
 	// to create it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating")
+		r.Log.Info("Not found, creating")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -330,7 +327,7 @@ func RoleBinding(n NFD) (ResourceStatus, error) {
 	}
 
 	// If we found the RoleBinding, let's attempt to update it
-	logger.Info("Found, updating")
+	r.Log.Info("Found, updating")
 	err = n.rec.Client.Update(context.TODO(), &obj)
 	if err != nil {
 		return NotReady, err
@@ -359,9 +356,8 @@ func ConfigMap(n NFD) (ResourceStatus, error) {
 
 	// found states if the ConfigMap was found
 	found := &corev1.ConfigMap{}
-	logger := log.WithValues("ConfigMap", obj.Name, "Namespace", obj.Namespace)
 
-	logger.Info("Looking for")
+	r.Log.Info("Looking for ConfigMap '", obj.Name, "' in Namespace '", obj.Namespace, "'")
 
 	// SetControllerReference sets the owner as a Controller OwnerReference
 	// and is used for garbage collection of the controlled object. It is
@@ -376,10 +372,10 @@ func ConfigMap(n NFD) (ResourceStatus, error) {
 	// it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating")
+		r.Log.Info("Not found, creating")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -388,7 +384,7 @@ func ConfigMap(n NFD) (ResourceStatus, error) {
 	}
 
 	// If we found the ConfigMap, let's attempt to update it
-	logger.Info("Found, updating")
+	r.Log.Info("Found, updating")
 	err = n.rec.Client.Update(context.TODO(), &obj)
 	if err != nil {
 		return NotReady, err
@@ -462,9 +458,8 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 
 	// found states if the DaemonSet was found
 	found := &appsv1.DaemonSet{}
-	logger := log.WithValues("DaemonSet", obj.Name, "Namespace", obj.Namespace)
 
-	logger.Info("Looking for")
+	r.Log.Info("Looking for DaemonSet '", obj.Name, "' in Namespace '", obj.Namespace, "'")
 
 	// SetControllerReference sets the owner as a Controller OwnerReference
 	// and is used for garbage collection of the controlled object. It is
@@ -479,10 +474,10 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 	// create it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating")
+		r.Log.Info("Not found, creating")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -491,7 +486,7 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 	}
 
 	// If we found the DaemonSet, let's attempt to update it
-	logger.Info("Found, updating")
+	r.Log.Info("Found, updating")
 	err = n.rec.Client.Update(context.TODO(), &obj)
 	if err != nil {
 		return NotReady, err
@@ -528,9 +523,8 @@ func Service(n NFD) (ResourceStatus, error) {
 
 	// found states if the Service was found
 	found := &corev1.Service{}
-	logger := log.WithValues("Service", obj.Name, "Namespace", obj.Namespace)
 
-	logger.Info("Looking for")
+	r.Log.Info("Looking for Service '", obj.Name, "' in Namespace '", obj.Namespace, "'")
 
 	// SetControllerReference sets the owner as a Controller OwnerReference
 	// and is used for garbage collection of the controlled object. It is
@@ -545,10 +539,10 @@ func Service(n NFD) (ResourceStatus, error) {
 	// it
 	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Not found, creating")
+		r.Log.Info("Not found, creating")
 		err = n.rec.Client.Create(context.TODO(), &obj)
 		if err != nil {
-			logger.Info("Couldn't create")
+			r.Log.Info("Couldn't create")
 			return NotReady, err
 		}
 		return Ready, nil
@@ -556,7 +550,7 @@ func Service(n NFD) (ResourceStatus, error) {
 		return NotReady, err
 	}
 
-	logger.Info("Found, updating")
+	r.Log.Info("Found, updating")
 
 	// Copy the Service object
 	required := obj.DeepCopy()
