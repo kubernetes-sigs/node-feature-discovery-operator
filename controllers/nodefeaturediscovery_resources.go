@@ -27,6 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
+	"k8s.io/klog/v2"
 	"k8s.io/kubectl/pkg/scheme"
 )
 
@@ -148,7 +149,7 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 			ctrl = append(ctrl, Service)
 
 		default:
-			log.Info("Unknown Resource: ", "Kind", kind)
+			klog.Info("Unknown Resource: ", "Kind", kind)
 		}
 
 	}
