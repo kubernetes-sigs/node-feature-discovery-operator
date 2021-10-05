@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -29,6 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"k8s.io/klog/v2"
 	"k8s.io/kubectl/pkg/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // assetsFromFile is the content of an asset file as raw data
@@ -162,4 +164,53 @@ func panicIfError(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// getServiceAccount gets one of the NFD Operator's ServiceAccounts
+func (r *NodeFeatureDiscoveryReconciler) getServiceAccount(ctx context.Context, namespace string, name string) (*corev1.ServiceAccount, error) {
+	sa := &corev1.ServiceAccount{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, sa)
+	return sa, err
+}
+
+// getDaemonSet gets one of the NFD Operator's DaemonSets
+func (r *NodeFeatureDiscoveryReconciler) getDaemonSet(ctx context.Context, namespace string, name string) (*appsv1.DaemonSet, error) {
+	ds := &appsv1.DaemonSet{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, ds)
+	return ds, err
+}
+
+// getService gets one of the NFD Operator's Services
+func (r *NodeFeatureDiscoveryReconciler) getService(ctx context.Context, namespace string, name string) (*corev1.Service, error) {
+	svc := &corev1.Service{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, svc)
+	return svc, err
+}
+
+// getRole gets one of the NFD Operator's Roles
+func (r *NodeFeatureDiscoveryReconciler) getRole(ctx context.Context, namespace string, name string) (*rbacv1.Role, error) {
+	role := &rbacv1.Role{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, role)
+	return role, err
+}
+
+// getRoleBinding gets one of the NFD Operator's RoleBindings
+func (r *NodeFeatureDiscoveryReconciler) getRoleBinding(ctx context.Context, namespace string, name string) (*rbacv1.RoleBinding, error) {
+	rb := &rbacv1.RoleBinding{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, rb)
+	return rb, err
+}
+
+// getClusterRole gets one of the NFD Operator's ClusterRoles
+func (r *NodeFeatureDiscoveryReconciler) getClusterRole(ctx context.Context, namespace string, name string) (*rbacv1.ClusterRole, error) {
+	cr := &rbacv1.ClusterRole{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, cr)
+	return cr, err
+}
+
+// getClusterRoleBinding gets one of the NFD Operator's ClusterRoleBindings
+func (r *NodeFeatureDiscoveryReconciler) getClusterRoleBinding(ctx context.Context, namespace string, name string) (*rbacv1.ClusterRoleBinding, error) {
+	crb := &rbacv1.ClusterRoleBinding{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, crb)
+	return crb, err
 }
