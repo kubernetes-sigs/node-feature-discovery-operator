@@ -19,27 +19,21 @@ package controllers
 import (
 	"context"
 
-	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	nfdv1 "github.com/kubernetes-sigs/node-feature-discovery-operator/api/v1"
 )
-
-// log is used to set the logger with a name that describes the actions of
-// functions and arguments in this file
-var log = logf.Log.WithName("controller_nodefeaturediscovery")
 
 // nfd is an NFD object that will be used to initialize the NFD operator
 var nfd NFD
@@ -50,9 +44,6 @@ type NodeFeatureDiscoveryReconciler struct {
 	// Client interface to communicate with the API server. Reconciler needs this for
 	// fetching objects.
 	client.Client
-
-	// Log is used to log the reconciliation. Every controller needs this.
-	Log logr.Logger
 
 	// Scheme is used by the kubebuilder library to set OwnerReferences. Every
 	// controller needs this.
@@ -136,10 +127,8 @@ func validateUpdateEvent(e *event.UpdateEvent) bool {
 // Reconcile is part of the main kubernetes reconciliation loop which aims
 // to move the current state of the cluster closer to the desired state.
 func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = r.Log.WithValues("nodefeaturediscovery", req.NamespacedName)
-
 	// Fetch the NodeFeatureDiscovery instance on the cluster
-	r.Log.Info("Fetch the NodeFeatureDiscovery instance")
+	klog.Info("Fetch the NodeFeatureDiscovery instance")
 	instance := &nfdv1.NodeFeatureDiscovery{}
 	err := r.Get(ctx, req.NamespacedName, instance)
 
@@ -152,15 +141,15 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup
 			// logic use finalizers. Return and don't requeue.
-			r.Log.Info("resource has been deleted", "req", req.Name, "got", instance.Name)
+			klog.Info("resource has been deleted", "req", req.Name, "got", instance.Name)
 			return ctrl.Result{Requeue: false}, nil
 		}
 
-		r.Log.Error(err, "requeueing event since there was an error reading object")
+		klog.Error(err, "requeueing event since there was an error reading object")
 		return ctrl.Result{Requeue: true}, err
 	}
 
-	r.Log.Info("Ready to apply components")
+	klog.Info("Ready to apply components")
 	nfd.init(r, instance)
 
 	// Run through all control functions, return an error on any NotReady resource.
