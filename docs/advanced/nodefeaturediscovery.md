@@ -109,7 +109,3 @@ spec:
     #            device: ["1014", "1017"]
     #          loadedKMod : ["vendor_kmod1", "vendor_kmod2"]
 ```
-
-For more information about how to setup the `WorkerConfig` stanza,
-see
-[worker config reference](https://kubernetes-sigs.github.io/node-feature-discovery/{{site.operand_version}}/advanced/worker-configuration-reference.html)
