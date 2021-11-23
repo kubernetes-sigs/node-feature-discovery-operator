@@ -13,7 +13,7 @@ sort: 3
 You can reach us via the following channels:
 
 - [#node-feature-discovery](https://kubernetes.slack.com/messages/node-feature-discovery)
-  channel in [Kubernetes Slack](slack.k8s.io)
+  channel in [Kubernetes Slack](https://slack.k8s.io/)
 - [SIG-Node](https://groups.google.com/g/kubernetes-sig-node) mailing list
 - File an
   [issue](https://github.com/kubernetes-sigs/node-feature-discovery-operator/issues/new)
@@ -29,4 +29,4 @@ The project was established in 2016 and was migrated to Kubernetes SIGs in 2018.
 
 ## License
 
-This is open source software released under the [Apache 2.0 License](LICENSE).
+This is open source software released under the [Apache 2.0 License](https://github.com/kubernetes-sigs/node-feature-discovery/blob/master/LICENSE).
