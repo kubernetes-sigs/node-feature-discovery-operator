@@ -50,12 +50,6 @@ IMAGE_REGISTRY=<my registry>
 make deploy
 ```
 
-Then create a NodeFeatureDiscovery CR by running
-
-```bash
-kubectl apply -f config/samples/nfd.kubernetes.io_v1_nodefeaturediscovery.yaml
-```
-
 ## Undeploy the operator
 
 The operator will use the operand node-feature-discovery
