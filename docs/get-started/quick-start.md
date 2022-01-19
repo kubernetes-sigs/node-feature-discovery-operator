@@ -12,17 +12,12 @@ Get the source code
 git clone -b {{ site.release }} https://github.com/kubernetes-sigs/node-feature-discovery-operator
 ```
 
-Deploy the operator
+Deploy the operator. This step also creates a sample `NodeFeatureDiscovery`
+object deploying the operand in default configuration.
 
 ```bash
 IMAGE_TAG={{ site.container_image }}
 make deploy
-```
-
-Create a NodeFeatureDiscovery instance
-
-```bash
-kubectl apply -f config/samples/nfd.kubernetes.io_v1_nodefeaturediscovery.yaml
 ```
 
 ## Verify
