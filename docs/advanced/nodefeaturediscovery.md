@@ -17,10 +17,16 @@ metadata:
   name: nfd-master-server
   namespace: node-feature-discovery-operator
 spec:
+  instance: "" # instance is empty by default
+  #labelWhiteList: ""
+  #extraLabelNs:
+  #  - "example.com"
+  #resourceLabels:
+  #  - "example.com/resource"
   operand:
     namespace: node-feature-discovery-operator
-    image: gcr.io/k8s-staging-nfd/node-feature-discovery:master
-    imagePullPolicy: Always
+    image: gcr.io/k8s-staging-nfd/node-feature-discovery:v0.9.0
+    imagePullPolicy: IfNotPresent
     servicePort: 12000
   workerConfig:
     configData: |
