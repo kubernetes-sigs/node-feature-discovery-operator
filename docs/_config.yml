@@ -51,6 +51,6 @@ display_version_list: true
 release: v0.3.0
 
 # Container image which to point to in the documentation
-container_image: gcr.io/k8s-staging-nfd/node-feature-discovery-operator:master
+container_image: k8s.gcr.io/nfd/node-feature-discovery-operator:v0.3.0
 # Operand Node Feature Discovery documentation version
 operand_version: v0.9
