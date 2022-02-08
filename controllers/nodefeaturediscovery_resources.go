@@ -113,10 +113,6 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 		kind = strings.TrimSpace(slce[1])
 
 		switch kind {
-		case "Namespace":
-			_, _, err := s.Decode(m, nil, &res.Namespace)
-			panicIfError(err)
-			ctrl = append(ctrl, Namespace)
 		case "ServiceAccount":
 			_, _, err := s.Decode(m, nil, &res.ServiceAccount)
 			panicIfError(err)
@@ -153,7 +149,6 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 		default:
 			klog.Info("Unknown Resource: ", "Kind", kind)
 		}
-
 	}
 
 	return res, ctrl
