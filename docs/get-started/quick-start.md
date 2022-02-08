@@ -25,6 +25,12 @@ IMAGE_TAG={{ site.container_image }}
 make deploy
 ```
 
+By default the operator will watch `NodeFeatureDiscovery` objects
+only in the namespace where the operator is deployed in. This is
+specified by the `WATCH_NAMESPACE` env variable in the operator
+deployment manifest. If unset the operator will watch ALL
+namespaces.
+
 Create a NodeFeatureDiscovery instance
 
 ```bash
