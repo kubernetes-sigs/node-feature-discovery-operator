@@ -30,9 +30,9 @@ import (
 )
 
 const (
-	nfdWorkerApp   string = "nfd-worker"
-	nfdMasterApp   string = "nfd-master"
-	nfdTopologyApp string = "nfd-topology-updater"
+	nfdWorkerApp          string = "nfd-worker"
+	nfdMasterApp          string = "nfd-master"
+	nfdTopologyUpdaterApp string = "nfd-topology-updater"
 )
 
 const (
