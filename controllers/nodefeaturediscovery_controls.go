@@ -68,6 +68,11 @@ func ServiceAccount(n NFD) (ResourceStatus, error) {
 	// object
 	obj := n.resources[state].ServiceAccount
 
+	// Check if nfd-topology-updater is needed, if not, skip
+	if !n.ins.Spec.TopologyUpdater && obj.ObjectMeta.Name == nfdTopologyUpdaterApp {
+		return Ready, nil
+	}
+
 	// It is also assumed that our service account has a defined Namespace
 	obj.SetNamespace(n.ins.GetNamespace())
 
@@ -116,6 +121,11 @@ func ClusterRole(n NFD) (ResourceStatus, error) {
 	// object
 	obj := n.resources[state].ClusterRole
 
+	// Check if nfd-topology-updater is needed, if not, skip
+	if !n.ins.Spec.TopologyUpdater && obj.ObjectMeta.Name == nfdTopologyUpdaterApp {
+		return Ready, nil
+	}
+
 	// found states if the ClusterRole was found
 	found := &rbacv1.ClusterRole{}
 
@@ -157,6 +167,11 @@ func ClusterRoleBinding(n NFD) (ResourceStatus, error) {
 	// ClusterRoleBinding object, so let's get the resource's
 	// ClusterRoleBinding object
 	obj := n.resources[state].ClusterRoleBinding
+
+	// Check if nfd-topology-updater is needed, if not, skip
+	if !n.ins.Spec.TopologyUpdater && obj.ObjectMeta.Name == nfdTopologyUpdaterApp {
+		return Ready, nil
+	}
 
 	// found states if the ClusterRoleBinding was found
 	found := &rbacv1.ClusterRoleBinding{}
@@ -364,6 +379,11 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 	// It is assumed that the index has already been verified to be a
 	// DaemonSet object, so let's get the resource's DaemonSet object
 	obj := n.resources[state].DaemonSet
+
+	// Check if nfd-topology-updater is needed, if not, skip
+	if !n.ins.Spec.TopologyUpdater && obj.ObjectMeta.Name == nfdTopologyUpdaterApp {
+		return Ready, nil
+	}
 
 	// Update the NFD operand image
 	obj.Spec.Template.Spec.Containers[0].Image = n.ins.Spec.Operand.ImagePath()
