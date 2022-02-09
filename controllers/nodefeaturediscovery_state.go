@@ -24,7 +24,6 @@ import (
 
 // NFD holds the needed information to watch from the Controller.
 type NFD struct {
-
 	// resources contains information about NFD's resources.
 	resources []Resources
 
@@ -71,7 +70,6 @@ func (n *NFD) init(
 // one set of resource control functions n order to determine if the related
 // resources are ready.
 func (n *NFD) step() error {
-
 	for _, fs := range n.controls[n.idx] {
 		stat, err := fs(*n)
 		if err != nil {

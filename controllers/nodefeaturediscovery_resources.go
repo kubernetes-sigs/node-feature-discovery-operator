@@ -27,6 +27,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"k8s.io/klog/v2"
 	"k8s.io/kubectl/pkg/scheme"
@@ -53,7 +54,6 @@ type Resources struct {
 // filePathWalkDir finds all non-directory files under the given path recursively,
 // i.e. including its subdirectories
 func filePathWalkDir(root string) ([]string, error) {
-
 	var files []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -66,7 +66,6 @@ func filePathWalkDir(root string) ([]string, error) {
 
 // getAssetsFrom recursively reads all manifest files under a given path
 func getAssetsFrom(path string) []assetsFromFile {
-
 	// All assets (manifests) as raw data
 	manifests := []assetsFromFile{}
 	assets := path
@@ -91,7 +90,6 @@ func getAssetsFrom(path string) []assetsFromFile {
 }
 
 func addResourcesControls(path string) (Resources, controlFunc) {
-
 	// Information about the manifest
 	res := Resources{}
 
@@ -161,51 +159,214 @@ func panicIfError(err error) {
 	}
 }
 
-// getServiceAccount gets one of the NFD Operator's ServiceAccounts
+// getServiceAccount gets one of the NFD Operand's ServiceAccounts
 func (r *NodeFeatureDiscoveryReconciler) getServiceAccount(ctx context.Context, namespace string, name string) (*corev1.ServiceAccount, error) {
 	sa := &corev1.ServiceAccount{}
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, sa)
 	return sa, err
 }
 
-// getDaemonSet gets one of the NFD Operator's DaemonSets
+// getDaemonSet gets one of the NFD Operand's DaemonSets
 func (r *NodeFeatureDiscoveryReconciler) getDaemonSet(ctx context.Context, namespace string, name string) (*appsv1.DaemonSet, error) {
 	ds := &appsv1.DaemonSet{}
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, ds)
 	return ds, err
 }
 
-// getService gets one of the NFD Operator's Services
+// getConfigMap gets one of the NFD Operand's ConfigMap
+func (r *NodeFeatureDiscoveryReconciler) getConfigMap(ctx context.Context, namespace string, name string) (*corev1.ConfigMap, error) {
+	cm := &corev1.ConfigMap{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, cm)
+	return cm, err
+}
+
+// getService gets one of the NFD Operand's Services
 func (r *NodeFeatureDiscoveryReconciler) getService(ctx context.Context, namespace string, name string) (*corev1.Service, error) {
 	svc := &corev1.Service{}
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, svc)
 	return svc, err
 }
 
-// getRole gets one of the NFD Operator's Roles
+// getRole gets one of the NFD Operand's Roles
 func (r *NodeFeatureDiscoveryReconciler) getRole(ctx context.Context, namespace string, name string) (*rbacv1.Role, error) {
 	role := &rbacv1.Role{}
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, role)
 	return role, err
 }
 
-// getRoleBinding gets one of the NFD Operator's RoleBindings
+// getRoleBinding gets one of the NFD Operand's RoleBindings
 func (r *NodeFeatureDiscoveryReconciler) getRoleBinding(ctx context.Context, namespace string, name string) (*rbacv1.RoleBinding, error) {
 	rb := &rbacv1.RoleBinding{}
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, rb)
 	return rb, err
 }
 
-// getClusterRole gets one of the NFD Operator's ClusterRoles
+// getClusterRole gets one of the NFD Operand's ClusterRoles
 func (r *NodeFeatureDiscoveryReconciler) getClusterRole(ctx context.Context, namespace string, name string) (*rbacv1.ClusterRole, error) {
 	cr := &rbacv1.ClusterRole{}
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, cr)
 	return cr, err
 }
 
-// getClusterRoleBinding gets one of the NFD Operator's ClusterRoleBindings
+// getClusterRoleBinding gets one of the NFD Operand's ClusterRoleBindings
 func (r *NodeFeatureDiscoveryReconciler) getClusterRoleBinding(ctx context.Context, namespace string, name string) (*rbacv1.ClusterRoleBinding, error) {
 	crb := &rbacv1.ClusterRoleBinding{}
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, crb)
 	return crb, err
+}
+
+// deleteServiceAccount deletes one of the NFD Operand's ServiceAccounts
+func (r *NodeFeatureDiscoveryReconciler) deleteServiceAccount(ctx context.Context, namespace string, name string) error {
+	// Attempt to get the existing ServiceAccount from the reconciler
+	sa, err := r.getServiceAccount(ctx, namespace, name)
+
+	// Do not return an error if the object has already been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), sa)
+}
+
+// deleteConfigMap deletes the NFD Operand ConfigMap
+func (r *NodeFeatureDiscoveryReconciler) deleteConfigMap(ctx context.Context, namespace string, name string) error {
+	cm, err := r.getConfigMap(ctx, namespace, name)
+
+	// Do not return an error if the object has already been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), cm)
+}
+
+// deleteDaemonSet deletes Operand DaemonSet
+func (r *NodeFeatureDiscoveryReconciler) deleteDaemonSet(ctx context.Context, namespace string, name string) error {
+	ds, err := r.getDaemonSet(ctx, namespace, name)
+
+	// Do not return an error if the object has already been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	// If some other error occurred when trying to get the
+	// resource, then return that error
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), ds)
+}
+
+// deleteService deletes the NFD Operand's Service
+func (r *NodeFeatureDiscoveryReconciler) deleteService(ctx context.Context, namespace string, name string) error {
+	// Attempt to get the existing Service from the reconciler
+	svc, err := r.getService(ctx, namespace, name)
+
+	// If the resource was not found, then do not return an
+	// error because this means the resource has already
+	// been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	// If some other error occurred when trying to get the
+	// resource, then return that error
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), svc)
+}
+
+// deleteRole deletes one of the NFD Operand's Roles
+func (r *NodeFeatureDiscoveryReconciler) deleteRole(ctx context.Context, namespace string, name string) error {
+	// Attempt to get the existing Role from the reconciler
+	role, err := r.getRole(ctx, namespace, name)
+
+	// If the resource was not found, then do not return an
+	// error because this means the resource has already
+	// been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	// If some other error occurred when trying to get the
+	// resource, then return that error
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), role)
+}
+
+// deleteRoleBinding deletes one of the NFD Operand's RoleBindings
+func (r *NodeFeatureDiscoveryReconciler) deleteRoleBinding(ctx context.Context, namespace string, name string) error {
+	// Attempt to get the existing RoleBinding from the reconciler
+	rb, err := r.getRoleBinding(ctx, namespace, name)
+
+	// If the resource was not found, then do not return an
+	// error because this means the resource has already
+	// been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	// If some other error occurred when trying to get the
+	// resource, then return that error
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), rb)
+}
+
+// deleteClusterRole deletes one of the NFD Operand's ClusterRoles
+func (r *NodeFeatureDiscoveryReconciler) deleteClusterRole(ctx context.Context, namespace string, name string) error {
+	// Attempt to get the existing ClusterRole from the reconciler
+	cr, err := r.getClusterRole(ctx, namespace, name)
+
+	// If the resource was not found, then do not return an
+	// error because this means the resource has already
+	// been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	// If some other error occurred when trying to get the
+	// resource, then return that error
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), cr)
+}
+
+// deleteClusterRoleBinding deletes one of the NFD Operand's ClusterRoleBindings
+func (r *NodeFeatureDiscoveryReconciler) deleteClusterRoleBinding(ctx context.Context, namespace string, name string) error {
+	// Attempt to get the existing ClusterRoleBinding from the reconciler
+	crb, err := r.getClusterRoleBinding(ctx, namespace, name)
+
+	// If the resource was not found, then do not return an
+	// error because this means the resource has already
+	// been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	// If some other error occurred when trying to get the
+	// resource, then return that error
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), crb)
 }
