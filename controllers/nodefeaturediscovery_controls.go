@@ -159,7 +159,6 @@ func ClusterRole(n NFD) (ResourceStatus, error) {
 
 // ClusterRoleBinding checks if a ClusterRoleBinding exists and creates one if it doesn't
 func ClusterRoleBinding(n NFD) (ResourceStatus, error) {
-
 	// state represents the resource's 'control' function index
 	state := n.idx
 
@@ -210,7 +209,6 @@ func ClusterRoleBinding(n NFD) (ResourceStatus, error) {
 
 // Role checks if a Role exists and creates a Role if it doesn't
 func Role(n NFD) (ResourceStatus, error) {
-
 	// state represents the resource's 'control' function index
 	state := n.idx
 
@@ -262,7 +260,6 @@ func Role(n NFD) (ResourceStatus, error) {
 
 // RoleBinding checks if a RoleBinding exists and creates a RoleBinding if it doesn't
 func RoleBinding(n NFD) (ResourceStatus, error) {
-
 	// state represents the resource's 'control' function index
 	state := n.idx
 
@@ -315,7 +312,6 @@ func RoleBinding(n NFD) (ResourceStatus, error) {
 
 // ConfigMap checks if a ConfigMap exists and creates one if it doesn't
 func ConfigMap(n NFD) (ResourceStatus, error) {
-
 	// state represents the resource's 'control' function index
 	state := n.idx
 
@@ -372,7 +368,6 @@ func ConfigMap(n NFD) (ResourceStatus, error) {
 
 // DaemonSet checks the readiness of a DaemonSet and creates one if it doesn't exist
 func DaemonSet(n NFD) (ResourceStatus, error) {
-
 	// state represents the resource's 'control' function index
 	state := n.idx
 
@@ -479,7 +474,6 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 
 // Service checks if a Service exists and creates one if it doesn't exist
 func Service(n NFD) (ResourceStatus, error) {
-
 	// state represents the resource's 'control' function index
 	state := n.idx
 

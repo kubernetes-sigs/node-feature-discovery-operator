@@ -38,6 +38,8 @@ import (
 // nfd is an NFD object that will be used to initialize the NFD operator
 var nfd NFD
 
+const finalizer = "foreground-deletion"
+
 // NodeFeatureDiscoveryReconciler reconciles a NodeFeatureDiscovery object
 type NodeFeatureDiscoveryReconciler struct {
 
@@ -149,6 +151,18 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return ctrl.Result{Requeue: true}, err
 	}
 
+	// If the resources are to be deleted, first check to see if the
+	// deletion timestamp pointer is not nil. A non-nil value indicates
+	// someone or something has triggered the deletion.
+	if instance.DeletionTimestamp != nil {
+		return r.finalizeNFDOperand(ctx, instance, finalizer)
+	}
+
+	// If the finalizer doesn't exist, add it.
+	if !r.hasFinalizer(instance, finalizer) {
+		return r.addFinalizer(ctx, instance, finalizer)
+	}
+
 	klog.Info("Ready to apply components")
 	nfd.init(r, instance)
 	result, err := applyComponents()
@@ -178,14 +192,14 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 	}
 
 	// Check the status of the NFD Operator cluster role
-	if rstatus, err := r.getClusterRoleConditions(ctx, instance); err != nil {
+	if rstatus, err := r.getMasterClusterRoleConditions(ctx, instance); err != nil {
 		return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, err.Error())
 	} else if rstatus.isDegraded {
 		return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, "nfd ClusterRole has been degraded")
 	}
 
 	// Check the status of the NFD Operator cluster role binding
-	if rstatus, err := r.getClusterRoleBindingConditions(ctx, instance); err != nil {
+	if rstatus, err := r.getMasterClusterRoleBindingConditions(ctx, instance); err != nil {
 		return r.updateDegradedCondition(instance, conditionFailedGettingNFDClusterRoleBinding, err.Error())
 	} else if rstatus.isDegraded {
 		return r.updateDegradedCondition(instance, conditionNFDClusterRoleBindingDegraded, "nfd ClusterRoleBinding has been degraded")
@@ -228,6 +242,36 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return r.updateProgressingCondition(instance, err.Error(), "nfd-master Daemonset is progressing")
 	} else if rstatus.isDegraded {
 		return r.updateDegradedCondition(instance, err.Error(), "nfd-master Daemonset has been degraded")
+	}
+
+	// Check if nfd-topology-updater is needed, if not, skip
+	if instance.Spec.TopologyUpdater {
+		// Check the status of the NFD Operator TopologyUpdater Worker DaemonSet
+		if rstatus, err := r.getTopologyUpdaterDaemonSetConditions(ctx, instance); err != nil {
+			return r.updateDegradedCondition(instance, conditionNFDTopologyUpdaterDaemonSetDegraded, err.Error())
+		} else if rstatus.isProgressing {
+			return r.updateProgressingCondition(instance, err.Error(), "nfd-topology-updater Daemonset is progressing")
+		} else if rstatus.isDegraded {
+			return r.updateDegradedCondition(instance, err.Error(), "nfd-topology-updater Daemonset has been degraded")
+		}
+		// Check the status of the NFD Operator TopologyUpdater cluster role
+		if rstatus, err := r.getTopologyUpdaterClusterRoleConditions(ctx, instance); err != nil {
+			return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, err.Error())
+		} else if rstatus.isDegraded {
+			return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, "nfd-topology-updater ClusterRole has been degraded")
+		}
+		// Check the status of the NFD Operator TopologyUpdater cluster role binding
+		if rstatus, err := r.getTopologyUpdaterClusterRoleBindingConditions(ctx, instance); err != nil {
+			return r.updateDegradedCondition(instance, conditionFailedGettingNFDClusterRoleBinding, err.Error())
+		} else if rstatus.isDegraded {
+			return r.updateDegradedCondition(instance, conditionNFDClusterRoleBindingDegraded, "nfd-topology-updater ClusterRoleBinding has been degraded")
+		}
+		// Check the status of the NFD Operator TopologyUpdater ServiceAccount
+		if rstatus, err := r.getTopologyUpdaterServiceAccountConditions(ctx, instance); err != nil {
+			return r.updateDegradedCondition(instance, conditionFailedGettingNFDTopologyUpdaterServiceAccount, err.Error())
+		} else if rstatus.isDegraded {
+			return r.updateDegradedCondition(instance, conditionNFDTopologyUpdaterServiceAccountDegraded, "nfd-topology-updater service account has been degraded")
+		}
 	}
 
 	// Get available conditions
