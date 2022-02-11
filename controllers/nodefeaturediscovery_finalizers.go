@@ -69,7 +69,7 @@ func (r *NodeFeatureDiscoveryReconciler) finalizeNFDOperand(ctx context.Context,
 	return ctrl.Result{Requeue: false}, nil
 }
 
-// addFinalizer adds a finalizer to the NFD Operator instance
+// addFinalizer adds a finalizer for the NFD operand.
 func (r *NodeFeatureDiscoveryReconciler) addFinalizer(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery, finalizer string) (ctrl.Result, error) {
 	instance.Finalizers = append(instance.Finalizers, finalizer)
 	instance.Status.Conditions = r.getProgressingConditions("DeploymentStarting", "Deployment is starting")
@@ -81,8 +81,7 @@ func (r *NodeFeatureDiscoveryReconciler) addFinalizer(ctx context.Context, insta
 	return ctrl.Result{Requeue: false}, nil
 }
 
-// hasFinalizer determines if the operator instance has a specific
-// finalizer value, which is defined by the parameter 'finalizer'
+// hasFinalizer determines if the operand has a certain finalizer.
 func (r *NodeFeatureDiscoveryReconciler) hasFinalizer(instance *nfdv1.NodeFeatureDiscovery, finalizer string) bool {
 	for _, f := range instance.Finalizers {
 		if f == finalizer {
@@ -92,7 +91,7 @@ func (r *NodeFeatureDiscoveryReconciler) hasFinalizer(instance *nfdv1.NodeFeatur
 	return false
 }
 
-// removeFinalizer removes a finalizer from the operator's instance
+// removeFinalizer removes a finalizer from the operand.
 func (r *NodeFeatureDiscoveryReconciler) removeFinalizer(instance *nfdv1.NodeFeatureDiscovery, finalizer string) {
 	var finalizers []string
 
@@ -105,7 +104,7 @@ func (r *NodeFeatureDiscoveryReconciler) removeFinalizer(instance *nfdv1.NodeFea
 	instance.Finalizers = finalizers
 }
 
-// deleteComponents deletes all of the NFD operator's components
+// deleteComponents deletes all of the NFD operand components.
 func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) error {
 	// Update CRD status to notify instance is undergoing deletion
 	_, _ = r.updateProgressingCondition(instance, "finalizers", "Foreground-Deletion")
@@ -295,9 +294,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	return nil
 }
 
-// doComponentsExist checks to see if any of the NFD Operator's
-// components exist. If they do, then return 'true' to let the
-// user know that all components have NOT been deleted successfully
+// doComponentsExist checks to see if any of the operand components exist.
 func (r *NodeFeatureDiscoveryReconciler) doComponentsExist(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) bool {
 	// Attempt to find the worker DaemonSet
 	if _, err := r.getDaemonSet(ctx, instance.ObjectMeta.Namespace, nfdWorkerApp); !k8serrors.IsNotFound(err) {

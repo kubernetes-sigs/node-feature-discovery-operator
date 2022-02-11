@@ -217,7 +217,6 @@ func (r *NodeFeatureDiscoveryReconciler) getClusterRoleBinding(ctx context.Conte
 
 // deleteServiceAccount deletes one of the NFD Operand's ServiceAccounts
 func (r *NodeFeatureDiscoveryReconciler) deleteServiceAccount(ctx context.Context, namespace string, name string) error {
-	// Attempt to get the existing ServiceAccount from the reconciler
 	sa, err := r.getServiceAccount(ctx, namespace, name)
 
 	// Do not return an error if the object has already been deleted
@@ -257,8 +256,6 @@ func (r *NodeFeatureDiscoveryReconciler) deleteDaemonSet(ctx context.Context, na
 		return nil
 	}
 
-	// If some other error occurred when trying to get the
-	// resource, then return that error
 	if err != nil {
 		return err
 	}
@@ -268,18 +265,13 @@ func (r *NodeFeatureDiscoveryReconciler) deleteDaemonSet(ctx context.Context, na
 
 // deleteService deletes the NFD Operand's Service
 func (r *NodeFeatureDiscoveryReconciler) deleteService(ctx context.Context, namespace string, name string) error {
-	// Attempt to get the existing Service from the reconciler
 	svc, err := r.getService(ctx, namespace, name)
 
-	// If the resource was not found, then do not return an
-	// error because this means the resource has already
-	// been deleted
+	// Do not return an error if the object has already been deleted
 	if k8serrors.IsNotFound(err) {
 		return nil
 	}
 
-	// If some other error occurred when trying to get the
-	// resource, then return that error
 	if err != nil {
 		return err
 	}
@@ -289,18 +281,13 @@ func (r *NodeFeatureDiscoveryReconciler) deleteService(ctx context.Context, name
 
 // deleteRole deletes one of the NFD Operand's Roles
 func (r *NodeFeatureDiscoveryReconciler) deleteRole(ctx context.Context, namespace string, name string) error {
-	// Attempt to get the existing Role from the reconciler
 	role, err := r.getRole(ctx, namespace, name)
 
-	// If the resource was not found, then do not return an
-	// error because this means the resource has already
-	// been deleted
+	// Do not return an error if the object has already been deleted
 	if k8serrors.IsNotFound(err) {
 		return nil
 	}
 
-	// If some other error occurred when trying to get the
-	// resource, then return that error
 	if err != nil {
 		return err
 	}
@@ -310,18 +297,13 @@ func (r *NodeFeatureDiscoveryReconciler) deleteRole(ctx context.Context, namespa
 
 // deleteRoleBinding deletes one of the NFD Operand's RoleBindings
 func (r *NodeFeatureDiscoveryReconciler) deleteRoleBinding(ctx context.Context, namespace string, name string) error {
-	// Attempt to get the existing RoleBinding from the reconciler
 	rb, err := r.getRoleBinding(ctx, namespace, name)
 
-	// If the resource was not found, then do not return an
-	// error because this means the resource has already
-	// been deleted
+	// Do not return an error if the object has already been deleted
 	if k8serrors.IsNotFound(err) {
 		return nil
 	}
 
-	// If some other error occurred when trying to get the
-	// resource, then return that error
 	if err != nil {
 		return err
 	}
@@ -331,18 +313,13 @@ func (r *NodeFeatureDiscoveryReconciler) deleteRoleBinding(ctx context.Context, 
 
 // deleteClusterRole deletes one of the NFD Operand's ClusterRoles
 func (r *NodeFeatureDiscoveryReconciler) deleteClusterRole(ctx context.Context, namespace string, name string) error {
-	// Attempt to get the existing ClusterRole from the reconciler
 	cr, err := r.getClusterRole(ctx, namespace, name)
 
-	// If the resource was not found, then do not return an
-	// error because this means the resource has already
-	// been deleted
+	// Do not return an error if the object has already been deleted
 	if k8serrors.IsNotFound(err) {
 		return nil
 	}
 
-	// If some other error occurred when trying to get the
-	// resource, then return that error
 	if err != nil {
 		return err
 	}
@@ -352,18 +329,13 @@ func (r *NodeFeatureDiscoveryReconciler) deleteClusterRole(ctx context.Context, 
 
 // deleteClusterRoleBinding deletes one of the NFD Operand's ClusterRoleBindings
 func (r *NodeFeatureDiscoveryReconciler) deleteClusterRoleBinding(ctx context.Context, namespace string, name string) error {
-	// Attempt to get the existing ClusterRoleBinding from the reconciler
 	crb, err := r.getClusterRoleBinding(ctx, namespace, name)
 
-	// If the resource was not found, then do not return an
-	// error because this means the resource has already
-	// been deleted
+	// Do not return an error if the object has already been deleted
 	if k8serrors.IsNotFound(err) {
 		return nil
 	}
 
-	// If some other error occurred when trying to get the
-	// resource, then return that error
 	if err != nil {
 		return err
 	}
