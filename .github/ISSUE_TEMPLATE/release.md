@@ -27,6 +27,7 @@ Please do not remove items from the checklist
 - [ ] Wait for the PR to be merged and verify that the image (`k8s.gcr.io/nfd/node-feature-discovery-operator:$VERSION`) is available.
 - [ ] Write the change log into the [Github release info](https://github.com/kubernetes-sigs/node-feature-discovery-operator/releases).
 - [ ] Add a link to the tagged release in this issue.
+- [ ] Create a new bundle for the $VERSION release at https://github.com/k8s-operatorhub/community-operators 
 - [ ] Send an announcement email to `kubernetes-dev@googlegroups.com` with the subject `[ANNOUNCE] node-feature-discovery-operator $VERSION is released`
 - [ ] Add a link to the release announcement in this issue
 - [ ] Close this issue
