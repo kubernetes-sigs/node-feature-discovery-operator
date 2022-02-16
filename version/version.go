@@ -18,5 +18,5 @@ package version
 
 var (
 	// Version tracks the NFD operator release
-	Version = "0.0.1"
+	Version = "0.4.0"
 )
