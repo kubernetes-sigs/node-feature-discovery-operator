@@ -29,7 +29,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	nfdkubernetesiov1 "github.com/kubernetes-sigs/node-feature-discovery-operator/api/v1"
+	nfdkubernetesiov1 "sigs.k8s.io/node-feature-discovery-operator/api/v1"
 	// +kubebuilder:scaffold:imports
 )
 

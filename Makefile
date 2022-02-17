@@ -81,7 +81,7 @@ endif
 
 GOOS=linux
 
-PACKAGE=github.com/kubernetes-sigs/node-feature-discovery-operator
+PACKAGE=sigs.k8s.io/node-feature-discovery-operator
 MAIN_PACKAGE=main.go
 BIN=node-feature-discovery-operator
 

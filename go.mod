@@ -1,4 +1,4 @@
-module github.com/kubernetes-sigs/node-feature-discovery-operator
+module sigs.k8s.io/node-feature-discovery-operator
 
 go 1.17
 
