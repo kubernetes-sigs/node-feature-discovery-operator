@@ -53,4 +53,4 @@ release: v0.4.0
 # Container image which to point to in the documentation
 container_image: gcr.io/k8s-staging-nfd/node-feature-discovery-operator:v0.4.0
 # Operand Node Feature Discovery documentation version
-operand_version: v0.10.1
+operand_version: v0.10
