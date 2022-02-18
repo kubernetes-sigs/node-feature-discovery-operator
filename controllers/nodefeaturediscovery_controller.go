@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	nfdv1 "github.com/kubernetes-sigs/node-feature-discovery-operator/api/v1"
+	nfdv1 "sigs.k8s.io/node-feature-discovery-operator/api/v1"
 )
 
 // nfd is an NFD object that will be used to initialize the NFD operator

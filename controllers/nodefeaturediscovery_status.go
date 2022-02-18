@@ -26,7 +26,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	nfdv1 "github.com/kubernetes-sigs/node-feature-discovery-operator/api/v1"
+	nfdv1 "sigs.k8s.io/node-feature-discovery-operator/api/v1"
 )
 
 const (

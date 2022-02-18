@@ -19,7 +19,7 @@ package controllers
 import (
 	"errors"
 
-	nfdv1 "github.com/kubernetes-sigs/node-feature-discovery-operator/api/v1"
+	nfdv1 "sigs.k8s.io/node-feature-discovery-operator/api/v1"
 )
 
 // NFD holds the needed information to watch from the Controller.
