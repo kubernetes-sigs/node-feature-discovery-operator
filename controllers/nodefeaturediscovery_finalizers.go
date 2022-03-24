@@ -65,7 +65,7 @@ func (r *NodeFeatureDiscoveryReconciler) finalizeNFDOperand(ctx context.Context,
 		return ctrl.Result{Requeue: false}, nil
 	}
 
-	klog.Info("Finalizer does not exist, but resource deletion succesful.")
+	klog.Info("Finalizer does not exist, but resource deletion successful.")
 	return ctrl.Result{Requeue: false}, nil
 }
 
