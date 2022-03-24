@@ -61,7 +61,7 @@ type NodeFeatureDiscoveryReconciler struct {
 func (r *NodeFeatureDiscoveryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	// The predicate package is used by the controller to filter events before
-	// they are sent to event handlers. Use it to initate the reconcile loop only
+	// they are sent to event handlers. Use it to initiate the reconcile loop only
 	// on a spec change of the runtime object.
 	p := predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {

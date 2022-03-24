@@ -83,7 +83,7 @@ make undeploy
 
 ## Clean up labels
 
-In case you need to reomve the labels created by NFD,
+In case you need to remove the labels created by NFD,
 the source Makefile comes with a built in target
 
 ```bash
