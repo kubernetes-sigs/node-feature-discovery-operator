@@ -80,12 +80,16 @@ func main() {
 	}
 
 	if *printVersion {
+		v := version.Get()
+
 		bi, ok := debug.ReadBuildInfo()
-		if !ok {
+		if ok {
+			v = version.GetWithVCSRevision(v, bi)
+		} else {
 			klog.Info("Could not extract build info from the binary")
 		}
 
-		fmt.Println(ProgramName, version.GetWithVCSRevision(version.Get(), bi))
+		fmt.Println(ProgramName, v)
 		os.Exit(0)
 	}
 
