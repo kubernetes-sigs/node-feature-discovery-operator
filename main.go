@@ -20,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog/v2"
@@ -79,7 +80,12 @@ func main() {
 	}
 
 	if *printVersion {
-		fmt.Println(ProgramName, version.Get())
+		bi, ok := debug.ReadBuildInfo()
+		if !ok {
+			klog.Info("Could not extract build info from the binary")
+		}
+
+		fmt.Println(ProgramName, version.GetWithVCSRevision(version.Get(), bi))
 		os.Exit(0)
 	}
 

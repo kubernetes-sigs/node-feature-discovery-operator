@@ -28,7 +28,7 @@ JEKYLL_OPTS := -d '$(SITE_DESTDIR)' $(if $(SITE_BASEURL),-b '$(SITE_BASEURL)',)
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
 # - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.2.1)
 # - use environment variables to overwrite this value (e.g export VERSION=0.2.1)
-VERSION := $(shell git describe --tags --dirty --always)
+VERSION := $(shell git describe --tags --abbrev=0)
 
 # CHANNELS define the bundle channels used in the bundle.
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "preview,fast,stable")
@@ -82,7 +82,6 @@ endif
 GOOS=linux
 
 PACKAGE=sigs.k8s.io/node-feature-discovery-operator
-MAIN_PACKAGE=main.go
 BIN=node-feature-discovery-operator
 LDFLAGS = -ldflags "-s -w -X sigs.k8s.io/node-feature-discovery-operator/pkg/version.version=$(VERSION)"
 
@@ -101,7 +100,7 @@ go_mod:
 
 # Build binary
 build: go_mod
-	@GOOS=$(GOOS) GO111MODULE=on CGO_ENABLED=0 $(GO_CMD) build -o $(BIN) $(LDFLAGS) $(MAIN_PACKAGE)
+	@GOOS=$(GOOS) GO111MODULE=on CGO_ENABLED=0 $(GO_CMD) build -o $(BIN) $(LDFLAGS)
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests

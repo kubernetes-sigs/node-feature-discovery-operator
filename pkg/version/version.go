@@ -16,6 +16,11 @@ limitations under the License.
 
 package version
 
+import (
+	"runtime/debug"
+	"strings"
+)
+
 const undefinedVersion string = "undefined"
 
 // Must not be const, supposed to be set using ldflags at build time
@@ -24,6 +29,42 @@ var version = undefinedVersion
 // Get returns the version as a string
 func Get() string {
 	return version
+}
+
+func GetWithVCSRevision(v string, bi *debug.BuildInfo) string {
+	var (
+		vcsRevision string
+		vcsDirty    = false
+	)
+
+	for _, s := range bi.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			vcsRevision = s.Value
+		case "vcs.modified":
+			if s.Value == "true" {
+				vcsDirty = true
+			}
+		}
+	}
+
+	var sb strings.Builder
+
+	sb.WriteString(v)
+
+	if vcsRevision == "" {
+		vcsRevision = "undefined"
+	}
+
+	sb.WriteRune('-')
+	sb.WriteString(vcsRevision)
+
+	if vcsDirty {
+		sb.WriteRune('-')
+		sb.WriteString("dirty")
+	}
+
+	return sb.String()
 }
 
 // Undefined returns if version is at it's default value
