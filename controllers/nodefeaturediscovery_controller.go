@@ -103,6 +103,7 @@ func validateUpdateEvent(e *event.UpdateEvent) bool {
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=pods/log,verbs=get
 // +kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=nodes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
@@ -235,13 +236,13 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return r.updateDegradedCondition(instance, err.Error(), "nfd-worker Daemonset has been degraded")
 	}
 
-	// Check the status of the NFD Operator Master DaemonSet
-	if rstatus, err := r.getMasterDaemonSetConditions(ctx, instance); err != nil {
-		return r.updateDegradedCondition(instance, conditionFailedGettingNFDMasterDaemonSet, err.Error())
+	// Check the status of the NFD Operator Master Deployment
+	if rstatus, err := r.getMasterDeploymentConditions(ctx, instance); err != nil {
+		return r.updateDegradedCondition(instance, conditionFailedGettingNFDMasterDeployment, err.Error())
 	} else if rstatus.isProgressing {
-		return r.updateProgressingCondition(instance, err.Error(), "nfd-master Daemonset is progressing")
+		return r.updateProgressingCondition(instance, err.Error(), "nfd-master Deployment is progressing")
 	} else if rstatus.isDegraded {
-		return r.updateDegradedCondition(instance, err.Error(), "nfd-master Daemonset has been degraded")
+		return r.updateDegradedCondition(instance, err.Error(), "nfd-master Deployment has been degraded")
 	}
 
 	// Check if nfd-topology-updater is needed, if not, skip
