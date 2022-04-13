@@ -43,7 +43,7 @@ const (
 	conditionFailedGettingNFDMasterServiceAccount          = "FailedGettingNFDMasterServiceAccount"
 	conditionFailedGettingNFDService                       = "FailedGettingNFDService"
 	conditionFailedGettingNFDWorkerDaemonSet               = "FailedGettingNFDWorkerDaemonSet"
-	conditionFailedGettingNFDMasterDaemonSet               = "FailedGettingNFDMasterDaemonSet"
+	conditionFailedGettingNFDMasterDeployment              = "FailedGettingNFDMasterDeployment"
 	conditionFailedGettingNFDRoleBinding                   = "FailedGettingNFDRoleBinding"
 	conditionFailedGettingNFDClusterRoleBinding            = "FailedGettingNFDClusterRole"
 
@@ -55,7 +55,7 @@ const (
 	conditionNFDServiceDegraded                       = "NFDServiceDegraded"
 	conditionNFDWorkerDaemonSetDegraded               = "NFDWorkerDaemonSetDegraded"
 	conditionNFDTopologyUpdaterDaemonSetDegraded      = "NFDTopologyUpdaterDaemonSetDegraded"
-	conditionNFDMasterDaemonSetDegraded               = "NFDMasterDaemonSetDegraded"
+	conditionNFDMasterDeploymentDegraded              = "NFDMasterDDeploymentDegraded"
 	conditionNFDRoleDegraded                          = "NFDRoleDegraded"
 	conditionNFDRoleBindingDegraded                   = "NFDRoleBindingDegraded"
 	conditionNFDClusterRoleDegraded                   = "NFDClusterRoleDegraded"
@@ -63,16 +63,13 @@ const (
 
 	// Unknown errors. (Catch all)
 	errorNFDWorkerDaemonSetUnknown = "NFDWorkerDaemonSetCorrupted"
-	errorNFDMasterDaemonSetUnknown = "NFDMasterDaemonSetCorrupted"
 
 	// More nodes are listed as "ready" than selected
 	errorTooManyNFDWorkerDaemonSetReadyNodes = "NFDWorkerDaemonSetHasMoreNodesThanScheduled"
-	errorTooManyNFDMasterDaemonSetReadyNodes = "NFDMasterDaemonSetHasMoreNodesThanScheduled"
 
 	// DaemonSet warnings (for "Progressing" conditions)
 	warningNumberOfReadyNodesIsLessThanScheduled = "warningNumberOfReadyNodesIsLessThanScheduled"
 	warningNFDWorkerDaemonSetProgressing         = "warningNFDWorkerDaemonSetProgressing"
-	warningNFDMasterDaemonSetProgressing         = "warningNFDMasterDaemonSetProgressing"
 
 	// ConditionAvailable indicates that the resources maintained by the operator,
 	// is functional and available in the cluster.
@@ -280,10 +277,35 @@ func (r *NodeFeatureDiscoveryReconciler) getTopologyUpdaterDaemonSetConditions(c
 	return r.getDaemonSetConditions(ctx, instance, nfdTopologyUpdaterApp)
 }
 
-// getMasterDaemonSetConditions is a wrapper around "getDaemonSetConditions" for
-// master DaemonSets
-func (r *NodeFeatureDiscoveryReconciler) getMasterDaemonSetConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
-	return r.getDaemonSetConditions(ctx, instance, nfdMasterApp)
+// getMasterDeploymentConditions is a wrapper around "getDeploymentConditions" for
+// master Deployment
+func (r *NodeFeatureDiscoveryReconciler) getMasterDeploymentConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
+	return r.getDeploymentConditions(ctx, instance, nfdMasterApp)
+}
+
+// getDeploymentConditions gets the current status of a Deployment. If an error
+// occurs, this function returns the corresponding error message
+func (r *NodeFeatureDiscoveryReconciler) getDeploymentConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery, nfdAppName string) (Status, error) {
+	// Initialize the resource's status to 'Degraded'
+	status := initializeDegradedStatus()
+
+	d, err := r.getDeployment(ctx, instance.ObjectMeta.Namespace, nfdAppName)
+	if err != nil {
+		return status, err
+	}
+
+	dStatus := d.Status.DeepCopy()
+
+	// TODO make the number of replicas configurable from CRD
+	if dStatus.AvailableReplicas == 0 {
+		return status, errors.New(conditionNFDMasterDeploymentDegraded)
+	}
+
+	// If all nodes are ready, then update the status to be "isAvailable"
+	status.isAvailable = true
+	status.isDegraded = false
+
+	return status, nil
 }
 
 // getDaemonSetConditions gets the current status of a DaemonSet. If an error
@@ -312,7 +334,6 @@ func (r *NodeFeatureDiscoveryReconciler) getDaemonSetConditions(ctx context.Cont
 		if nfdAppName == nfdWorkerApp {
 			return status, errors.New(errorNFDWorkerDaemonSetUnknown)
 		}
-		return status, errors.New(errorNFDMasterDaemonSetUnknown)
 	}
 	if numberUnavailable > 0 {
 		status.isProgressing = true
@@ -320,7 +341,6 @@ func (r *NodeFeatureDiscoveryReconciler) getDaemonSetConditions(ctx context.Cont
 		if nfdAppName == nfdWorkerApp {
 			return status, errors.New(warningNFDWorkerDaemonSetProgressing)
 		}
-		return status, errors.New(warningNFDMasterDaemonSetProgressing)
 	}
 
 	// If there are none scheduled, then we have a problem because we should
@@ -329,7 +349,6 @@ func (r *NodeFeatureDiscoveryReconciler) getDaemonSetConditions(ctx context.Cont
 		if nfdAppName == nfdWorkerApp {
 			return status, errors.New(conditionNFDWorkerDaemonSetDegraded)
 		}
-		return status, errors.New(conditionNFDMasterDaemonSetDegraded)
 	}
 
 	// Just check in case the number of "ready" nodes is greater than the
@@ -339,7 +358,6 @@ func (r *NodeFeatureDiscoveryReconciler) getDaemonSetConditions(ctx context.Cont
 		if nfdAppName == nfdWorkerApp {
 			return status, errors.New(errorTooManyNFDWorkerDaemonSetReadyNodes)
 		}
-		return status, errors.New(errorTooManyNFDMasterDaemonSetReadyNodes)
 	}
 
 	// If we have less than the number of scheduled pods, then the DaemonSet
