@@ -47,6 +47,7 @@ type Resources struct {
 	ClusterRoleBinding rbacv1.ClusterRoleBinding
 	ConfigMap          corev1.ConfigMap
 	DaemonSet          appsv1.DaemonSet
+	Deployment         appsv1.Deployment
 	Pod                corev1.Pod
 	Service            corev1.Service
 }
@@ -139,6 +140,10 @@ func addResourcesControls(path string) (Resources, controlFunc) {
 			_, _, err := s.Decode(m, nil, &res.DaemonSet)
 			panicIfError(err)
 			ctrl = append(ctrl, DaemonSet)
+		case "Deployment":
+			_, _, err := s.Decode(m, nil, &res.Deployment)
+			panicIfError(err)
+			ctrl = append(ctrl, Deployment)
 		case "Service":
 			_, _, err := s.Decode(m, nil, &res.Service)
 			panicIfError(err)
@@ -171,6 +176,13 @@ func (r *NodeFeatureDiscoveryReconciler) getDaemonSet(ctx context.Context, names
 	ds := &appsv1.DaemonSet{}
 	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, ds)
 	return ds, err
+}
+
+// getDeployment gets one of the NFD Operand's Deployment
+func (r *NodeFeatureDiscoveryReconciler) getDeployment(ctx context.Context, namespace string, name string) (*appsv1.Deployment, error) {
+	d := &appsv1.Deployment{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, d)
+	return d, err
 }
 
 // getConfigMap gets one of the NFD Operand's ConfigMap
@@ -261,6 +273,22 @@ func (r *NodeFeatureDiscoveryReconciler) deleteDaemonSet(ctx context.Context, na
 	}
 
 	return r.Delete(context.TODO(), ds)
+}
+
+// deleteDeployment deletes Operand Deployment
+func (r *NodeFeatureDiscoveryReconciler) deleteDeployment(ctx context.Context, namespace string, name string) error {
+	d, err := r.getDeployment(ctx, namespace, name)
+
+	// Do not return an error if the object has already been deleted
+	if k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return r.Delete(context.TODO(), d)
 }
 
 // deleteService deletes the NFD Operand's Service

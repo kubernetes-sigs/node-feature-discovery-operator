@@ -174,13 +174,13 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 		return err
 	}
 
-	// Attempt to delete master DaemonSet
+	// Attempt to delete master Deployment
 	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
-		err = r.deleteDaemonSet(ctx, instance.ObjectMeta.Namespace, nfdMasterApp)
+		err = r.deleteDeployment(ctx, instance.ObjectMeta.Namespace, nfdMasterApp)
 		if err != nil {
-			return false, interpretError(err, "master DaemonSet")
+			return false, interpretError(err, "master Deployment")
 		}
-		klog.Info("Master DaemonSet resource has been deleted.")
+		klog.Info("Master Deployment resource has been deleted.")
 		return true, nil
 	})
 	if err != nil {
@@ -301,8 +301,8 @@ func (r *NodeFeatureDiscoveryReconciler) doComponentsExist(ctx context.Context, 
 		return true
 	}
 
-	// Attempt to find the master DaemonSet
-	if _, err := r.getDaemonSet(ctx, instance.ObjectMeta.Namespace, nfdMasterApp); !k8serrors.IsNotFound(err) {
+	// Attempt to find the master Deployment
+	if _, err := r.getDeployment(ctx, instance.ObjectMeta.Namespace, nfdMasterApp); !k8serrors.IsNotFound(err) {
 		return true
 	}
 
