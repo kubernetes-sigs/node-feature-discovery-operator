@@ -129,7 +129,7 @@ func ClusterRole(n NFD) (ResourceStatus, error) {
 	// found states if the ClusterRole was found
 	found := &rbacv1.ClusterRole{}
 
-	klog.Info("Looking for ClusterRole %q in Namespace %", obj.Name, obj.Namespace)
+	klog.Info("Looking for ClusterRole %q in Namespace %q", obj.Name, obj.Namespace)
 
 	// Look for the ClusterRole to see if it exists, and if so, check
 	// if it's Ready/NotReady. If the ClusterRole does not exist, then
@@ -388,46 +388,6 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 		obj.Spec.Template.Spec.Containers[0].ImagePullPolicy = n.ins.Spec.Operand.ImagePolicy(n.ins.Spec.Operand.ImagePullPolicy)
 	}
 
-	// Update nfd-master service port
-	if obj.ObjectMeta.Name == "nfd-master" {
-		var args []string
-		port := defaultServicePort
-
-		// If the operand service port has already been defined,
-		// then set "port" to the defined port. Otherwise, it is
-		// ok to just use the defaultServicePort value
-		if n.ins.Spec.Operand.ServicePort != 0 {
-			port = n.ins.Spec.Operand.ServicePort
-		}
-
-		// Now that the port has been determined, append it to
-		// the list of args
-		args = append(args, fmt.Sprintf("--port=%d", port))
-
-		// Check if running as instance. If not, then it is
-		// expected that n.ins.Spec.Instance will return ""
-		// https://kubernetes-sigs.github.io/node-feature-discovery/v0.8/advanced/master-commandline-reference.html#-instance
-		if n.ins.Spec.Instance != "" {
-			args = append(args, fmt.Sprintf("--instance=%s", n.ins.Spec.Instance))
-		}
-
-		if len(n.ins.Spec.ExtraLabelNs) != 0 {
-			args = append(args, fmt.Sprintf("--extra-label-ns=%s", strings.Join(n.ins.Spec.ExtraLabelNs, ",")))
-		}
-
-		if len(n.ins.Spec.ResourceLabels) != 0 {
-			args = append(args, fmt.Sprintf("--resource-labels=%s", strings.Join(n.ins.Spec.ResourceLabels, ",")))
-		}
-
-		if strings.TrimSpace(n.ins.Spec.LabelWhiteList) != "" {
-			args = append(args, fmt.Sprintf("--label-whitelist=%s", n.ins.Spec.LabelWhiteList))
-		}
-
-		// Set the args based on the port that was determined
-		// and the instance that was determined
-		obj.Spec.Template.Spec.Containers[0].Args = args
-	}
-
 	// Set namespace based on the NFD namespace. (And again,
 	// it is assumed that the Namespace has already been
 	// determined before this function was called.)
@@ -464,6 +424,102 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 
 	// If we found the DaemonSet, let's attempt to update it
 	klog.Info("Daemonset %q in Namespace %q found, updating", obj.Name, obj.Namespace)
+	err = n.rec.Client.Update(context.TODO(), &obj)
+	if err != nil {
+		return NotReady, err
+	}
+
+	return Ready, nil
+}
+
+// Deployment checks the readiness of a Deployment and creates one if it doesn't exist
+func Deployment(n NFD) (ResourceStatus, error) {
+	// state represents the resource's 'control' function index
+	state := n.idx
+
+	// It is assumed that the index has already been verified to be a
+	// Deployment object, so let's get the resource's Deployment object
+	obj := n.resources[state].Deployment
+
+	// Update the NFD operand image
+	obj.Spec.Template.Spec.Containers[0].Image = n.ins.Spec.Operand.ImagePath()
+
+	// Update the image pull policy
+	if n.ins.Spec.Operand.ImagePullPolicy != "" {
+		obj.Spec.Template.Spec.Containers[0].ImagePullPolicy = n.ins.Spec.Operand.ImagePolicy(n.ins.Spec.Operand.ImagePullPolicy)
+	}
+
+	var args []string
+	port := defaultServicePort
+
+	// If the operand service port has already been defined,
+	// then set "port" to the defined port. Otherwise, it is
+	// ok to just use the defaultServicePort value
+	if n.ins.Spec.Operand.ServicePort != 0 {
+		port = n.ins.Spec.Operand.ServicePort
+	}
+
+	// Now that the port has been determined, append it to
+	// the list of args
+	args = append(args, fmt.Sprintf("--port=%d", port))
+
+	// Check if running as instance. If not, then it is
+	// expected that n.ins.Spec.Instance will return ""
+	// https://kubernetes-sigs.github.io/node-feature-discovery/v0.8/advanced/master-commandline-reference.html#-instance
+	if n.ins.Spec.Instance != "" {
+		args = append(args, fmt.Sprintf("--instance=%q", n.ins.Spec.Instance))
+	}
+
+	if len(n.ins.Spec.ExtraLabelNs) != 0 {
+		args = append(args, fmt.Sprintf("--extra-label-ns=%q", strings.Join(n.ins.Spec.ExtraLabelNs, ",")))
+	}
+
+	if len(n.ins.Spec.ResourceLabels) != 0 {
+		args = append(args, fmt.Sprintf("--resource-labels=%q", strings.Join(n.ins.Spec.ResourceLabels, ",")))
+	}
+
+	if strings.TrimSpace(n.ins.Spec.LabelWhiteList) != "" {
+		args = append(args, fmt.Sprintf("--label-whitelist=%q", n.ins.Spec.LabelWhiteList))
+	}
+
+	obj.Spec.Template.Spec.Containers[0].Args = args
+
+	// Set namespace based on the NFD namespace. (And again,
+	// it is assumed that the Namespace has already been
+	// determined before this function was called.)
+	obj.SetNamespace(n.ins.GetNamespace())
+
+	// found states if the Deployment was found
+	found := &appsv1.Deployment{}
+
+	klog.Info("Looking for Deployment %q in Namespace %q", obj.Name, obj.Namespace)
+
+	// SetControllerReference sets the owner as a Controller OwnerReference
+	// and is used for garbage collection of the controlled object. It is
+	// also used to reconcile the owner object on changes to the controlled
+	// object. If we cannot set the owner, then return NotReady
+	if err := controllerutil.SetControllerReference(n.ins, &obj, n.rec.Scheme); err != nil {
+		return NotReady, err
+	}
+
+	// Look for the Deployment to see if it exists, and if so, check if it's
+	// Ready/NotReady. If the DaemonSet does not exist, then attempt to
+	// create it
+	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
+	if err != nil && errors.IsNotFound(err) {
+		klog.Info("Deployment %q in Namespace %q not found, creating", obj.Name, obj.Namespace)
+		err = n.rec.Client.Create(context.TODO(), &obj)
+		if err != nil {
+			klog.Info("Couldn't create Deployment %q in Namespace %q", obj.Name, obj.Namespace)
+			return NotReady, err
+		}
+		return Ready, nil
+	} else if err != nil {
+		return NotReady, err
+	}
+
+	// If we found the Deployment, let's attempt to update it
+	klog.Info("Deployment %q in Namespace %q found, updating", obj.Name, obj.Namespace)
 	err = n.rec.Client.Update(context.TODO(), &obj)
 	if err != nil {
 		return NotReady, err
