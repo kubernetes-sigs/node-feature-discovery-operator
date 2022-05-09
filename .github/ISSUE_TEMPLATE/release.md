@@ -12,10 +12,12 @@ Please do not remove items from the checklist
 -->
 - [ ] All [OWNERS](https://github.com/kubernetes-sigs/node-feature-discovery-operator/blob/master/OWNERS) must LGTM the release proposal
 - [ ] Verify that the changelog in this issue is up-to-date
-- [ ] For major releases (v0.$MAJ.0), an OWNER creates a release branch with
-      `git branch release-0.$MAJ master`
-- [ ] An OWNER creates a vanilla release branch from master and pushes it with
-      `git push release-0.$MAJ`
+- [ ] For major releases (v0.$MAJ.0), an OWNER creates a release branch
+  - [ ] An OWNER creates a vanilla release branch from master
+        `git branch release-0.$MAJ master`
+  - [ ] An OWNER pushes the newly created branch
+        `git push release-0.$MAJ`
+- [ ] Update references in `docs/_config.yml` (`version`, `release` and `container_image` fields) to point to the upcoming release and subbmit a PR against the release branch
 - [ ] An OWNER creates an annotated and signed tag with
      `git tag -a -s $VERSION`
       and inserts the changelog into the tag description.
