@@ -115,6 +115,8 @@ install: manifests kustomize
 uninstall: manifests kustomize
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
+clean-manifests = (cd config/manager && $(KUSTOMIZE) edit set image controller=k8s.gcr.io/nfd/node-feature-discovery-operator:0.4.2)
+
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: kustomize
 	cd $(PROJECT_DIR)/config/manager && \
@@ -122,6 +124,7 @@ deploy: kustomize
 	cd $(PROJECT_DIR)/config/default && \
 		$(KUSTOMIZE) edit set image kube-rbac-proxy=${IMAGE_TAG_RBAC_PROXY}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
+	@$(call clean-manifests)
 
 # UnDeploy controller from the configured Kubernetes cluster in ~/.kube/config
 undeploy:
