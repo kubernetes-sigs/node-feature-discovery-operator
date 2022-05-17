@@ -56,12 +56,14 @@ spec:
             - "nfd-master"
           args: []
           securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
             allowPrivilegeEscalation: false
             capabilities:
               drop:
               - ALL
             readOnlyRootFilesystem: true
-            runAsNonRoot: true  
           volumeMounts: []
           livenessProbe:
             exec:
