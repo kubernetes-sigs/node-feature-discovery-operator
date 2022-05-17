@@ -120,7 +120,7 @@ clean-manifests = (cd config/manager && $(KUSTOMIZE) edit set image controller=k
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: kustomize
 	cd $(PROJECT_DIR)/config/manager && \
-		$(KUSTOMIZE) edit set image controller=${IMAGE_TAG}
+		$(KUSTOMIZE) edit set image controller=${IMAGE_TAG}-minimal
 	cd $(PROJECT_DIR)/config/default && \
 		$(KUSTOMIZE) edit set image kube-rbac-proxy=${IMAGE_TAG_RBAC_PROXY}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
@@ -214,7 +214,7 @@ kustomize:
 .PHONY: bundle
 bundle: manifests kustomize
 	operator-sdk generate kustomize manifests -q
-	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG)
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG)-minimal
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	operator-sdk bundle validate ./bundle
 

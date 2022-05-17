@@ -20,6 +20,10 @@ git clone -b {{ site.release }} https://github.com/kubernetes-sigs/node-feature-
 
 Deploy the operator
 
+> By default it will deploy using the minimal tag image, is
+> desired you can simply modify the IMAGE_TAG env var to point to the image
+> tag to use.
+
 ```bash
 IMAGE_TAG={{ site.container_image }}
 make deploy
