@@ -34,7 +34,8 @@ spec:
       #  labelWhiteList:
       #  noPublish: false
       #  sleepInterval: 60s
-      #  sources: [all]
+      #  featureSources: [all]
+      #  labelSources: [all]
       #  klog:
       #    addDirHeader: false
       #    alsologtostderr: false
@@ -75,8 +76,8 @@ spec:
       #        - "SSE"
       #        - "SSE2"
       #        - "SSE3"
-      #        - "SSE4.1"
-      #        - "SSE4.2"
+      #        - "SSE4"
+      #        - "SSE42"
       #        - "SSSE3"
       #      attributeWhitelist:
       #  kernel:
@@ -107,34 +108,76 @@ spec:
       #      - "vendor"
       #      - "device"
       #  custom:
-      #    - name: "my.kernel.feature"
-      #      matchOn:
-      #        - loadedKMod: ["example_kmod1", "example_kmod2"]
-      #    - name: "my.pci.feature"
-      #      matchOn:
-      #        - pciId:
-      #            class: ["0200"]
-      #            vendor: ["15b3"]
-      #            device: ["1014", "1017"]
-      #        - pciId :
-      #            vendor: ["8086"]
-      #            device: ["1000", "1100"]
-      #    - name: "my.usb.feature"
-      #      matchOn:
-      #        - usbId:
-      #          class: ["ff"]
-      #          vendor: ["03e7"]
-      #          device: ["2485"]
-      #        - usbId:
-      #          class: ["fe"]
-      #          vendor: ["1a6e"]
-      #          device: ["089a"]
-      #    - name: "my.combined.feature"
-      #      matchOn:
-      #        - pciId:
-      #            vendor: ["15b3"]
-      #            device: ["1014", "1017"]
-      #          loadedKMod : ["vendor_kmod1", "vendor_kmod2"]
+      #    # The following feature demonstrates the capabilities of the matchFeatures
+      #    - name: "my custom rule"
+      #      labels:
+      #        my-ng-feature: "true"
+      #      # matchFeatures implements a logical AND over all matcher terms in the
+      #      # list (i.e. all of the terms, or per-feature matchers, must match)
+      #      matchFeatures:
+      #        - feature: cpu.cpuid
+      #          matchExpressions:
+      #            AVX512F: {op: Exists}
+      #        - feature: cpu.cstate
+      #          matchExpressions:
+      #            enabled: {op: IsTrue}
+      #        - feature: cpu.pstate
+      #          matchExpressions:
+      #            no_turbo: {op: IsFalse}
+      #            scaling_governor: {op: In, value: ["performance"]}
+      #        - feature: cpu.rdt
+      #          matchExpressions:
+      #            RDTL3CA: {op: Exists}
+      #        - feature: cpu.sst
+      #          matchExpressions:
+      #            bf.enabled: {op: IsTrue}
+      #        - feature: cpu.topology
+      #          matchExpressions:
+      #            hardware_multithreading: {op: IsFalse}
+      #
+      #        - feature: kernel.config
+      #          matchExpressions:
+      #            X86: {op: Exists}
+      #            LSM: {op: InRegexp, value: ["apparmor"]}
+      #        - feature: kernel.loadedmodule
+      #          matchExpressions:
+      #            e1000e: {op: Exists}
+      #        - feature: kernel.selinux
+      #          matchExpressions:
+      #            enabled: {op: IsFalse}
+      #        - feature: kernel.version
+      #          matchExpressions:
+      #            major: {op: In, value: ["5"]}
+      #            minor: {op: Gt, value: ["10"]}
+      #
+      #        - feature: storage.block
+      #          matchExpressions:
+      #            rotational: {op: In, value: ["0"]}
+      #            dax: {op: In, value: ["0"]}
+      #
+      #        - feature: network.device
+      #          matchExpressions:
+      #            operstate: {op: In, value: ["up"]}
+      #            speed: {op: Gt, value: ["100"]}
+      #
+      #        - feature: memory.numa
+      #          matchExpressions:
+      #            node_count: {op: Gt, value: ["2"]}
+      #        - feature: memory.nv
+      #          matchExpressions:
+      #            devtype: {op: In, value: ["nd_dax"]}
+      #            mode: {op: In, value: ["memory"]}
+      #
+      #        - feature: system.osrelease
+      #          matchExpressions:
+      #            ID: {op: In, value: ["fedora", "centos"]}
+      #        - feature: system.name
+      #          matchExpressions:
+      #            nodename: {op: InRegexp, value: ["^worker-X"]}
+      #
+      #        - feature: local.label
+      #          matchExpressions:
+      #            custom-feature-knob: {op: Gt, value: ["100"]}
 ```
 
 For more information about how to setup the `WorkerConfig` stanza,
