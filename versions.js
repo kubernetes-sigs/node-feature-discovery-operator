@@ -5,5 +5,6 @@ function getVersionListItems() {
     { name: 'v0.2', url: '/node-feature-discovery-operator/v0.2' },
     { name: 'v0.3', url: '/node-feature-discovery-operator/v0.3' },
     { name: 'v0.4', url: '/node-feature-discovery-operator/v0.4' },
+    { name: 'v0.5', url: '/node-feature-discovery-operator/v0.5' },
   ];
 }
