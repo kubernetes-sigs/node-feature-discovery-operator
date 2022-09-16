@@ -6,8 +6,6 @@ GO_CMD ?= go
 GO_FMT ?= gofmt
 CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 
-MDL ?= mdl
-
 # Docker base command for working with html documentation.
 # Use host networking because 'jekyll serve' is stupid enough to use the
 # same site url than the "host" it binds to. Thus, all the links will be
@@ -151,7 +149,12 @@ ci-lint:
 	golangci-lint run --timeout 5m0s
 
 mdlint:
-	find docs/ -path docs/vendor -prune -false -o -name '*.md' | xargs $(MDL) -s docs/mdl-style.rb
+	${CONTAINER_RUN_CMD} \
+	--rm \
+	--volume "${PWD}:/workdir:ro,z" \
+	--workdir /workdir \
+	ruby:slim \
+	/workdir/scripts/test-infra/mdlint.sh
 
 clean:
 	$(GO_CMD)  clean
