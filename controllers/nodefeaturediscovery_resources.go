@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -80,7 +79,7 @@ func getAssetsFrom(path string) []assetsFromFile {
 	// For each file in the 'files' list, read the file
 	// and store its contents in 'manifests'
 	for _, file := range files {
-		buffer, err := ioutil.ReadFile(file)
+		buffer, err := os.ReadFile(file)
 		if err != nil {
 			panic(err)
 		}
