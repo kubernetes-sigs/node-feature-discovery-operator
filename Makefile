@@ -27,6 +27,7 @@ JEKYLL_OPTS := -d '$(SITE_DESTDIR)' $(if $(SITE_BASEURL),-b '$(SITE_BASEURL)',)
 # - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.2.1)
 # - use environment variables to overwrite this value (e.g export VERSION=0.2.1)
 VERSION := $(shell git describe --tags --dirty --always)
+BUNDLE_VERSION := $(shell git tag | sort -V | tail -1 | awk '{print substr($$1,2); }')
 
 # CHANNELS define the bundle channels used in the bundle.
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "preview,fast,stable")
@@ -218,7 +219,7 @@ kustomize:
 bundle: manifests kustomize
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG)-minimal
-	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(BUNDLE_VERSION) $(BUNDLE_METADATA_OPTS)
 	operator-sdk bundle validate ./bundle
 
 # Build the bundle image.
