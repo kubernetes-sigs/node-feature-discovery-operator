@@ -4,7 +4,7 @@
 
 GO_CMD ?= go
 GO_FMT ?= gofmt
-GO_VERSION := $(shell awk '/go /{print $$2}' go.mod|grep -v v)
+GO_VERSION := $(shell awk '/^go /{print $$2}' go.mod|head -n1)
 CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 
 # Docker base command for working with html documentation.
