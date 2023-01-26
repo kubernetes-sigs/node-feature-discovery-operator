@@ -1,23 +1,68 @@
 # Node Feature Discovery Operator
 
-The Node Feature Discovery operator manages detection of hardware features and configuration in a kubernetes cluster.
-The operator orchestrates all resources needed to run the [Node-Feature-Discovery](https://github.com/kubernetes-sigs/node-feature-discovery) DaemonSet
+The Node Feature Discovery operator is a tool for Kubernetes administrators 
+that makes it easy to detect and understand the hardware features and 
+configurations of a cluster's nodes. With this operator, administrators can 
+easily gather information about their nodes that can be used for scheduling, 
+resource management, and more by controlling the life cycle of 
+[NFD](https://github.com/kubernetes-sigs/node-feature-discovery).
 
-Welcome to Node Feature Discovery Operator!
+## How it Works
 
-### See our [Documentation][documentation] for detailed instructions and reference
+The operator works by orchestrating all resources needed to run the 
+Node-Feature-Discovery (NFD). NFD runs on each node in the cluster and detects 
+the features and configurations of the node's hardware.
 
-## Community, discussion, contribution, and support
+## Quick start
 
-Learn how to engage with the Kubernetes community on the [community page](http://kubernetes.io/community/).
 
-You can reach the maintainers of this project at:
+Get the source code
 
-- [Slack channel](https://kubernetes.slack.com/messages/node-feature-discovery)
-- [Mailing list](https://groups.google.com/forum/#!forum/kubernetes-sig-node)
+```bash
+git clone -b v0.5.0 https://github.com/kubernetes-sigs/node-feature-discovery-operator
+```
 
-### Code of conduct
+Deploy the operator
 
-Participation in the Kubernetes community is governed by the [Kubernetes Code of Conduct](code-of-conduct.md).
+> By default it will deploy using the minimal tag image, is
+> desired you can simply modify the IMAGE_TAG env var to point to the image
+> tag to use.
 
-[documentation]: https://kubernetes-sigs.github.io/node-feature-discovery-operator
+```bash
+IMAGE_TAG={{ site.container_image }}
+make deploy
+```
+
+By default the operator will watch `NodeFeatureDiscovery` objects
+only in the namespace where the operator is deployed in. This is
+specified by the `WATCH_NAMESPACE` env variable in the operator
+deployment manifest. If unset the operator will watch ALL
+namespaces.
+
+Create a NodeFeatureDiscovery instance
+
+```bash
+kubectl apply -f config/samples/nfd.kubernetes.io_v1_nodefeaturediscovery.yaml
+```
+
+## Documentation
+
+For more detailed information on how to use the Node Feature Discovery operator,
+please check out our 
+[documentation](https://github.com/kubernetes-sigs/node-feature-discovery-operator/blob/master/docs/index.md)
+
+## Contributing
+
+The Node Feature Discovery operator welcomes contributions, and interested 
+parties are encouraged to take a look at the 
+[contributing guidelines](CONTRIBUTING.md) and 
+[open issues](https://github.com/kubernetes-sigs/node-feature-discovery-operator/issues). 
+We're excited to have you join our community of contributors.
+
+## Support
+
+If there are any issues or questions about the Node Feature Discovery operator,
+they can be addressed by opening an issue on the 
+[GitHub repository](https://github.com/kubernetes-sigs/node-feature-discovery-operator/issues/new/choose) 
+or reaching out on the 
+[Slack channel](https://kubernetes.slack.com/messages/node-feature-discovery).
