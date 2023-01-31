@@ -49,7 +49,7 @@ kubectl apply -f config/samples/nfd.kubernetes.io_v1_nodefeaturediscovery.yaml
 
 For more detailed information on how to use the Node Feature Discovery operator,
 please check out our 
-[documentation](https://github.com/kubernetes-sigs/node-feature-discovery-operator/blob/master/docs/index.md)
+[documentation](https://kubernetes-sigs.github.io/node-feature-discovery-operator/master)
 
 ## Contributing
 
