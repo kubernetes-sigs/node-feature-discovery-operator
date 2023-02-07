@@ -13,10 +13,10 @@ The process to release a new version of node-feature-discovery-operator is as fo
   `gcr.io/k8s-staging-nfd/node-feature-discovery-operator:$VERSION`
 - [ ] Do final release verification on the staging image
 - [ ] Submit a PR against [k8s.io](https://github.com/kubernetes/k8s.io),
-  updating `k8s.gcr.io/images/k8s-staging-nfd/images.yaml`, in order to promote
+  updating `registry.k8s.io/images/k8s-staging-nfd/images.yaml`, in order to promote
   the container image to production
 - [ ] Wait for the PR to be merged and verify that the image
-  (`k8s.gcr.io/nfd/node-feature-discovery-operator:$VERSION`) is available
+  (`registry.k8s.io/nfd/node-feature-discovery-operator:$VERSION`) is available
 - [ ] Write the change log into the
   [Github release info](https://github.com/kubernetes-sigs/node-feature-discovery-operator/releases).
 - [ ] Add a link to the tagged release in this issue

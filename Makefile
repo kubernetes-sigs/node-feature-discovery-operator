@@ -57,7 +57,7 @@ BUNDLE_IMG ?= controller-bundle:$(VERSION)
 IMAGE_BUILD_CMD ?= docker build
 IMAGE_PUSH_CMD ?= docker push
 IMAGE_BUILD_EXTRA_OPTS ?=
-IMAGE_REGISTRY ?= k8s.gcr.io/nfd
+IMAGE_REGISTRY ?= registry.k8s.io/nfd
 IMAGE_NAME := node-feature-discovery-operator
 IMAGE_TAG_NAME ?= $(VERSION)
 IMAGE_EXTRA_TAG_NAMES ?=
@@ -116,7 +116,7 @@ install: manifests kustomize
 uninstall: manifests kustomize
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
-clean-manifests = (cd config/manager && $(KUSTOMIZE) edit set image controller=k8s.gcr.io/nfd/node-feature-discovery-operator:0.4.2)
+clean-manifests = (cd config/manager && $(KUSTOMIZE) edit set image controller=registry.k8s.io/nfd/node-feature-discovery-operator:0.4.2)
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: kustomize
