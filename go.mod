@@ -1,6 +1,6 @@
 module sigs.k8s.io/node-feature-discovery-operator
 
-go 1.19
+go 1.20
 
 require (
 	github.com/onsi/ginkgo/v2 v2.6.0
