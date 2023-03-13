@@ -1,13 +1,15 @@
 ---
 title: "Image variants"
 layout: default
-sort: 1
+sort: 3
 ---
 
 # Image variants
+
 {: .no_toc}
 
 ## Table of contents
+
 {: .no_toc .text-delta}
 
 1. TOC
@@ -15,24 +17,23 @@ sort: 1
 
 ---
 
-NFD-Operator currently offers two variants of the container image. The "minimal" variant is
-currently deployed by default. Released container images are available for
-x86_64 and Arm64 architectures.
+# Image variants
 
-## Minimal
+Node-Feautre-Discovery-Operator currently offers two variants
+of the container image. The "full" variant is currently
+deployed by default.
 
-This is a minimal image based on
+## Default
+
+This is a minimal image based on:
 [gcr.io/distroless/base](https://github.com/GoogleContainerTools/distroless/blob/master/base/README.md)
-and only supports running statically linked binaries.
 
-For backwards compatibility a container image tag with suffix `-minimal`
-(e.g. `{{ site.container_image }}-minimal`) is provided.
+The container image tag has suffix `-minimal`
+(e.g. `{{ site.container_image }}-minimal`)
+and the image is deployed by default.
 
 ## Full
 
-This image is based on [debian:bullseye-slim](https://hub.docker.com/_/debian)
-and contains a full Linux system for running shell-based nfd-worker hooks and
-doing live debugging and diagnosis of the NFD-Operator images.
-
-The container image tag has suffix `-full`
-(e.g. `{{ site.container_image }}-full`).
+This image is based on
+[debian:buster-slim](https://hub.docker.com/_/debian) and contains a full Linux
+system for doing live debugging and diagnosis of the operator.

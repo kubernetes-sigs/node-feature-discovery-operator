@@ -1,13 +1,15 @@
 ---
 title: "Helm"
 layout: default
-sort: 2
+sort: 1
 ---
 
 # Deployment with Helm
+
 {: .no_toc}
 
 ## Table of contents
+
 {: .no_toc .text-delta}
 
 1. TOC
@@ -17,9 +19,9 @@ sort: 2
 
 Helm chart allow to easily deploy and manage the NFD-operator.
 
-> NOTE: NFD-operator is not ideal for other Helm charts to depend on as that may result
-> in multiple parallel NFD-operator deployments in the same cluster which is not fully
-> supported by the NFD-operator Helm chart.
+> NOTE: NFD-operator is not ideal for other Helm charts to depend on as that
+> may result in multiple parallel NFD-operator deployments in the same cluster
+> which is not fully supported by the NFD-operator Helm chart.
 
 ## Prerequisites
 
