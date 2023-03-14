@@ -17,7 +17,7 @@ Continue to:
 
 - **[Advanced](/advanced)** for more advanced topics and
   reference.
-  
+
 # Introduction
 
 The Node Feature Discovery Operator manages the detection
