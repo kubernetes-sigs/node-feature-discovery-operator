@@ -4,6 +4,20 @@ layout: default
 sort: 1
 ---
 
+# Node Feature Discovery Operator
+
+Welcome to Node Feature Discovery Operator – an Operator
+Framework implementation around the Node Feature Discovery project to enable
+detecting hardware features and system configuration!
+
+Continue to:
+
+- **[Deployment](/deployment)** for instructions on how to
+  deploy NFD-Operator to a cluster.
+
+- **[Advanced](/advanced)** for more advanced topics and
+  reference.
+
 # Introduction
 
 The Node Feature Discovery Operator manages the detection

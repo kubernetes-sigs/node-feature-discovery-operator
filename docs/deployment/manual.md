@@ -1,16 +1,28 @@
 ---
-title: "Quick start"
+title: "Manual deployment"
 layout: default
 sort: 2
 ---
 
+# Manual deployment
+
+{: .no_toc}
+
+## Table of contents
+
+{: .no_toc .text-delta}
+
+1. TOC
+{:toc}
+
+---
 # Requirements
 
 1. Linux (x86_64/Arm64/Arm)
 1. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl)
    (properly set up and configured to work with your Kubernetes cluster)
 
-# Quick start
+# Manual deployment
 
 Get the source code
 
@@ -41,27 +53,6 @@ Create a NodeFeatureDiscovery instance
 kubectl apply -f config/samples/nfd.kubernetes.io_v1_nodefeaturediscovery.yaml
 ```
 
-## Image variants
-
-Node-Feautre-Discovery-Operator currently offers two variants
-of the container image. The "full" variant is currently
-deployed by default.
-
-### Full
-
-This image is based on
-[debian:buster-slim](https://hub.docker.com/_/debian) and contains a full Linux
-system for doing live debugging and diagnosis of the operator.
-
-### Minimal
-
-This is a minimal image based on
-[gcr.io/distroless/base](https://github.com/GoogleContainerTools/distroless/blob/master/base/README.md)
-and only supports running statically linked binaries.
-
-The container image tag has suffix `-minimal`
-(e.g. `{{ site.container_image }}-minimal`)
-
 ## Verify
 
 The Operator will deploy NFD based on the information
@@ -88,3 +79,26 @@ $ kubectl get no -o json | jq .items[].metadata.labels
   "kubernetes.io/os": "linux",
 ...
 ```
+
+# Uninstallation
+
+If you followed the deployment instructions from the above you
+can simply do:
+
+```bash
+kubectl -n nfd-operator delete NodeFeatureDiscovery my-nfd-deployment
+```
+
+Optionally, you can also remove the namespace:
+
+```bash
+kubectl delete ns nfd-operator
+```
+
+See the [node-feature-discovery-operator][nfd-operator] and [OLM][OLM] project
+documentation for instructions for uninstalling the operator and operator
+lifecycle manager, respectively.
+
+<!-- Links -->
+[nfd-operator]: https://github.com/kubernetes-sigs/node-feature-discovery-operator
+[OLM]: https://github.com/operator-framework/operator-lifecycle-manager
