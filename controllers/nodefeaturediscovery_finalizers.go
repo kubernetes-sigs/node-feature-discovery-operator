@@ -49,6 +49,16 @@ func (r *NodeFeatureDiscoveryReconciler) finalizeNFDOperand(ctx context.Context,
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
+	if instance.Spec.PruneOnDelete {
+		klog.Info("Deleting NFD labels and NodeFeature CRs from cluster")
+		if err := deployPrune(ctx, r, instance); err != nil {
+			klog.Error(err, "Failed to delete NFD labels and NodeFeature CRs from cluster")
+			return ctrl.Result{}, err
+		}
+	} else {
+		klog.Warning("PruneOnDelete is disabled, NFD labels and NodeFeature CRs will not be deleted from cluster")
+	}
+
 	// If all components are deleted, then remove the finalizer
 	klog.Info("Secondary check passed. Removing finalizer if it exists.")
 	if r.hasFinalizer(instance, finalizer) {
@@ -361,6 +371,100 @@ func (r *NodeFeatureDiscoveryReconciler) doComponentsExist(ctx context.Context, 
 	}
 
 	return false
+}
+
+// deployPrune deploys nfd-master with --prune option
+// to remove labels and NodeFeature CRs
+func deployPrune(ctx context.Context, r *NodeFeatureDiscoveryReconciler, instance *nfdv1.NodeFeatureDiscovery) error {
+	res, ctrl := addResourcesControls("/opt/nfd/prune")
+	n := NFD{
+		rec: r,
+		ins: instance,
+		idx: 0,
+	}
+
+	n.controls = append(n.controls, ctrl)
+	n.resources = append(n.resources, res)
+
+	// Run through all control functions, return an error on any NotReady resource.
+	for {
+		err := n.step()
+		if err != nil {
+			return err
+		}
+		if n.last() {
+			break
+		}
+	}
+
+	// wait until job is finished and then delete it
+	err := wait.Poll(RetryInterval, time.Minute*3, func() (done bool, err error) {
+		job, err := r.getJob(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
+		if err != nil {
+			return false, err
+		}
+		if job.Status.Succeeded > 0 {
+			return true, nil
+		}
+		return false, nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// delete job and RBAC objects
+	// Attempt to delete the Job
+	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+		err = r.deleteJob(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
+		if err != nil {
+			return false, interpretError(err, "Prune Job")
+		}
+		klog.Info("nfd-prune Job resource has been deleted.")
+		return true, nil
+	})
+	if err != nil {
+		return err
+	}
+	// Attempt to delete the ServiceAccount
+	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+		err = r.deleteServiceAccount(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
+		if err != nil {
+			return false, interpretError(err, "Prune ServiceAccount")
+		}
+		klog.Info("nfd-prune ServiceAccount resource has been deleted.")
+		return true, nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Attempt to delete the ClusterRole
+	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+		err = r.deleteClusterRole(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
+		if err != nil {
+			return false, interpretError(err, "Prune ClusterRole")
+		}
+		klog.Info("nfd-prune ClusterRole resource has been deleted.")
+		return true, nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Attempt to delete the ClusterRoleBinding
+	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+		err = r.deleteClusterRoleBinding(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
+		if err != nil {
+			return false, interpretError(err, "Prune ClusterRoleBinding")
+		}
+		klog.Info("nfd-prune ClusterRoleBinding resource has been deleted.")
+		return true, nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // interpretError determines if a resource has already been
