@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -523,6 +524,67 @@ func Deployment(n NFD) (ResourceStatus, error) {
 	err = n.rec.Client.Update(context.TODO(), &obj)
 	if err != nil {
 		return NotReady, err
+	}
+
+	return Ready, nil
+}
+
+// Job checks the readiness of a Job and creates one if it doesn't exist
+func Job(n NFD) (ResourceStatus, error) {
+	// state represents the resource's 'control' function index
+	state := n.idx
+
+	// It is assumed that the index has already been verified to be a
+	// Job object, so let's get the resource's Job object
+	obj := n.resources[state].Job
+
+	// Update the NFD operand image
+	obj.Spec.Template.Spec.Containers[0].Image = n.ins.Spec.Operand.ImagePath()
+
+	// Update the image pull policy
+	if n.ins.Spec.Operand.ImagePullPolicy != "" {
+		obj.Spec.Template.Spec.Containers[0].ImagePullPolicy = n.ins.Spec.Operand.ImagePolicy(n.ins.Spec.Operand.ImagePullPolicy)
+	}
+
+	// Set namespace based on the NFD namespace. (And again,
+	// it is assumed that the Namespace has already been
+	// determined before this function was called.)
+	obj.SetNamespace(n.ins.GetNamespace())
+
+	// found states if the Job was found
+	found := &batchv1.Job{}
+
+	klog.InfoS("Looking for Job", "name", obj.Name, "namespace", obj.Namespace)
+
+	// SetControllerReference sets the owner as a Controller OwnerReference
+	// and is used for garbage collection of the controlled object. It is
+	// also used to reconcile the owner object on changes to the controlled
+	// object. If we cannot set the owner, then return NotReady
+	if err := controllerutil.SetControllerReference(n.ins, &obj, n.rec.Scheme); err != nil {
+		return NotReady, err
+	}
+
+	// Look for the Job to see if it exists, and if so, check if it's
+	// Ready/NotReady. If the Job does not exist, then attempt to
+	// create it
+	err := n.rec.Client.Get(context.TODO(), types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, found)
+	if err != nil && errors.IsNotFound(err) {
+		klog.InfoS("Job not found, creating", "name", obj.Name, "namespace", obj.Namespace)
+		err = n.rec.Client.Create(context.TODO(), &obj)
+		if err != nil {
+			klog.ErrorS(err, "Couldn't create Job", "name", obj.Name, "namespace", obj.Namespace)
+			return NotReady, err
+		}
+		return Ready, nil
+	} else if err != nil {
+		return NotReady, err
+	}
+
+	// If we found the Job, and is Ready, then we're done
+	if found.Status.Active > 0 {
+		return NotReady, nil
+	} else if found.Status.Failed > 0 {
+		return NotReady, fmt.Errorf("prune Job failed")
 	}
 
 	return Ready, nil
