@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 namespace: node-feature-discovery-operator
 image:
-  repository: gcr.io/k8s-staging-nfd/node-feature-discovery-operator
+  repository: registry.k8s.io/nfd/node-feature-discovery-operator
   # This should be set to 'IfNotPresent' for released version
   pullPolicy: Always
   # tag, if defined will use the given image tag, else Chart.AppVersion will be used
@@ -18,5 +18,5 @@ enableNodeFeatureApi: false
 
 nfd:
   image: 
-    repository: gcr.io/k8s-staging-nfd/node-feature-discovery
-    tag: master
+    repository: registry.k8s.io/nfd/node-feature-discovery
+    tag: v0.12.1
