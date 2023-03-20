@@ -19,7 +19,7 @@ the features and configurations of the node's hardware.
 Get the source code
 
 ```bash
-git clone -b v0.5.0 https://github.com/kubernetes-sigs/node-feature-discovery-operator
+git clone -b v0.6.0 https://github.com/kubernetes-sigs/node-feature-discovery-operator
 ```
 
 Deploy the operator
