@@ -32,6 +32,9 @@ FROM ${BASE_IMAGE_MINIMAL} as minimal
 COPY --from=builder /workspace/node-feature-discovery-operator /
 COPY --from=builder /workspace/build/assets /opt/nfd
 
+# Run as unprivileged user
+USER 65534:65534
+
 ENTRYPOINT ["/node-feature-discovery-operator"]
 LABEL io.k8s.display-name="node-feature-discovery-operator"
 
