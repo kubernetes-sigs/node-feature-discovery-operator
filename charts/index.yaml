@@ -1,0 +1,22 @@
+apiVersion: v1
+entries:
+  nfd-operator:
+  - apiVersion: v2
+    appVersion: v0.6.0
+    created: "2023-03-21T16:33:36.048610008Z"
+    description: 'The Node Feature Discovery Operator is a Kubernetes operator that
+      deploys and  manages the Node Feature Discovery (NFD) lifecycle. '
+    digest: da7c5b15d8615944216c1e99eb193477207d38e01ececaa364ddd8fa88981ccd
+    home: https://github.com/kubernetes-sigs/node-feature-discovery-operator
+    keywords:
+    - feature-discovery
+    - feature-detection
+    - node-labels
+    name: nfd-operator
+    sources:
+    - https://github.com/kubernetes-sigs/node-feature-discovery-operator
+    type: application
+    urls:
+    - https://github.com/kubernetes-sigs/node-feature-discovery-operator/releases/download/v0.6.0/node-feature-discovery-operator-chart-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-03-21T16:33:36.045785563Z"
