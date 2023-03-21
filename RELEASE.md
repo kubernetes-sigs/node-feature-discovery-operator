@@ -2,25 +2,28 @@
 
 The process to release a new version of node-feature-discovery-operator is as follows:
 
-- [ ] File [a new issue](https://github.com/kubernetes-sigs/node-feature-discovery-operator/issues/new)
-  to propose a new release. Copy this checklist into the issue description
-- [ ] Add a changelog section in the issue description, capturing changes since the
-  previous release
-- [ ] An OWNER runs `git tag -s $VERSION` and inserts the changelog into the
-  tag description
-- [ ] An OWNER pushes the tag with `git push $VERSION` - this will trigger prow
-  to build and publish a staging container image
-  `gcr.io/k8s-staging-nfd/node-feature-discovery-operator:$VERSION`
-- [ ] Do final release verification on the staging image
-- [ ] Submit a PR against [k8s.io](https://github.com/kubernetes/k8s.io),
-  updating `registry.k8s.io/images/k8s-staging-nfd/images.yaml`, in order to promote
-  the container image to production
-- [ ] Wait for the PR to be merged and verify that the image
-  (`registry.k8s.io/nfd/node-feature-discovery-operator:$VERSION`) is available
-- [ ] Write the change log into the
-  [Github release info](https://github.com/kubernetes-sigs/node-feature-discovery-operator/releases).
-- [ ] Add a link to the tagged release in this issue
-- [ ] Send an announcement email to `kubernetes-dev@googlegroups.com` with the
-  subject `[ANNOUNCE] node-feature-discovery-operator $VERSION is released`
-- [ ] Add a link to the release announcement email in this issue
+- [ ] All [OWNERS](https://github.com/kubernetes-sigs/node-feature-discovery-operator/blob/master/OWNERS) must LGTM the release proposal
+- [ ] Verify that the changelog in this issue is up-to-date
+- [ ] For major releases (v0.$MAJ.0), an OWNER creates a release branch
+  - [ ] An OWNER creates a vanilla release branch from master
+        `git branch release-0.$MAJ master`
+  - [ ] An OWNER pushes the newly created branch
+        `git push release-0.$MAJ`
+- [ ] Update references in `docs/_config.yml` (`version`, `release` and `container_image` fields) to point to the upcoming release and subbmit a PR against the release branch
+- [ ] Update the `node-feature-discovery-operator.clusterserviceversion` on `/bundle/manifest` and `/config/manifests` to point to the upcoming release and subbmit a PR against the release branch
+- [ ] An OWNER creates an annotated and signed tag with
+     `git tag -a -s $VERSION`
+      and inserts the changelog into the tag description.
+- [ ] An OWNER pushes the tag with
+      `git push $VERSION`
+      This will trigger prow to build and publish a staging container image
+      `gcr.io/k8s-staging-nfd/node-feature-discovery-operator:$VERSION`
+- [ ] Submit a PR against [k8s.io](https://github.com/kubernetes/k8s.io), updating `registry.k8s.io/images/k8s-staging-nfd/images.yaml` to promote the container image to production
+- [ ] Wait for the PR to be merged and verify that the image (`registry.k8s.io/nfd/node-feature-discovery-operator:$VERSION`) is available.
+- [ ] Write the change log into the [Github release info](https://github.com/kubernetes-sigs/node-feature-discovery-operator/releases).
+- [ ] Create Signed Helm charts and add them to the release artifacts.
+- [ ] Add a link to the tagged release in this issue.
+- [ ] Create a new bundle for the $VERSION release at https://github.com/k8s-operatorhub/community-operators 
+- [ ] Send an announcement email to `kubernetes-dev@googlegroups.com` with the subject `[ANNOUNCE] node-feature-discovery-operator $VERSION is released`
+- [ ] Add a link to the release announcement in this issue
 - [ ] Close this issue

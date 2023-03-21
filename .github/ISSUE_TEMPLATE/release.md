@@ -18,6 +18,7 @@ Please do not remove items from the checklist
   - [ ] An OWNER pushes the newly created branch
         `git push release-0.$MAJ`
 - [ ] Update references in `docs/_config.yml` (`version`, `release` and `container_image` fields) to point to the upcoming release and subbmit a PR against the release branch
+- [ ] Update the `node-feature-discovery-operator.clusterserviceversion` on `/bundle/manifest` and `/config/manifests` to point to the upcoming release and subbmit a PR against the release branch
 - [ ] An OWNER creates an annotated and signed tag with
      `git tag -a -s $VERSION`
       and inserts the changelog into the tag description.
@@ -28,6 +29,7 @@ Please do not remove items from the checklist
 - [ ] Submit a PR against [k8s.io](https://github.com/kubernetes/k8s.io), updating `registry.k8s.io/images/k8s-staging-nfd/images.yaml` to promote the container image to production
 - [ ] Wait for the PR to be merged and verify that the image (`registry.k8s.io/nfd/node-feature-discovery-operator:$VERSION`) is available.
 - [ ] Write the change log into the [Github release info](https://github.com/kubernetes-sigs/node-feature-discovery-operator/releases).
+- [ ] Create Signed Helm charts and add them to the release artifacts.
 - [ ] Add a link to the tagged release in this issue.
 - [ ] Create a new bundle for the $VERSION release at https://github.com/k8s-operatorhub/community-operators 
 - [ ] Send an announcement email to `kubernetes-dev@googlegroups.com` with the subject `[ANNOUNCE] node-feature-discovery-operator $VERSION is released`
