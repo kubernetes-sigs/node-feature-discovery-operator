@@ -1,6 +1,6 @@
 ARG BUILDER_IMAGE
-ARG BASE_IMAGE_FULL
-ARG BASE_IMAGE_MINIMAL
+ARG BASE_IMAGE_DEBUG
+ARG BASE_IMAGE_PROD
 # Build the manager biinary
 FROM ${BUILDER_IMAGE} as builder
 
@@ -16,8 +16,8 @@ RUN go mod download
 COPY . .
 RUN make build
 
-# Create production image for running the operator
-FROM ${BASE_IMAGE_FULL} as full
+# Debug image for running the operator
+FROM ${BASE_IMAGE_DEBUG} as debug
 COPY --from=builder /workspace/node-feature-discovery-operator /
 COPY --from=builder /workspace/build/assets /opt/nfd
 
@@ -27,8 +27,8 @@ USER 65534:65534
 ENTRYPOINT ["/node-feature-discovery-operator"]
 LABEL io.k8s.display-name="node-feature-discovery-operator"
 
-# Create a minimal image for running the operator
-FROM ${BASE_IMAGE_MINIMAL} as minimal
+# Production image for running the operator
+FROM ${BASE_IMAGE_PROD} as prod
 COPY --from=builder /workspace/node-feature-discovery-operator /
 COPY --from=builder /workspace/build/assets /opt/nfd
 
