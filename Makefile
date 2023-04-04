@@ -65,8 +65,8 @@ IMAGE_REPO ?= $(IMAGE_REGISTRY)/$(IMAGE_NAME)
 IMAGE_TAG ?= $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
 BUILDER_IMAGE ?= golang:$(GO_VERSION)-buster
-BASE_IMAGE_FULL ?= debian:buster-slim
-BASE_IMAGE_MINIMAL ?= gcr.io/distroless/base
+BASE_IMAGE_DEBUG ?= debian:buster-slim
+BASE_IMAGE_PROD ?= gcr.io/distroless/base
 
 IMAGE_TAG_RBAC_PROXY ?= gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
 
@@ -121,7 +121,7 @@ clean-manifests = (cd config/manager && $(KUSTOMIZE) edit set image controller=r
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: kustomize
 	cd $(PROJECT_DIR)/config/manager && \
-		$(KUSTOMIZE) edit set image controller=${IMAGE_TAG}-minimal
+		$(KUSTOMIZE) edit set image controller=${IMAGE_TAG}
 	cd $(PROJECT_DIR)/config/default && \
 		$(KUSTOMIZE) edit set image kube-rbac-proxy=${IMAGE_TAG_RBAC_PROXY}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
@@ -175,30 +175,30 @@ generate: controller-gen
 # Build the container image
 image:
 	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG) \
-		--target full \
+		--target prod \
 		--build-arg BUILDER_IMAGE=$(BUILDER_IMAGE) \
-		--build-arg BASE_IMAGE_FULL=$(BASE_IMAGE_FULL) \
-		--build-arg BASE_IMAGE_MINIMAL=$(BASE_IMAGE_MINIMAL) \
+		--build-arg BASE_IMAGE_PROD=$(BASE_IMAGE_PROD) \
+		--build-arg BASE_IMAGE_DEBUG=$(BASE_IMAGE_DEBUG) \
 		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)) \
 		$(IMAGE_BUILD_EXTRA_OPTS) ./
 
-image-minimal:
-	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG)-minimal \
-		--target minimal \
+image-debug:
+	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG)-debug \
+		--target debug \
 		--build-arg BUILDER_IMAGE=$(BUILDER_IMAGE) \
-		--build-arg BASE_IMAGE_FULL=$(BASE_IMAGE_FULL) \
-		--build-arg BASE_IMAGE_MINIMAL=$(BASE_IMAGE_MINIMAL) \
-		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)-minimal) \
+		--build-arg BASE_IMAGE_PROD=$(BASE_IMAGE_PROD) \
+		--build-arg BASE_IMAGE_DEBUG=$(BASE_IMAGE_DEBUG) \
+		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)-debug) \
 		$(IMAGE_BUILD_EXTRA_OPTS) ./
 
 # Push the container image
-push: 
+push:
 	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)
 	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
 
-push-minimal:
-	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)-minimal
-	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
+push-debug:
+	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)-debug
+	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag-debug; done
 
 site-build:
 	@mkdir -p docs/vendor/bundle
@@ -222,7 +222,7 @@ kustomize:
 .PHONY: bundle
 bundle: manifests kustomize
 	operator-sdk generate kustomize manifests -q
-	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG)-minimal
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(BUNDLE_VERSION) $(BUNDLE_METADATA_OPTS)
 	operator-sdk bundle validate ./bundle
 

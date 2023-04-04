@@ -51,13 +51,6 @@ helm install nfd-operator ./nfd-operator/ --namespace $NFD_O_NS --create-namespa
 See the [configuration](#configuration) section below for instructions how to
 alter the deployment parameters.
 
-In order to deploy the [minimal](image-variants.md#minimal) image you need to
-override the image tag:
-
-```bash
-helm install nfd-operator ./nfd-operator/ --set image.tag={{ site.release }}-minimal --namespace $NFD_O_NS --create-namespace
-```
-
 ## Configuration
 
 You can override values from `values.yaml` and provide a file with custom values:
