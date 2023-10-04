@@ -394,6 +394,18 @@ func DaemonSet(n NFD) (ResourceStatus, error) {
 	// determined before this function was called.)
 	obj.SetNamespace(n.ins.GetNamespace())
 
+	// Set tolerations
+	tolerations := obj.Spec.Template.Spec.Tolerations
+	for _, t := range tolerations {
+		// if the t is not in n.ins.Spec.Operand.Tolerations then add it
+		for _, t2 := range n.ins.Spec.Operand.Tolerations {
+			if t.Key == t2.Key {
+				continue
+			}
+		}
+		obj.Spec.Template.Spec.Tolerations = append(obj.Spec.Template.Spec.Tolerations, t)
+	}
+
 	// found states if the DaemonSet was found
 	found := &appsv1.DaemonSet{}
 
@@ -448,6 +460,18 @@ func Deployment(n NFD) (ResourceStatus, error) {
 	// Update the image pull policy
 	if n.ins.Spec.Operand.ImagePullPolicy != "" {
 		obj.Spec.Template.Spec.Containers[0].ImagePullPolicy = n.ins.Spec.Operand.ImagePolicy(n.ins.Spec.Operand.ImagePullPolicy)
+	}
+
+	// Set tolerations
+	tolerations := obj.Spec.Template.Spec.Tolerations
+	for _, t := range tolerations {
+		// if the t is not in n.ins.Spec.Operand.Tolerations then add it
+		for _, t2 := range n.ins.Spec.Operand.Tolerations {
+			if t.Key == t2.Key {
+				continue
+			}
+		}
+		obj.Spec.Template.Spec.Tolerations = append(obj.Spec.Template.Spec.Tolerations, t)
 	}
 
 	var args []string
@@ -550,6 +574,18 @@ func Job(n NFD) (ResourceStatus, error) {
 	// it is assumed that the Namespace has already been
 	// determined before this function was called.)
 	obj.SetNamespace(n.ins.GetNamespace())
+
+	// Set tolerations
+	tolerations := obj.Spec.Template.Spec.Tolerations
+	for _, t := range tolerations {
+		// if the t is not in n.ins.Spec.Operand.Tolerations then add it
+		for _, t2 := range n.ins.Spec.Operand.Tolerations {
+			if t.Key == t2.Key {
+				continue
+			}
+		}
+		obj.Spec.Template.Spec.Tolerations = append(obj.Spec.Template.Spec.Tolerations, t)
+	}
 
 	// found states if the Job was found
 	found := &batchv1.Job{}

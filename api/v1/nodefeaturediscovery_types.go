@@ -89,6 +89,10 @@ type OperandSpec struct {
 	// listens for incoming requests.
 	// +kubebuilder:validation:Optional
 	ServicePort int `json:"servicePort"`
+
+	// Toleration defines the toleration for the NFD pods
+	// +kubebuilder:validation:Optional
+	Tolerations []corev1.Toleration `json:"toleration,omitempty"`
 }
 
 // ConfigMap describes configuration options for the NFD worker
