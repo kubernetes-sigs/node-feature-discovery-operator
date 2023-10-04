@@ -60,6 +60,7 @@ func (n *NFD) init(
 	n.ins = i
 	n.idx = 0
 	if len(n.controls) == 0 {
+		n.addState("/opt/nfd/gc")
 		n.addState("/opt/nfd/master")
 		n.addState("/opt/nfd/worker")
 		n.addState("/opt/nfd/topologyupdater")

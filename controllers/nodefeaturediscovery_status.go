@@ -30,20 +30,23 @@ import (
 )
 
 const (
-	nfdWorkerApp          string = "nfd-worker"
-	nfdMasterApp          string = "nfd-master"
-	nfdTopologyUpdaterApp string = "nfd-topology-updater"
-	nfdPruneApp           string = "nfd-prune"
+	nfdWorkerApp           string = "nfd-worker"
+	nfdMasterApp           string = "nfd-master"
+	nfdGarbageCollectorApp string = "nfd-gc"
+	nfdTopologyUpdaterApp  string = "nfd-topology-updater"
+	nfdPruneApp            string = "nfd-prune"
 )
 
 const (
 	// Resource is missing
 	conditionFailedGettingNFDWorkerConfig                  = "FailedGettingNFDWorkerConfig"
 	conditionFailedGettingNFDWorkerServiceAccount          = "FailedGettingNFDWorkerServiceAccount"
+	conditionFailedGettingNFDGcServiceAccount              = "FailedGettingNFDGcServiceAccount"
 	conditionFailedGettingNFDTopologyUpdaterServiceAccount = "FailedGettingNFDTopoloGyUpdaterServiceAccount"
 	conditionFailedGettingNFDMasterServiceAccount          = "FailedGettingNFDMasterServiceAccount"
 	conditionFailedGettingNFDService                       = "FailedGettingNFDService"
 	conditionFailedGettingNFDWorkerDaemonSet               = "FailedGettingNFDWorkerDaemonSet"
+	conditionFailedGettingNFDGcDeployment                  = "FailedGettingNFDGcDeployment"
 	conditionFailedGettingNFDMasterDeployment              = "FailedGettingNFDMasterDeployment"
 	conditionFailedGettingNFDRoleBinding                   = "FailedGettingNFDRoleBinding"
 	conditionFailedGettingNFDClusterRoleBinding            = "FailedGettingNFDClusterRole"
@@ -51,6 +54,7 @@ const (
 	// Resource degraded
 	conditionNFDWorkerConfigDegraded                  = "NFDWorkerConfigResourceDegraded"
 	conditionNFDWorkerServiceAccountDegraded          = "NFDWorkerServiceAccountDegraded"
+	conditionNFDGcServiceAccountDegraded              = "NFDGcServiceAccountDegraded"
 	conditionNFDTopologyUpdaterServiceAccountDegraded = "NFDTopologyUpdaterServiceAccountDegraded"
 	conditionNFDMasterServiceAccountDegraded          = "NFDMasterServiceAccountDegraded"
 	conditionNFDServiceDegraded                       = "NFDServiceDegraded"
@@ -278,6 +282,12 @@ func (r *NodeFeatureDiscoveryReconciler) getTopologyUpdaterDaemonSetConditions(c
 	return r.getDaemonSetConditions(ctx, instance, nfdTopologyUpdaterApp)
 }
 
+// getGarbageCollectorDeploymentConditions is a wrapper around "getDeploymentConditions" for
+// garbage collector Deployment
+func (r *NodeFeatureDiscoveryReconciler) getGarbageCollectorDeploymentConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
+	return r.getDeploymentConditions(ctx, instance, nfdGarbageCollectorApp)
+}
+
 // getMasterDeploymentConditions is a wrapper around "getDeploymentConditions" for
 // master Deployment
 func (r *NodeFeatureDiscoveryReconciler) getMasterDeploymentConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
@@ -461,6 +471,12 @@ func (r *NodeFeatureDiscoveryReconciler) getRoleBindingConditions(ctx context.Co
 	return status, nil
 }
 
+// getGarbageCollectorClusterRoleConditions is a wrapper around "getClusterRoleConditions" for
+// garbage collector cluster role.
+func (r *NodeFeatureDiscoveryReconciler) getGarbageCollectorClusterRoleConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
+	return r.getClusterRoleConditions(ctx, instance, nfdGarbageCollectorApp)
+}
+
 // getMasterClusterRoleConditions is a wrapper around "getClusterRoleConditions" for
 // worker service account.
 func (r *NodeFeatureDiscoveryReconciler) getMasterClusterRoleConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
@@ -492,6 +508,12 @@ func (r *NodeFeatureDiscoveryReconciler) getClusterRoleConditions(ctx context.Co
 	status.isDegraded = false
 
 	return status, nil
+}
+
+// getGarbageCollectorClusterRoleBindingConditions is a wrapper around "getClusterRoleBindingConditions" for
+// garbage collector cluster role binding.
+func (r *NodeFeatureDiscoveryReconciler) getGarbageCollectorClusterRoleBindingConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
+	return r.getClusterRoleBindingConditions(ctx, instance, nfdGarbageCollectorApp)
 }
 
 // getMasterClusterRoleBindingConditions is a wrapper around "getServiceAccountConditions" for
@@ -538,6 +560,12 @@ func (r *NodeFeatureDiscoveryReconciler) getWorkerServiceAccountConditions(ctx c
 // worker service account.
 func (r *NodeFeatureDiscoveryReconciler) getTopologyUpdaterServiceAccountConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
 	return r.getServiceAccountConditions(ctx, instance, nfdTopologyUpdaterApp)
+}
+
+// getGarbageCollectorServiceAccountConditions is a wrapper around "getServiceAccountConditions" for
+// garbage collector service account.
+func (r *NodeFeatureDiscoveryReconciler) getGarbageCollectorServiceAccountConditions(ctx context.Context, instance *nfdv1.NodeFeatureDiscovery) (Status, error) {
+	return r.getServiceAccountConditions(ctx, instance, nfdGarbageCollectorApp)
 }
 
 // getMasterServiceAccountConditions is a wrapper around "getServiceAccountConditions" for
