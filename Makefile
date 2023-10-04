@@ -64,7 +64,7 @@ IMAGE_EXTRA_TAG_NAMES ?=
 IMAGE_REPO ?= $(IMAGE_REGISTRY)/$(IMAGE_NAME)
 IMAGE_TAG ?= $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
-BUILDER_IMAGE ?= golang:$(GO_VERSION)-buster
+BUILDER_IMAGE ?= golang:$(GO_VERSION)-bullseye
 BASE_IMAGE_DEBUG ?= debian:buster-slim
 BASE_IMAGE_PROD ?= gcr.io/distroless/base
 
