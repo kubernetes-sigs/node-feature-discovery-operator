@@ -206,11 +206,13 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return r.updateDegradedCondition(instance, conditionNFDRoleBindingDegraded, "nfd RoleBinding has been degraded")
 	}
 
-	// Check the status of the NFD Operator Service
-	if rstatus, err := r.getServiceConditions(ctx, instance); err != nil {
-		return r.updateDegradedCondition(instance, conditionFailedGettingNFDService, err.Error())
-	} else if rstatus.isDegraded {
-		return r.updateDegradedCondition(instance, conditionNFDServiceDegraded, "nfd Service has been degraded")
+	// Check the status of the NFD Operator Service when running on gRPC mode
+	if instance.Spec.GrpcMode {
+		if rstatus, err := r.getServiceConditions(ctx, instance); err != nil {
+			return r.updateDegradedCondition(instance, conditionFailedGettingNFDService, err.Error())
+		} else if rstatus.isDegraded {
+			return r.updateDegradedCondition(instance, conditionNFDServiceDegraded, "nfd Service has been degraded")
+		}
 	}
 
 	// Check the status of the NFD Operator worker ConfigMap

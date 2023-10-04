@@ -70,6 +70,13 @@ type NodeFeatureDiscoverySpec struct {
 	// as annotations, extended resources and taints) from the cluster nodes.
 	// +optional
 	PruneOnDelete bool `json:"prunerOnDelete"`
+
+	// GrpcMode defines whether the NFD-master should be deployed in gRPC mode
+	// or not. If enabled, the Operator will deploy an NFD-Master in gRPC mode
+	// that will listen for incoming gRPC requests and disable the NodeFeature
+	// API controller.
+	// +optional
+	GrpcMode bool `json:"grpcMode"`
 }
 
 // OperandSpec describes configuration options for the operand

@@ -4,7 +4,6 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
-    api-approved.kubernetes.io: unapproved, experimental-only
   creationTimestamp: null
   name: nodefeaturediscoveries.nfd.kubernetes.io
 spec:
@@ -45,6 +44,12 @@ spec:
                   type: string
                 nullable: true
                 type: array
+              grpcMode:
+                description: GrpcMode defines whether the NFD-master should be deployed
+                  in gRPC mode or not. If enabled, the Operator will deploy an NFD-Master
+                  in gRPC mode that will listen for incoming gRPC requests and disable
+                  the NodeFeature API controller.
+                type: boolean
               instance:
                 description: Instance name. Used to separate annotation namespaces
                   for multiple parallel deployments.

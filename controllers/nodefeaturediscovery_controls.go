@@ -451,18 +451,24 @@ func Deployment(n NFD) (ResourceStatus, error) {
 	}
 
 	var args []string
-	port := defaultServicePort
 
-	// If the operand service port has already been defined,
-	// then set "port" to the defined port. Otherwise, it is
-	// ok to just use the defaultServicePort value
-	if n.ins.Spec.Operand.ServicePort != 0 {
-		port = n.ins.Spec.Operand.ServicePort
+	if n.ins.Spec.GrpcMode && obj.Name == nfdMasterApp {
+		// Disable NodeFeature API
+		args = append(args, "-enable-nodefeature-api=false")
+
+		port := defaultServicePort
+
+		// If the operand service port has already been defined,
+		// then set "port" to the defined port. Otherwise, it is
+		// ok to just use the defaultServicePort value
+		if n.ins.Spec.Operand.ServicePort != 0 {
+			port = n.ins.Spec.Operand.ServicePort
+		}
+
+		// Now that the port has been determined, append it to
+		// the list of args
+		args = append(args, fmt.Sprintf("-port=%d", port))
 	}
-
-	// Now that the port has been determined, append it to
-	// the list of args
-	args = append(args, fmt.Sprintf("--port=%d", port))
 
 	// Check if running as instance. If not, then it is
 	// expected that n.ins.Spec.Instance will return ""
@@ -598,6 +604,11 @@ func Service(n NFD) (ResourceStatus, error) {
 	// It is assumed that the index has already been verified to be a
 	// Service object, so let's get the resource's Service object
 	obj := n.resources[state].Service
+
+	// Service is not needed if not running in gRPC mode
+	if !n.ins.Spec.GrpcMode {
+		return Ready, nil
+	}
 
 	// Update ports for the Service. If the service port has already
 	// been defined, then that value should be used. Otherwise, just
