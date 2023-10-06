@@ -171,6 +171,13 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return r.updateDegradedCondition(instance, conditionNFDWorkerServiceAccountDegraded, "nfd-worker service account has been degraded")
 	}
 
+	// Check the status of the NFD Operator Garbage Collector ServiceAccount
+	if rstatus, err := r.getGarbageCollectorServiceAccountConditions(ctx, instance); err != nil {
+		return r.updateDegradedCondition(instance, conditionFailedGettingNFDGcServiceAccount, err.Error())
+	} else if rstatus.isDegraded {
+		return r.updateDegradedCondition(instance, conditionNFDGcServiceAccountDegraded, "nfd-gc service account has been degraded")
+	}
+
 	// Check the status of the NFD Operator Master ServiceAccount
 	if rstatus, err := r.getMasterServiceAccountConditions(ctx, instance); err != nil {
 		return r.updateDegradedCondition(instance, conditionFailedGettingNFDMasterServiceAccount, err.Error())
@@ -185,18 +192,32 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return r.updateDegradedCondition(instance, conditionNFDRoleDegraded, "nfd-worker role has been degraded")
 	}
 
+	// Check the status of the NFD Operator cluster role for Garbage Collector
+	if rstatus, err := r.getGarbageCollectorClusterRoleConditions(ctx, instance); err != nil {
+		return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, err.Error())
+	} else if rstatus.isDegraded {
+		return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, "nfd-gc ClusterRole has been degraded")
+	}
+
 	// Check the status of the NFD Operator cluster role
 	if rstatus, err := r.getMasterClusterRoleConditions(ctx, instance); err != nil {
 		return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, err.Error())
 	} else if rstatus.isDegraded {
-		return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, "nfd ClusterRole has been degraded")
+		return r.updateDegradedCondition(instance, conditionNFDClusterRoleDegraded, "nfd-master ClusterRole has been degraded")
+	}
+
+	// Check the status of the NFD Operator cluster role binding for Garbage Collector
+	if rstatus, err := r.getGarbageCollectorClusterRoleBindingConditions(ctx, instance); err != nil {
+		return r.updateDegradedCondition(instance, conditionFailedGettingNFDClusterRoleBinding, err.Error())
+	} else if rstatus.isDegraded {
+		return r.updateDegradedCondition(instance, conditionNFDClusterRoleBindingDegraded, "nfd-gc ClusterRoleBinding has been degraded")
 	}
 
 	// Check the status of the NFD Operator cluster role binding
 	if rstatus, err := r.getMasterClusterRoleBindingConditions(ctx, instance); err != nil {
 		return r.updateDegradedCondition(instance, conditionFailedGettingNFDClusterRoleBinding, err.Error())
 	} else if rstatus.isDegraded {
-		return r.updateDegradedCondition(instance, conditionNFDClusterRoleBindingDegraded, "nfd ClusterRoleBinding has been degraded")
+		return r.updateDegradedCondition(instance, conditionNFDClusterRoleBindingDegraded, "nfd-master ClusterRoleBinding has been degraded")
 	}
 
 	// Check the status of the NFD Operator role binding
@@ -227,6 +248,15 @@ func (r *NodeFeatureDiscoveryReconciler) Reconcile(ctx context.Context, req ctrl
 		return r.updateProgressingCondition(instance, err.Error(), "nfd-worker Daemonset is progressing")
 	} else if rstatus.isDegraded {
 		return r.updateDegradedCondition(instance, err.Error(), "nfd-worker Daemonset has been degraded")
+	}
+
+	// Check the status of the NFD Operator Garbage Collector Deployment
+	if rstatus, err := r.getGarbageCollectorDeploymentConditions(ctx, instance); err != nil {
+		return r.updateDegradedCondition(instance, conditionFailedGettingNFDGcDeployment, err.Error())
+	} else if rstatus.isProgressing {
+		return r.updateProgressingCondition(instance, err.Error(), "nfd-gc Deployment is progressing")
+	} else if rstatus.isDegraded {
+		return r.updateDegradedCondition(instance, err.Error(), "nfd-gc Deployment has been degraded")
 	}
 
 	// Check the status of the NFD Operator Master Deployment
