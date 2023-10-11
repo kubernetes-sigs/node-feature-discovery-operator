@@ -5,86 +5,217 @@ metadata:
     alm-examples: |-
       [
         {
-          "apiVersion": "nfd.kubernetes.io/v1",
+          "apiVersion": "nfd.k8s-sigs.io/v1",
           "kind": "NodeFeatureDiscovery",
           "metadata": {
-            "name": "nfd-master-server",
+            "name": "nodefeaturediscovery-instance",
             "namespace": "node-feature-discovery-operator"
           },
           "spec": {
-            "instance": "",
-            "operand": {
-              "image": "gcr.io/k8s-staging-nfd/node-feature-discovery-operator:master",
-              "imagePullPolicy": "Always",
-              "servicePort": 12000
+            "enableNodeFeatureApi": true,
+            "fullnameOverride": "",
+            "gc": {
+              "affinity": {},
+              "annotations": {},
+              "deploymentAnnotations": {},
+              "enable": true,
+              "interval": "1h",
+              "nodeSelector": {},
+              "podSecurityContext": {},
+              "rbac": {
+                "create": true
+              },
+              "replicaCount": 1,
+              "resources": {},
+              "serviceAccount": {
+                "annotations": {},
+                "create": true,
+                "name": null
+              },
+              "tolerations": []
             },
-            "workerConfig": {
-              "configData": "#core:\n#  labelWhiteList:\n#  noPublish: false\n#  sleepInterval: 60s\n#  sources: [all]\n#  klog:\n#    addDirHeader: false\n#    alsologtostderr: false\n#    logBacktraceAt:\n#    logtostderr: true\n#    skipHeaders: false\n#    stderrthreshold: 2\n#    v: 0\n#    vmodule:\n##   NOTE: the following options are not dynamically run-time configurable\n##         and require a nfd-worker restart to take effect after being changed\n#    logDir:\n#    logFile:\n#    logFileMaxSize: 1800\n#    skipLogHeaders: false\n#sources:\n#  cpu:\n#    cpuid:\n##     NOTE: whitelist has priority over blacklist\n#      attributeBlacklist:\n#        - \"BMI1\"\n#        - \"BMI2\"\n#        - \"CLMUL\"\n#        - \"CMOV\"\n#        - \"CX16\"\n#        - \"ERMS\"\n#        - \"F16C\"\n#        - \"HTT\"\n#        - \"LZCNT\"\n#        - \"MMX\"\n#        - \"MMXEXT\"\n#        - \"NX\"\n#        - \"POPCNT\"\n#        - \"RDRAND\"\n#        - \"RDSEED\"\n#        - \"RDTSCP\"\n#        - \"SGX\"\n#        - \"SSE\"\n#        - \"SSE2\"\n#        - \"SSE3\"\n#        - \"SSE4.1\"\n#        - \"SSE4.2\"\n#        - \"SSSE3\"\n#      attributeWhitelist:\n#  kernel:\n#    kconfigFile: \"/path/to/kconfig\"\n#    configOpts:\n#      - \"NO_HZ\"\n#      - \"X86\"\n#      - \"DMI\"\n#  pci:\n#    deviceClassWhitelist:\n#      - \"0200\"\n#      - \"03\"\n#      - \"12\"\n#    deviceLabelFields:\n#      - \"class\"\n#      - \"vendor\"\n#      - \"device\"\n#      - \"subsystem_vendor\"\n#      - \"subsystem_device\"\n#  usb:\n#    deviceClassWhitelist:\n#      - \"0e\"\n#      - \"ef\"\n#      - \"fe\"\n#      - \"ff\"\n#    deviceLabelFields:\n#      - \"class\"\n#      - \"vendor\"\n#      - \"device\"\n#  custom:\n#    - name: \"my.kernel.feature\"\n#      matchOn:\n#        - loadedKMod: [\"example_kmod1\", \"example_kmod2\"]\n#    - name: \"my.pci.feature\"\n#      matchOn:\n#        - pciId:\n#            class: [\"0200\"]\n#            vendor: [\"15b3\"]\n#            device: [\"1014\", \"1017\"]\n#        - pciId :\n#            vendor: [\"8086\"]\n#            device: [\"1000\", \"1100\"]\n#    - name: \"my.usb.feature\"\n#      matchOn:\n#        - usbId:\n#          class: [\"ff\"]\n#          vendor: [\"03e7\"]\n#          device: [\"2485\"]\n#        - usbId:\n#          class: [\"fe\"]\n#          vendor: [\"1a6e\"]\n#          device: [\"089a\"]\n#    - name: \"my.combined.feature\"\n#      matchOn:\n#        - pciId:\n#            vendor: [\"15b3\"]\n#            device: [\"1014\", \"1017\"]\n#          loadedKMod : [\"vendor_kmod1\", \"vendor_kmod2\"]\n"
-            }
-          }
-        },
-        {
-          "apiVersion": "nfd.kubernetes.io/v1alpha1",
-          "kind": "NodeFeatureRule",
-          "metadata": {
-            "name": "my-sample-rule-object"
-          },
-          "spec": {
-            "rules": [
-              {
-                "labels": {
-                  "my-sample-feature": "true"
-                },
-                "matchFeatures": [
-                  {
-                    "feature": "kernel.loadedmodule",
-                    "matchExpressions": {
-                      "dummy": {
-                        "op": "Exists"
-                      }
-                    }
-                  },
-                  {
-                    "feature": "kernel.config",
-                    "matchExpressions": {
-                      "X86": {
-                        "op": "In",
-                        "value": [
-                          "y"
+            "image": {
+              "pullPolicy": "IfNotPresent",
+              "repository": "registry.k8s.io/nfd/node-feature-discovery"
+            },
+            "imagePullSecrets": [],
+            "master": {
+              "affinity": {
+                "nodeAffinity": {
+                  "preferredDuringSchedulingIgnoredDuringExecution": [
+                    {
+                      "preference": {
+                        "matchExpressions": [
+                          {
+                            "key": "node-role.kubernetes.io/master",
+                            "operator": "In",
+                            "values": [
+                              ""
+                            ]
+                          }
                         ]
-                      }
+                      },
+                      "weight": 1
+                    },
+                    {
+                      "preference": {
+                        "matchExpressions": [
+                          {
+                            "key": "node-role.kubernetes.io/control-plane",
+                            "operator": "In",
+                            "values": [
+                              ""
+                            ]
+                          }
+                        ]
+                      },
+                      "weight": 1
                     }
-                  }
-                ],
-                "name": "my sample rule"
-              }
-            ]
+                  ]
+                }
+              },
+              "annotations": {},
+              "config": null,
+              "crdController": null,
+              "denyLabelNs": [],
+              "deploymentAnnotations": {},
+              "enableTaints": false,
+              "extraLabelNs": [],
+              "featureApi": null,
+              "featureRulesController": null,
+              "instance": null,
+              "metricsPort": 8081,
+              "nfdApiParallelism": null,
+              "nodeSelector": {},
+              "podSecurityContext": {},
+              "port": 8080,
+              "rbac": {
+                "create": true
+              },
+              "replicaCount": 1,
+              "resourceLabels": [],
+              "resources": {},
+              "resyncPeriod": null,
+              "securityContext": {
+                "allowPrivilegeEscalation": false,
+                "capabilities": {
+                  "drop": [
+                    "ALL"
+                  ]
+                },
+                "readOnlyRootFilesystem": true,
+                "runAsNonRoot": true
+              },
+              "service": {
+                "port": 8080,
+                "type": "ClusterIP"
+              },
+              "serviceAccount": {
+                "annotations": {},
+                "create": true,
+                "name": null
+              },
+              "tolerations": [
+                {
+                  "effect": "NoSchedule",
+                  "key": "node-role.kubernetes.io/master",
+                  "operator": "Equal",
+                  "value": ""
+                },
+                {
+                  "effect": "NoSchedule",
+                  "key": "node-role.kubernetes.io/control-plane",
+                  "operator": "Equal",
+                  "value": ""
+                }
+              ]
+            },
+            "nameOverride": "",
+            "namespaceOverride": "",
+            "prometheus": {
+              "enable": false,
+              "labels": {}
+            },
+            "tls": {
+              "certManager": false,
+              "enable": false
+            },
+            "topologyUpdater": {
+              "affinity": {},
+              "annotations": {},
+              "config": null,
+              "createCRDs": false,
+              "daemonsetAnnotations": {},
+              "enable": false,
+              "kubeletConfigPath": null,
+              "kubeletPodResourcesSockPath": null,
+              "kubeletStateDir": "/var/lib/kubelet",
+              "metricsPort": 8081,
+              "nodeSelector": {},
+              "podSecurityContext": {},
+              "podSetFingerprint": true,
+              "rbac": {
+                "create": true
+              },
+              "resources": {},
+              "securityContext": {
+                "allowPrivilegeEscalation": false,
+                "capabilities": {
+                  "drop": [
+                    "ALL"
+                  ]
+                },
+                "readOnlyRootFilesystem": true,
+                "runAsUser": 0
+              },
+              "serviceAccount": {
+                "annotations": {},
+                "create": true,
+                "name": null
+              },
+              "tolerations": [],
+              "updateInterval": "60s",
+              "watchNamespace": "*"
+            },
+            "worker": {
+              "affinity": {},
+              "annotations": {},
+              "config": null,
+              "daemonsetAnnotations": {},
+              "metricsPort": 8081,
+              "mountUsrSrc": false,
+              "nodeSelector": {},
+              "podSecurityContext": {},
+              "priorityClassName": "",
+              "rbac": {
+                "create": true
+              },
+              "resources": {},
+              "securityContext": {
+                "allowPrivilegeEscalation": false,
+                "capabilities": {
+                  "drop": [
+                    "ALL"
+                  ]
+                },
+                "readOnlyRootFilesystem": true,
+                "runAsNonRoot": true
+              },
+              "serviceAccount": {
+                "annotations": {},
+                "create": true,
+                "name": null
+              },
+              "tolerations": []
+            }
           }
         }
       ]
     capabilities: Basic Install
-    categories: Integration & Delivery
-    containerImage: gcr.io/k8s-staging-nfd/node-feature-discovery-operator:master
-    createdAt: "2023-01-17T14:52:07Z"
-    description: |-
-      The Node Feature Discovery Operator manages the detection of hardware features and configuration in a Kubernetes cluster by labeling the nodes with hardware-specific information. The Node Feature Discovery (NFD) will label the host with node-specific attributes, like PCI cards, kernel, or OS version, and many more.
-
-      NFD consists  of the following software components:
-
-      The NFD Operator is based on the Operator Framework an open source toolkit to manage Kubernetes native applications, called Operators, in an effective, automated, and scalable way.
-
-      ##NFD-Master
-      NFD-Master is the daemon responsible for communication towards the Kubernetes API. That is, it receives labeling requests from the worker and modifies node objects accordingly.
-
-      ##NFD-Worker
-      NFD-Worker is a daemon responsible for feature detection. It then communicates the information to nfd-master which does the actual node labeling. One instance of nfd-worker is supposed to be running on each node of the cluster.
-
-      ##NFD-Topology-Updater
-      NFD-Topology-Updater is a daemon responsible for examining allocated resources on a worker node to account for resources available to be allocated to new pod on a per-zone basis (where a zone can be a NUMA node). It then communicates the information to nfd-master which does the NodeResourceTopology CR creation corresponding to all the nodes in the cluster. One instance of nfd-topology-updater is supposed to be running on each node of the cluster.
-    operators.operatorframework.io/builder: operator-sdk-v1.26.0+git
-    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
-    repository: https://github.com/kubernetes-sigs/node-feature-discovery-operator
-  name: nfd-operator.master
+    createdAt: "2023-10-09T19:11:28Z"
+    operators.operatorframework.io/builder: operator-sdk-v1.32.0
+    operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
+  name: node-feature-discovery-operator.v0.14.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -93,12 +224,12 @@ spec:
     - description: |
         The NodeFeatureDiscovery instance is the CustomResource being watched by the NFD-Operator, and holds all the needed information to setup the behaviour of the master and worker pods
       kind: NodeFeatureDiscovery
-      name: nodefeaturediscoveries.nfd.kubernetes.io
+      name: nodefeaturediscoveries.nfd.k8s-sigs.io
       version: v1
     - description: |
         NodeFeatureRule resource specifies a configuration for feature-based customization of node objects, such as node labeling.
       kind: NodeFeatureRule
-      name: nodefeaturerules.nfd.kubernetes.io
+      name: nodefeaturerules.nfd.k8s-sigs.io
       version: v1alpha1
     - description: |
         NodeResourceTopology resource describes node resources and their topology.
@@ -129,215 +260,6 @@ spec:
       clusterPermissions:
       - rules:
         - apiGroups:
-          - ""
-          resources:
-          - events
-          verbs:
-          - create
-          - update
-          - watch
-        - apiGroups:
-          - apps
-          resources:
-          - daemonsets
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - apps
-          resources:
-          - deployments
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - cert-manager.io
-          resources:
-          - certificates
-          verbs:
-          - get
-          - list
-          - watch
-        - apiGroups:
-          - cert-manager.io
-          resources:
-          - issuers
-          verbs:
-          - get
-          - list
-          - watch
-        - apiGroups:
-          - coordination.k8s.io
-          resources:
-          - leases
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - configmaps
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - namespaces
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - nodes
-          verbs:
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - nodes/status
-          verbs:
-          - get
-          - patch
-          - update
-        - apiGroups:
-          - ""
-          resources:
-          - pods
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - serviceaccounts
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - services
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - nfd.k8s-sigs.io
-          resources:
-          - nodefeaturerules
-          verbs:
-          - get
-          - list
-          - watch
-        - apiGroups:
-          - policy
-          resourceNames:
-          - nfd-worker
-          resources:
-          - podsecuritypolicies
-          verbs:
-          - use
-        - apiGroups:
-          - rbac.authorization.k8s.io
-          resources:
-          - clusterrolebindings
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - rbac.authorization.k8s.io
-          resources:
-          - clusterroles
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - rbac.authorization.k8s.io
-          resources:
-          - rolebindings
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - rbac.authorization.k8s.io
-          resources:
-          - roles
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - topology.node.k8s.io
-          resources:
-          - noderesourcetopologies
-          verbs:
-          - create
-          - get
-          - update
-        - apiGroups:
           - authentication.k8s.io
           resources:
           - tokenreviews
@@ -349,9 +271,15 @@ spec:
           - subjectaccessreviews
           verbs:
           - create
-        serviceAccountName: default
+        serviceAccountName: nfd-controller-manager
       deployments:
       - label:
+          app.kubernetes.io/component: manager
+          app.kubernetes.io/created-by: node-feature-discovery-operator
+          app.kubernetes.io/instance: controller-manager
+          app.kubernetes.io/managed-by: kustomize
+          app.kubernetes.io/name: deployment
+          app.kubernetes.io/part-of: node-feature-discovery-operator
           control-plane: controller-manager
         name: nfd-controller-manager
         spec:
@@ -362,49 +290,57 @@ spec:
           strategy: {}
           template:
             metadata:
+              annotations:
+                kubectl.kubernetes.io/default-container: manager
               labels:
                 control-plane: controller-manager
             spec:
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: kubernetes.io/arch
+                        operator: In
+                        values:
+                        - amd64
+                        - arm64
+                        - ppc64le
+                        - s390x
+                      - key: kubernetes.io/os
+                        operator: In
+                        values:
+                        - linux
               containers:
               - args:
                 - --secure-listen-address=0.0.0.0:8443
                 - --upstream=http://127.0.0.1:8080/
                 - --logtostderr=true
-                - --v=10
-                image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
+                - --v=0
+                image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1
                 name: kube-rbac-proxy
                 ports:
                 - containerPort: 8443
                   name: https
-                resources: {}
+                  protocol: TCP
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 128Mi
+                  requests:
+                    cpu: 5m
+                    memory: 64Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
                     drop:
                     - ALL
-                  runAsNonRoot: true
-                  seccompProfile:
-                    type: RuntimeDefault
               - args:
                 - --health-probe-bind-address=:8081
                 - --metrics-bind-address=127.0.0.1:8080
                 - --leader-elect
-                command:
-                - /node-feature-discovery-operator
-                env:
-                - name: WATCH_NAMESPACE
-                  valueFrom:
-                    fieldRef:
-                      fieldPath: metadata.annotations['olm.targetNamespaces']
-                - name: POD_NAME
-                  valueFrom:
-                    fieldRef:
-                      fieldPath: metadata.name
-                - name: OPERATOR_NAME
-                  value: cluster-nfd-operator
-                - name: NODE_FEATURE_DISCOVERY_IMAGE
-                  value: gcr.io/k8s-staging-nfd/node-feature-discovery:master-minimal
-                image: gcr.io/k8s-staging-nfd/node-feature-discovery-operator:master
+                - --leader-election-id=node-feature-discovery-operator
+                image: sigs.k8s.io/node-feature-discovery-operator:master
                 imagePullPolicy: Always
                 livenessProbe:
                   httpGet:
@@ -419,7 +355,13 @@ spec:
                     port: 8081
                   initialDelaySeconds: 5
                   periodSeconds: 10
-                resources: {}
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 128Mi
+                  requests:
+                    cpu: 10m
+                    memory: 64Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
@@ -427,17 +369,27 @@ spec:
                     - ALL
                   readOnlyRootFilesystem: true
                   runAsNonRoot: true
-                  runAsUser: 65534
                   seccompProfile:
                     type: RuntimeDefault
+              serviceAccountName: nfd-controller-manager
               terminationGracePeriodSeconds: 10
       permissions:
       - rules:
         - apiGroups:
           - ""
-          - coordination.k8s.io
           resources:
           - configmaps
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - patch
+          - delete
+        - apiGroups:
+          - coordination.k8s.io
+          resources:
           - leases
           verbs:
           - get
@@ -454,53 +406,7 @@ spec:
           verbs:
           - create
           - patch
-        - apiGroups:
-          - rbac.authorization.k8s.io
-          resources:
-          - roles
-          - rolebindings
-          - clusterroles
-          - clusterrolebindings
-          verbs:
-          - '*'
-        - apiGroups:
-          - ""
-          resources:
-          - pods
-          - services
-          - endpoints
-          - persistentvolumeclaims
-          - events
-          - configmaps
-          - secrets
-          - serviceaccounts
-          - nodes
-          verbs:
-          - '*'
-        - apiGroups:
-          - ""
-          resources:
-          - namespaces
-          verbs:
-          - get
-          - list
-          - watch
-        - apiGroups:
-          - apps
-          resources:
-          - deployments
-          - daemonsets
-          - replicasets
-          - statefulsets
-          verbs:
-          - '*'
-        - apiGroups:
-          - nfd.kubernetes.io
-          resources:
-          - '*'
-          verbs:
-          - '*'
-        serviceAccountName: default
+        serviceAccountName: nfd-controller-manager
     strategy: deployment
   installModes:
   - supported: false
@@ -529,4 +435,4 @@ spec:
   provider:
     name: kubernetes-sigs
   version: master
-  replaces: v0.6.0
+  replaces: v0.7.0

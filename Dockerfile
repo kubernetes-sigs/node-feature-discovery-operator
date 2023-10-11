@@ -1,40 +1,11 @@
-ARG BUILDER_IMAGE
-ARG BASE_IMAGE_DEBUG
-ARG BASE_IMAGE_PROD
-# Build the manager biinary
-FROM ${BUILDER_IMAGE} as builder
+FROM quay.io/operator-framework/helm-operator:v1.32.0
 
-WORKDIR /workspace
-# Copy the Go Modules manifests
-COPY go.mod go.sum ./
+LABEL io.k8s.display-name="node-feature-discovery-operator"
 
-# cache deps before building and copying source so that we don't need to re-download as much
-# and so that source changes don't invalidate our downloaded layer
-RUN go mod download
-
-# Build
-COPY . .
-RUN make build
-
-# Debug image for running the operator
-FROM ${BASE_IMAGE_DEBUG} as debug
-COPY --from=builder /workspace/node-feature-discovery-operator /
-COPY --from=builder /workspace/build/assets /opt/nfd
+ENV HOME=/opt/helm
+COPY watches.yaml ${HOME}/watches.yaml
+COPY nfd  ${HOME}/helm-charts
+WORKDIR ${HOME}
 
 # Run as unprivileged user
 USER 65534:65534
-
-ENTRYPOINT ["/node-feature-discovery-operator"]
-LABEL io.k8s.display-name="node-feature-discovery-operator"
-
-# Production image for running the operator
-FROM ${BASE_IMAGE_PROD} as prod
-COPY --from=builder /workspace/node-feature-discovery-operator /
-COPY --from=builder /workspace/build/assets /opt/nfd
-
-# Run as unprivileged user
-USER 65534:65534
-
-ENTRYPOINT ["/node-feature-discovery-operator"]
-LABEL io.k8s.display-name="node-feature-discovery-operator"
-

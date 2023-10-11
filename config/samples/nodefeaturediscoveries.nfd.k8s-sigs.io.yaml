@@ -1,0 +1,157 @@
+apiVersion: nfd.k8s-sigs.io/v1
+kind: NodeFeatureDiscovery
+metadata:
+  annotations:
+    helm.sdk.operatorframework.io/uninstall-wait: "true"
+  name: nodefeaturediscovery-instance
+  namespace: node-feature-discovery
+spec:
+  enableNodeFeatureApi: true
+  fullnameOverride: ""
+  gc:
+    affinity: {}
+    annotations: {}
+    deploymentAnnotations: {}
+    enable: true
+    interval: 1h
+    nodeSelector: {}
+    podSecurityContext: {}
+    rbac:
+      create: true
+    replicaCount: 1
+    resources: {}
+    serviceAccount:
+      annotations: {}
+      create: true
+      name: null
+    tolerations: []
+  image:
+    pullPolicy: IfNotPresent
+    repository: registry.k8s.io/nfd/node-feature-discovery
+  imagePullSecrets: []
+  master:
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+            - key: node-role.kubernetes.io/master
+              operator: In
+              values:
+              - ""
+          weight: 1
+        - preference:
+            matchExpressions:
+            - key: node-role.kubernetes.io/control-plane
+              operator: In
+              values:
+              - ""
+          weight: 1
+    annotations: {}
+    config: null
+    crdController: null
+    denyLabelNs: []
+    deploymentAnnotations: {}
+    enableTaints: false
+    extraLabelNs: []
+    featureApi: null
+    featureRulesController: null
+    instance: null
+    metricsPort: 8081
+    nfdApiParallelism: null
+    nodeSelector: {}
+    podSecurityContext: {}
+    port: 8080
+    rbac:
+      create: true
+    replicaCount: 1
+    resourceLabels: []
+    resources: {}
+    resyncPeriod: null
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+    service:
+      port: 8080
+      type: ClusterIP
+    serviceAccount:
+      annotations: {}
+      create: true
+      name: null
+    tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+      operator: Equal
+      value: ""
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Equal
+      value: ""
+  nameOverride: ""
+  namespaceOverride: ""
+  prometheus:
+    enable: false
+    labels: {}
+  tls:
+    certManager: false
+    enable: false
+  topologyUpdater:
+    affinity: {}
+    annotations: {}
+    config: null
+    createCRDs: false
+    daemonsetAnnotations: {}
+    enable: false
+    kubeletConfigPath: null
+    kubeletPodResourcesSockPath: null
+    kubeletStateDir: /var/lib/kubelet
+    metricsPort: 8081
+    nodeSelector: {}
+    podSecurityContext: {}
+    podSetFingerprint: true
+    rbac:
+      create: true
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsUser: 0
+    serviceAccount:
+      annotations: {}
+      create: true
+      name: null
+    tolerations: []
+    updateInterval: 60s
+    watchNamespace: '*'
+  worker:
+    affinity: {}
+    annotations: {}
+    config: null
+    daemonsetAnnotations: {}
+    metricsPort: 8081
+    mountUsrSrc: false
+    nodeSelector: {}
+    podSecurityContext: {}
+    priorityClassName: ""
+    rbac:
+      create: true
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+    serviceAccount:
+      annotations: {}
+      create: true
+      name: null
+    tolerations: []

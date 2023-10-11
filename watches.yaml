@@ -1,0 +1,6 @@
+# Use the 'create api' subcommand to add watches to this file.
+- group: nfd.k8s-sigs.io
+  version: v1
+  kind: NodeFeatureDiscovery
+  chart: helm-charts/node-feature-discovery
+#+kubebuilder:scaffold:watch

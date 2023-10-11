@@ -11,175 +11,168 @@ to define the behaviour of the Node Feature Discovery Operand,
 an example of the CustomResource:
 
 ```yaml
-apiVersion: nfd.kubernetes.io/v1
+apiVersion: nfd.k8s-sigs.io/v1
 kind: NodeFeatureDiscovery
 metadata:
-  name: nfd-master-server
-  namespace: node-feature-discovery-operator
+  name: nodefeaturediscovery-instance
+  namespace: node-feature-discovery
 spec:
-  instance: "" # instance is empty by default
-  #labelWhiteList: ""
-  #extraLabelNs:
-  #  - "example.com"
-  #resourceLabels:
-  #  - "example.com/resource"
-  operand:
-    namespace: node-feature-discovery-operator
-    image: gcr.io/k8s-staging-nfd/node-feature-discovery:master
-    imagePullPolicy: Always
-    servicePort: 12000
-  workerConfig:
-    configData: |
-      #core:
-      #  labelWhiteList:
-      #  noPublish: false
-      #  sleepInterval: 60s
-      #  featureSources: [all]
-      #  labelSources: [all]
-      #  klog:
-      #    addDirHeader: false
-      #    alsologtostderr: false
-      #    logBacktraceAt:
-      #    logtostderr: true
-      #    skipHeaders: false
-      #    stderrthreshold: 2
-      #    v: 0
-      #    vmodule:
-      ##   NOTE: the following options are not dynamically run-time configurable
-      ##         and require a nfd-worker restart to take effect after being changed
-      #    logDir:
-      #    logFile:
-      #    logFileMaxSize: 1800
-      #    skipLogHeaders: false
-      #sources:
-      #  cpu:
-      #    cpuid:
-      ##     NOTE: whitelist has priority over blacklist
-      #      attributeBlacklist:
-      #        - "BMI1"
-      #        - "BMI2"
-      #        - "CLMUL"
-      #        - "CMOV"
-      #        - "CX16"
-      #        - "ERMS"
-      #        - "F16C"
-      #        - "HTT"
-      #        - "LZCNT"
-      #        - "MMX"
-      #        - "MMXEXT"
-      #        - "NX"
-      #        - "POPCNT"
-      #        - "RDRAND"
-      #        - "RDSEED"
-      #        - "RDTSCP"
-      #        - "SGX"
-      #        - "SSE"
-      #        - "SSE2"
-      #        - "SSE3"
-      #        - "SSE4"
-      #        - "SSE42"
-      #        - "SSSE3"
-      #      attributeWhitelist:
-      #  kernel:
-      #    kconfigFile: "/path/to/kconfig"
-      #    configOpts:
-      #      - "NO_HZ"
-      #      - "X86"
-      #      - "DMI"
-      #  pci:
-      #    deviceClassWhitelist:
-      #      - "0200"
-      #      - "03"
-      #      - "12"
-      #    deviceLabelFields:
-      #      - "class"
-      #      - "vendor"
-      #      - "device"
-      #      - "subsystem_vendor"
-      #      - "subsystem_device"
-      #  usb:
-      #    deviceClassWhitelist:
-      #      - "0e"
-      #      - "ef"
-      #      - "fe"
-      #      - "ff"
-      #    deviceLabelFields:
-      #      - "class"
-      #      - "vendor"
-      #      - "device"
-      #  custom:
-      #    # The following feature demonstrates the capabilities of the matchFeatures
-      #    - name: "my custom rule"
-      #      labels:
-      #        my-ng-feature: "true"
-      #      # matchFeatures implements a logical AND over all matcher terms in the
-      #      # list (i.e. all of the terms, or per-feature matchers, must match)
-      #      matchFeatures:
-      #        - feature: cpu.cpuid
-      #          matchExpressions:
-      #            AVX512F: {op: Exists}
-      #        - feature: cpu.cstate
-      #          matchExpressions:
-      #            enabled: {op: IsTrue}
-      #        - feature: cpu.pstate
-      #          matchExpressions:
-      #            no_turbo: {op: IsFalse}
-      #            scaling_governor: {op: In, value: ["performance"]}
-      #        - feature: cpu.rdt
-      #          matchExpressions:
-      #            RDTL3CA: {op: Exists}
-      #        - feature: cpu.sst
-      #          matchExpressions:
-      #            bf.enabled: {op: IsTrue}
-      #        - feature: cpu.topology
-      #          matchExpressions:
-      #            hardware_multithreading: {op: IsFalse}
-      #
-      #        - feature: kernel.config
-      #          matchExpressions:
-      #            X86: {op: Exists}
-      #            LSM: {op: InRegexp, value: ["apparmor"]}
-      #        - feature: kernel.loadedmodule
-      #          matchExpressions:
-      #            e1000e: {op: Exists}
-      #        - feature: kernel.selinux
-      #          matchExpressions:
-      #            enabled: {op: IsFalse}
-      #        - feature: kernel.version
-      #          matchExpressions:
-      #            major: {op: In, value: ["5"]}
-      #            minor: {op: Gt, value: ["10"]}
-      #
-      #        - feature: storage.block
-      #          matchExpressions:
-      #            rotational: {op: In, value: ["0"]}
-      #            dax: {op: In, value: ["0"]}
-      #
-      #        - feature: network.device
-      #          matchExpressions:
-      #            operstate: {op: In, value: ["up"]}
-      #            speed: {op: Gt, value: ["100"]}
-      #
-      #        - feature: memory.numa
-      #          matchExpressions:
-      #            node_count: {op: Gt, value: ["2"]}
-      #        - feature: memory.nv
-      #          matchExpressions:
-      #            devtype: {op: In, value: ["nd_dax"]}
-      #            mode: {op: In, value: ["memory"]}
-      #
-      #        - feature: system.osrelease
-      #          matchExpressions:
-      #            ID: {op: In, value: ["fedora", "centos"]}
-      #        - feature: system.name
-      #          matchExpressions:
-      #            nodename: {op: InRegexp, value: ["^worker-X"]}
-      #
-      #        - feature: local.label
-      #          matchExpressions:
-      #            custom-feature-knob: {op: Gt, value: ["100"]}
+  # Default values copied from <project_dir>/helm-charts/node-feature-discovery/values.yaml
+  enableNodeFeatureApi: true
+  fullnameOverride: ""
+  gc:
+    affinity: {}
+    annotations: {}
+    deploymentAnnotations: {}
+    enable: true
+    interval: 1h
+    nodeSelector: {}
+    podSecurityContext: {}
+    rbac:
+      create: true
+    replicaCount: 1
+    resources: {}
+    serviceAccount:
+      annotations: {}
+      create: true
+      name: null
+    tolerations: []
+  image:
+    pullPolicy: IfNotPresent
+    repository: registry.k8s.io/nfd/node-feature-discovery
+  imagePullSecrets: []
+  master:
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+            - key: node-role.kubernetes.io/master
+              operator: In
+              values:
+              - ""
+          weight: 1
+        - preference:
+            matchExpressions:
+            - key: node-role.kubernetes.io/control-plane
+              operator: In
+              values:
+              - ""
+          weight: 1
+    annotations: {}
+    config: null
+    crdController: null
+    denyLabelNs: []
+    deploymentAnnotations: {}
+    enableTaints: false
+    extraLabelNs: []
+    featureApi: null
+    featureRulesController: null
+    instance: null
+    metricsPort: 8081
+    nfdApiParallelism: null
+    nodeSelector: {}
+    podSecurityContext: {}
+    port: 8080
+    rbac:
+      create: true
+    replicaCount: 1
+    resourceLabels: []
+    resources: {}
+    resyncPeriod: null
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+    service:
+      port: 8080
+      type: ClusterIP
+    serviceAccount:
+      annotations: {}
+      create: true
+      name: null
+    tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+      operator: Equal
+      value: ""
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Equal
+      value: ""
+  nameOverride: ""
+  namespaceOverride: ""
+  prometheus:
+    enable: false
+    labels: {}
+  tls:
+    certManager: false
+    enable: false
+  topologyUpdater:
+    affinity: {}
+    annotations: {}
+    config: null
+    createCRDs: false
+    daemonsetAnnotations: {}
+    enable: false
+    kubeletConfigPath: null
+    kubeletPodResourcesSockPath: null
+    kubeletStateDir: /var/lib/kubelet
+    metricsPort: 8081
+    nodeSelector: {}
+    podSecurityContext: {}
+    podSetFingerprint: true
+    rbac:
+      create: true
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsUser: 0
+    serviceAccount:
+      annotations: {}
+      create: true
+      name: null
+    tolerations: []
+    updateInterval: 60s
+    watchNamespace: '*'
+  worker:
+    affinity: {}
+    annotations: {}
+    config: null
+    daemonsetAnnotations: {}
+    metricsPort: 8081
+    mountUsrSrc: false
+    nodeSelector: {}
+    podSecurityContext: {}
+    priorityClassName: ""
+    rbac:
+      create: true
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+    serviceAccount:
+      annotations: {}
+      create: true
+      name: null
+    tolerations: []
 ```
 
-For more information about how to setup the `WorkerConfig` stanza,
-see
+For more information about how to setup the `worker.config`,
+see -
 [worker config reference](https://kubernetes-sigs.github.io/node-feature-discovery/{{site.operand_version}}/advanced/worker-configuration-reference.html)
+
+For more information about how to setup the `MasterConfig`,
+see -
+[master config reference](https://kubernetes-sigs.github.io/node-feature-discovery/v0.14/reference/master-configuration-reference.html)

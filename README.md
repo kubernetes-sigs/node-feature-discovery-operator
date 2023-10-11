@@ -42,7 +42,7 @@ namespaces.
 Create a NodeFeatureDiscovery instance
 
 ```bash
-kubectl apply -f config/samples/nfd.kubernetes.io_v1_nodefeaturediscovery.yaml
+kubectl apply -f config/samples/nfd.k8s-sigs.io_v1_nodefeaturediscovery.yaml
 ```
 
 ## Documentation

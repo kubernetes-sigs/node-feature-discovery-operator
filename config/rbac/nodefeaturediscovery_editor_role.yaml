@@ -2,10 +2,17 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: nodefeaturediscovery-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: node-feature-discovery-operator
+    app.kubernetes.io/part-of: node-feature-discovery-operator
+    app.kubernetes.io/managed-by: kustomize
   name: nodefeaturediscovery-editor-role
 rules:
 - apiGroups:
-  - nfd.kubernetes.io
+  - nfd.k8s-sigs.io
   resources:
   - nodefeaturediscoveries
   verbs:
@@ -17,17 +24,8 @@ rules:
   - update
   - watch
 - apiGroups:
-  - nfd.kubernetes.io
+  - nfd.k8s-sigs.io
   resources:
   - nodefeaturediscoveries/status
   verbs:
   - get
-# For nfd-worker
-- apiGroups:
-  - policy
-  resources:
-  - podsecuritypolicies
-  verbs:
-  - use
-  resourceNames:
-  - nfd-worker

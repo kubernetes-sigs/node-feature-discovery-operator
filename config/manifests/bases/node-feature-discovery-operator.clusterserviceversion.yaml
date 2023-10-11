@@ -1,0 +1,41 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: node-feature-discovery-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions: {}
+  description: '|-'
+  displayName: node-feature-discovery-operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - 'NFD consists  of the following software components:'
+  links:
+  - name: Node Feature Discovery Operator
+    url: https://node-feature-discovery-operator.domain
+  maturity: alpha
+  provider:
+    name: The Node Feature Discovery Operator manages the detection of hardware features
+      and configuration in a Kubernetes cluster by labeling the nodes with hardware-specific
+      information. The Node Feature Discovery (NFD) will label the host with node-specific
+      attributes, like PCI cards, kernel, or OS version, and many more.
+  version: 0.0.0

@@ -30,25 +30,11 @@ IMAGE_REGISTRY=<my registry>
 make image
 ```
 
-Or for the `debug` variant
-
-```bash
-IMAGE_REGISTRY=<my registry>
-make image-debug
-```
-
 #### Push the container image
 
 ```bash
 IMAGE_REGISTRY=<my registry>
 make push
-```
-
-Or for the `debug` variant
-
-```bash
-IMAGE_REGISTRY=<my registry>
-make push-debug
 ```
 
 Alternatively, instead of specifying variables on the command line,
@@ -67,7 +53,7 @@ make deploy
 Then create a NodeFeatureDiscovery CR by running
 
 ```bash
-kubectl apply -f config/samples/nfd.kubernetes.io_v1_nodefeaturediscovery.yaml
+kubectl apply -f config/samples/nfd.k8s-sigs.io_v1_nodefeaturediscovery.yaml
 ```
 
 ## Undeploy the operator

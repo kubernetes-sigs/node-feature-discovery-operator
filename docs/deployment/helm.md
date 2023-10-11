@@ -32,7 +32,7 @@ Helm chart allow to easily deploy and manage the NFD-operator.
 To install the latest stable version:
 
 ```bash
-export NFD_O_NS=nfd-operator
+export NFD_O_NS=node-feature-discovery-operator
 helm repo add nfd-operator https://kubernetes-sigs.github.io/node-feature-discovery-operator/charts
 helm repo update
 helm install nfd-operator/nfd-operator --namespace $NFD_O_NS --create-namespace --generate-name
@@ -44,26 +44,33 @@ repository and install from there.
 ```bash
 git clone https://github.com/kubernetes-sigs/node-feature-discovery-operator/
 cd node-feature-discovery-operator/deployment/helm
-export NFD_O_NS=nfd-operator
+export NFD_O_NS=node-feature-discovery-operator
 helm install nfd-operator ./nfd-operator/ --namespace $NFD_O_NS --create-namespace
 ```
 
 See the [configuration](#configuration) section below for instructions how to
 alter the deployment parameters.
 
+Create a NodeFeatureDiscovery instance
+
+```bash
+kubectl create ns node-feature-discovery
+kubectl apply -f config/samples/nodefeaturediscoveries.nfd.k8s-sigs.io.yaml
+```
+
 ## Configuration
 
 You can override values from `values.yaml` and provide a file with custom values:
 
 ```bash
-export NFD_O_NS=nfd-operator
+export NFD_O_NS=node-feature-discovery-operator
 helm install nfd-operator/nfd-operator -f <path/to/custom/values.yaml> --namespace $NFD_O_NS --create-namespace
 ```
 
 To specify each parameter separately you can provide them to helm install command:
 
 ```bash
-export NFD_O_NS=nfd-operator
+export NFD_O_NS=node-feature-discovery-operator
 helm install nfd-operator/nfd-operator --set nameOverride=NFDinstance --namespace $NFD_O_NS --create-namespace
 ```
 
@@ -72,7 +79,7 @@ helm install nfd-operator/nfd-operator --set nameOverride=NFDinstance --namespac
 To uninstall the `nfd-operator` deployment:
 
 ```bash
-export NFD_O_NS=nfd-operator
+export NFD_O_NS=node-feature-discovery-operator
 helm uninstall nfd-operator --namespace $NFD_O_NS
 ```
 
@@ -85,6 +92,8 @@ In order to tailor the deployment of the Node Feature Discovery to your cluster 
 We have introduced the following Chart parameters.
 
 ### General parameters
+
+These parameters are used to configure the NFD-operator deployment.
 
 | Name | Type | Default | description |
 | ---- | ---- | ------- | ----------- |
@@ -102,4 +111,5 @@ We have introduced the following Chart parameters.
 | `controller.image.repository` | string | `{{ site.container_image | split: ":" | first }}` | NFD-Operator image repository |
 | `controller.image.tag` | string | `{{ site.release }}` | NFD-Operator image tag |
 
+<!-- Links -->
 [rbac]: https://kubernetes.io/docs/reference/access-authn-authz/rbac/

@@ -4,9 +4,9 @@
 
 GO_CMD ?= go
 GO_FMT ?= gofmt
-GO_VERSION := $(shell awk '/^go /{print $$2}' go.mod|head -n1)
 CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 
+# Docs
 # Docker base command for working with html documentation.
 # Use host networking because 'jekyll serve' is stupid enough to use the
 # same site url than the "host" it binds to. Thus, all the links will be
@@ -22,19 +22,15 @@ SITE_BASEURL ?=
 SITE_DESTDIR ?= _site
 JEKYLL_OPTS := -d '$(SITE_DESTDIR)' $(if $(SITE_BASEURL),-b '$(SITE_BASEURL)',)
 
+# App
 # VERSION defines the project version for the bundle.
-# Update this value when you upgrade the version of your project.
-# To re-generate a bundle for another specific version without changing the standard setup, you can:
-# - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.2.1)
-# - use environment variables to overwrite this value (e.g export VERSION=0.2.1)
-VERSION := $(shell git describe --tags --dirty --always)
-BUNDLE_VERSION := $(shell git tag | sort -V | tail -1 | awk '{print substr($$1,2); }')
+VERSION ?= $(shell git describe --tags --dirty --always)
 
 # CHANNELS define the bundle channels used in the bundle.
-# Add a new line here if you would like to change its default config. (E.g CHANNELS = "preview,fast,stable")
+# Add a new line here if you would like to change its default config. (E.g CHANNELS = "candidate,fast,stable")
 # To re-generate a bundle for other specific channels without changing the standard setup, you can:
-# - use the CHANNELS as arg of the bundle target (e.g make bundle CHANNELS=preview,fast,stable)
-# - use environment variables to overwrite this value (e.g export CHANNELS="preview,fast,stable")
+# - use the CHANNELS as arg of the bundle target (e.g make bundle CHANNELS=candidate,fast,stable)
+# - use environment variables to overwrite this value (e.g export CHANNELS="candidate,fast,stable")
 ifneq ($(origin CHANNELS), undefined)
 BUNDLE_CHANNELS := --channels=$(CHANNELS)
 endif
@@ -49,10 +45,6 @@ BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
 endif
 BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
-# BUNDLE_IMG defines the image:tag used for the bundle.
-# You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= controller-bundle:$(VERSION)
-
 # Image URL to use all building/pushing image targets
 IMAGE_BUILD_CMD ?= docker build
 IMAGE_PUSH_CMD ?= docker push
@@ -64,142 +56,199 @@ IMAGE_EXTRA_TAG_NAMES ?=
 IMAGE_REPO ?= $(IMAGE_REGISTRY)/$(IMAGE_NAME)
 IMAGE_TAG ?= $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
-BUILDER_IMAGE ?= golang:$(GO_VERSION)-bullseye
-BASE_IMAGE_DEBUG ?= debian:buster-slim
-BASE_IMAGE_PROD ?= gcr.io/distroless/base
 
-IMAGE_TAG_RBAC_PROXY ?= gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
+# BUNDLE_IMG defines the image:tag used for the bundle.
+# You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
+BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 
-# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd"
+# BUNDLE_GEN_FLAGS are the flags passed to the operator-sdk generate bundle command
+BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 
-# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell $(GO_CMD) env GOBIN))
-GOBIN=$(shell $(GO_CMD) env GOPATH)/bin
-else
-GOBIN=$(shell $(GO_CMD) env GOBIN)
+# USE_IMAGE_DIGESTS defines if images are resolved via tags or digests
+# You can enable this value if you would like to use SHA Based Digests
+# To enable set flag to true
+USE_IMAGE_DIGESTS ?= false
+ifeq ($(USE_IMAGE_DIGESTS), true)
+	BUNDLE_GEN_FLAGS += --use-image-digests
 endif
 
-GOOS=linux
+# Set the Operator SDK version to use. By default, what is installed on the system is used.
+# This is useful for CI or a project to utilize a specific version of the operator-sdk toolkit.
+OPERATOR_SDK_VERSION ?= v1.32.0
 
-PACKAGE=sigs.k8s.io/node-feature-discovery-operator
-MAIN_PACKAGE=main.go
-BIN=node-feature-discovery-operator
-LDFLAGS = -ldflags "-s -w -X sigs.k8s.io/node-feature-discovery-operator/pkg/version.version=$(VERSION)"
+# Image URL to use all building/pushing image targets
+IMG ?= $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 
-PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+.PHONY: all
+all: image
 
-all: build
+##@ General
 
-# Run tests
-ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin
-test: generate fmt vet manifests
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.0/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); $(GO_CMD) test ./... -coverprofile cover.out
-go_mod:
-	@$(GO_CMD) mod download
+# The help target prints out all targets with their descriptions organized
+# beneath their categories. The categories are represented by '##@' and the
+# target descriptions by '##'. The awk commands is responsible for reading the
+# entire set of makefiles included in this invocation, looking for lines of the
+# file as xyz: ## something, and then pretty-format the target and help. Then,
+# if there's a line with ##@ something, that gets pretty-printed as a category.
+# More info on the usage of ANSI control characters for terminal formatting:
+# https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
+# More info on the awk command:
+# http://linuxcommand.org/lc3_adv_awk.php
 
-# Build binary
-build: go_mod
-	@GOOS=$(GOOS) GO111MODULE=on CGO_ENABLED=0 $(GO_CMD) build -o $(BIN) $(LDFLAGS) $(MAIN_PACKAGE)
+.PHONY: help
+help: ## Display this help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-# Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate fmt vet manifests
-	$(GO_CMD) run ./main.go
+##@ Build
 
-# Install CRDs into a cluster
-install: manifests kustomize
-	$(KUSTOMIZE) build config/crd | kubectl apply -f -
+.PHONY: run
+run: helm-operator ## Run against the configured Kubernetes cluster in ~/.kube/config
+	$(HELM_OPERATOR) run
 
-# Uninstall CRDs from a cluster
-uninstall: manifests kustomize
-	$(KUSTOMIZE) build config/crd | kubectl delete -f -
+# Build the container image
+.PHONY: image
+image:
+	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG) \
+		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)) \
+		$(IMAGE_BUILD_EXTRA_OPTS) ./
 
-clean-manifests = (cd config/manager && $(KUSTOMIZE) edit set image controller=registry.k8s.io/nfd/node-feature-discovery-operator:0.4.2)
-
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: kustomize
-	cd $(PROJECT_DIR)/config/manager && \
-		$(KUSTOMIZE) edit set image controller=${IMAGE_TAG}
-	cd $(PROJECT_DIR)/config/default && \
-		$(KUSTOMIZE) edit set image kube-rbac-proxy=${IMAGE_TAG_RBAC_PROXY}
-	$(KUSTOMIZE) build config/default | kubectl apply -f -
-	@$(call clean-manifests)
-
-# UnDeploy controller from the configured Kubernetes cluster in ~/.kube/config
-undeploy:
-	$(KUSTOMIZE) build config/default | kubectl delete -f -
-
-# Generate manifests e.g. CRD, RBAC etc.
-manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-
-# Run go fmt against code
-fmt:
-	@$(GO_FMT) -w -l $$(find . -name '*.go')
-
-# Run go vet against code
-vet:
-	$(GO_CMD)  vet ./...
-
-verify:	verify-gofmt ci-lint
-
-verify-gofmt:
-	@./scripts/verify-gofmt.sh
-
-ci-lint:
-	golangci-lint run --timeout 5m0s
-
-mdlint:
-	${CONTAINER_RUN_CMD} \
-	--rm \
-	--volume "${PWD}:/workdir:ro,z" \
-	--workdir /workdir \
-	ruby:slim \
-	/workdir/scripts/test-infra/mdlint.sh
-
-clean:
-	$(GO_CMD)  clean
-	rm -f $(BIN)
+# Push the container image
+.PHONY: push
+push:
+	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)
+	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
 
 # clean NFD labels on all nodes
 # devel only
 clean-labels:
 	kubectl get no -o yaml | sed -e '/^\s*nfd.node.kubernetes.io/d' -e '/^\s*feature.node.kubernetes.io/d' | kubectl replace -f -
 
-# Generate code
-generate: controller-gen
-	$(CONTROLLER_GEN) object:headerFile="utils/boilerplate.go.txt" paths="./..."
+##@ Deployment
 
-# Build the container image
-image:
-	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG) \
-		--target prod \
-		--build-arg BUILDER_IMAGE=$(BUILDER_IMAGE) \
-		--build-arg BASE_IMAGE_PROD=$(BASE_IMAGE_PROD) \
-		--build-arg BASE_IMAGE_DEBUG=$(BASE_IMAGE_DEBUG) \
-		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)) \
-		$(IMAGE_BUILD_EXTRA_OPTS) ./
+.PHONY: install
+install: kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 
-image-debug:
-	$(IMAGE_BUILD_CMD) -t $(IMAGE_TAG)-debug \
-		--target debug \
-		--build-arg BUILDER_IMAGE=$(BUILDER_IMAGE) \
-		--build-arg BASE_IMAGE_PROD=$(BASE_IMAGE_PROD) \
-		--build-arg BASE_IMAGE_DEBUG=$(BASE_IMAGE_DEBUG) \
-		$(foreach tag,$(IMAGE_EXTRA_TAGS),-t $(tag)-debug) \
-		$(IMAGE_BUILD_EXTRA_OPTS) ./
+.PHONY: uninstall
+uninstall: kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
-# Push the container image
-push:
-	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)
-	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag; done
+.PHONY: deploy
+deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
-push-debug:
-	$(IMAGE_PUSH_CMD) $(IMAGE_TAG)-debug
-	for tag in $(IMAGE_EXTRA_TAGS); do $(IMAGE_PUSH_CMD) $$tag-debug; done
+.PHONY: undeploy
+undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build config/default | kubectl delete -f -
 
+OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
+ARCH := $(shell uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+
+.PHONY: kustomize
+KUSTOMIZE = $(shell pwd)/bin/kustomize
+kustomize: ## Download kustomize locally if necessary.
+ifeq (,$(wildcard $(KUSTOMIZE)))
+ifeq (,$(shell which kustomize 2>/dev/null))
+	@{ \
+	set -e ;\
+	mkdir -p $(dir $(KUSTOMIZE)) ;\
+	curl -sSLo - https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.7/kustomize_v4.5.7_$(OS)_$(ARCH).tar.gz | \
+	tar xzf - -C bin/ ;\
+	}
+else
+KUSTOMIZE = $(shell which kustomize)
+endif
+endif
+
+.PHONY: helm-operator
+HELM_OPERATOR = $(shell pwd)/bin/helm-operator
+helm-operator: ## Download helm-operator locally if necessary, preferring the $(pwd)/bin path over global if both exist.
+ifeq (,$(wildcard $(HELM_OPERATOR)))
+ifeq (,$(shell which helm-operator 2>/dev/null))
+	@{ \
+	set -e ;\
+	mkdir -p $(dir $(HELM_OPERATOR)) ;\
+	curl -sSLo $(HELM_OPERATOR) https://github.com/operator-framework/operator-sdk/releases/download/v1.32.0/helm-operator_$(OS)_$(ARCH) ;\
+	chmod +x $(HELM_OPERATOR) ;\
+	}
+else
+HELM_OPERATOR = $(shell which helm-operator)
+endif
+endif
+
+.PHONY: operator-sdk
+OPERATOR_SDK ?= ./bin/operator-sdk
+operator-sdk: ## Download operator-sdk locally if necessary.
+ifeq (,$(wildcard $(OPERATOR_SDK)))
+ifeq (, $(shell which operator-sdk 2>/dev/null))
+	@{ \
+	set -e ;\
+	mkdir -p $(dir $(OPERATOR_SDK)) ;\
+	curl -sSLo $(OPERATOR_SDK) https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS)_$(ARCH) ;\
+	chmod +x $(OPERATOR_SDK) ;\
+	}
+else
+OPERATOR_SDK = $(shell which operator-sdk)
+endif
+endif
+
+.PHONY: bundle
+bundle: kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
+	$(OPERATOR_SDK) generate kustomize manifests -q
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
+	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
+	$(OPERATOR_SDK) bundle validate ./bundle
+
+.PHONY: bundle-build
+bundle-build: ## Build the bundle image.
+	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+
+.PHONY: bundle-push
+bundle-push: ## Push the bundle image.
+	$(MAKE) push IMG=$(BUNDLE_IMG)
+
+.PHONY: opm
+OPM = ./bin/opm
+opm: ## Download opm locally if necessary.
+ifeq (,$(wildcard $(OPM)))
+ifeq (,$(shell which opm 2>/dev/null))
+	@{ \
+	set -e ;\
+	mkdir -p $(dir $(OPM)) ;\
+	curl -sSLo $(OPM) https://github.com/operator-framework/operator-registry/releases/download/v1.23.0/$(OS)-$(ARCH)-opm ;\
+	chmod +x $(OPM) ;\
+	}
+else
+OPM = $(shell which opm)
+endif
+endif
+
+# A comma-separated list of bundle images (e.g. make catalog-build BUNDLE_IMGS=example.com/operator-bundle:v0.1.0,example.com/operator-bundle:v0.2.0).
+# These images MUST exist in a registry and be pull-able.
+BUNDLE_IMGS ?= $(BUNDLE_IMG)
+
+# The image tag given to the resulting catalog image (e.g. make catalog-build CATALOG_IMG=example.com/operator-catalog:v0.2.0).
+CATALOG_IMG ?= $(IMAGE_TAG_BASE)-catalog:v$(VERSION)
+
+# Set CATALOG_BASE_IMG to an existing catalog image tag to add $BUNDLE_IMGS to that image.
+ifneq ($(origin CATALOG_BASE_IMG), undefined)
+FROM_INDEX_OPT := --from-index $(CATALOG_BASE_IMG)
+endif
+
+# Build a catalog image by adding bundle images to an empty catalog using the operator package manager tool, 'opm'.
+# This recipe invokes 'opm' in 'semver' bundle add mode. For more information on add modes, see:
+# https://github.com/operator-framework/community-operators/blob/7f1438c/docs/packaging-operator.md#updating-your-existing-operator
+.PHONY: catalog-build
+catalog-build: opm ## Build a catalog image.
+	$(OPM) index add --container-tool docker --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
+
+# Push the catalog image.
+.PHONY: catalog-push
+catalog-push: ## Push a catalog image.
+	$(MAKE) push IMG=$(CATALOG_IMG)
+
+# Docs related targets
 site-build:
 	@mkdir -p docs/vendor/bundle
 	$(SITE_BUILD_CMD) sh -c '/usr/local/bin/bundle install && "$$BUNDLE_BIN/jekyll" build $(JEKYLL_OPTS)'
@@ -208,30 +257,10 @@ site-serve:
 	@mkdir -p docs/vendor/bundle
 	$(SITE_BUILD_CMD) sh -c '/usr/local/bin/bundle install && "$$BUNDLE_BIN/jekyll" serve $(JEKYLL_OPTS) -H 127.0.0.1'
 
-# Download controller-gen locally if necessary
-CONTROLLER_GEN = $(PROJECT_DIR)/bin/controller-gen
-controller-gen:
-	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0
-
-# Download kustomize locally if necessary
-KUSTOMIZE = $(PROJECT_DIR)/bin/kustomize
-kustomize:
-	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/kustomize/kustomize/v4@v4.5.2
-
-# Generate bundle manifests and metadata, then validate generated files.
-.PHONY: bundle
-bundle: manifests kustomize
-	operator-sdk generate kustomize manifests -q
-	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG)
-	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(BUNDLE_VERSION) $(BUNDLE_METADATA_OPTS)
-	operator-sdk bundle validate ./bundle
-
-# Build the bundle image.
-.PHONY: bundle-build
-bundle-build:
-	$(IMAGE_BUILD_CMD)  -f bundle.Dockerfile -t $(BUNDLE_IMG) .
-
-# push the bundle image.
-.PHONY: bundle-push
-bundle-push:
-	$(IMAGE_PUSH_CMD) $(BUNDLE_IMG)
+mdlint:
+	${CONTAINER_RUN_CMD} \
+	--rm \
+	--volume "${PWD}:/workdir:ro,z" \
+	--workdir /workdir \
+	ruby:slim \
+	/workdir/scripts/test-infra/mdlint.sh

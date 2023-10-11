@@ -14,3 +14,5 @@ spec:
   selector:
     control-plane: controller-manager
     {{- include "node-feature-discovery-operator.selectorLabels" . | nindent 4 }}
+status:
+  loadBalancer: {}
