@@ -122,7 +122,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	// If NFD-Topology-Updater was requested
 	if instance.Spec.TopologyUpdater {
 		// Attempt to delete Topology DaemonSet
-		err := wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+		err := wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 			err = r.deleteDaemonSet(ctx, instance.ObjectMeta.Namespace, nfdTopologyUpdaterApp)
 			if err != nil {
 				return false, interpretError(err, "Topology DaemonSet")
@@ -134,7 +134,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 			return err
 		}
 		// Attempt to delete the ClusterRole
-		err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+		err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 			err = r.deleteClusterRole(ctx, instance.ObjectMeta.Namespace, nfdTopologyUpdaterApp)
 			if err != nil {
 				return false, interpretError(err, "nfd-Topology-Updater ClusterRole")
@@ -146,7 +146,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 			return err
 		}
 		// Attempt to delete the ClusterRoleBinding
-		err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+		err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 			err = r.deleteClusterRoleBinding(ctx, instance.ObjectMeta.Namespace, nfdTopologyUpdaterApp)
 			if err != nil {
 				return false, interpretError(err, "ClusterRoleBinding")
@@ -158,7 +158,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 			return err
 		}
 		// Attempt to delete the Worker ServiceAccount
-		err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+		err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 			err = r.deleteServiceAccount(ctx, instance.ObjectMeta.Namespace, nfdTopologyUpdaterApp)
 			if err != nil {
 				return false, interpretError(err, "worker ServiceAccount")
@@ -172,7 +172,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete worker DaemonSet
-	err := wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err := wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteDaemonSet(ctx, instance.ObjectMeta.Namespace, nfdWorkerApp)
 		if err != nil {
 			return false, interpretError(err, "worker DaemonSet")
@@ -185,7 +185,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete master Deployment
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteDeployment(ctx, instance.ObjectMeta.Namespace, nfdMasterApp)
 		if err != nil {
 			return false, interpretError(err, "master Deployment")
@@ -198,7 +198,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete the Service
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteService(ctx, instance.ObjectMeta.Namespace, nfdMasterApp)
 		if err != nil {
 			return false, interpretError(err, "nfd-master Service")
@@ -211,7 +211,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete the Role
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteRole(ctx, instance.ObjectMeta.Namespace, nfdWorkerApp)
 		if err != nil {
 			return false, interpretError(err, "nfd-worker Role")
@@ -224,7 +224,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete the ClusterRole
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteClusterRole(ctx, instance.ObjectMeta.Namespace, nfdMasterApp)
 		if err != nil {
 			return false, interpretError(err, "nfd-master ClusterRole")
@@ -237,7 +237,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete the RoleBinding
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteRoleBinding(ctx, instance.ObjectMeta.Namespace, nfdWorkerApp)
 		if err != nil {
 			return false, interpretError(err, "nfd-worker RoleBinding")
@@ -250,7 +250,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete the ClusterRoleBinding
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteClusterRoleBinding(ctx, instance.ObjectMeta.Namespace, nfdMasterApp)
 		if err != nil {
 			return false, interpretError(err, "ClusterRoleBinding")
@@ -263,7 +263,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete the Worker ServiceAccount
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteServiceAccount(ctx, instance.ObjectMeta.Namespace, nfdWorkerApp)
 		if err != nil {
 			return false, interpretError(err, "worker ServiceAccount")
@@ -276,7 +276,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete the Master ServiceAccount
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteServiceAccount(ctx, instance.ObjectMeta.Namespace, nfdMasterApp)
 		if err != nil {
 			return false, interpretError(err, "master ServiceAccount")
@@ -289,7 +289,7 @@ func (r *NodeFeatureDiscoveryReconciler) deleteComponents(ctx context.Context, i
 	}
 
 	// Attempt to delete the Worker config map
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteConfigMap(ctx, instance.ObjectMeta.Namespace, nfdWorkerApp)
 		if err != nil {
 			return false, interpretError(err, "nfd-worker config map")
@@ -398,7 +398,7 @@ func deployPrune(ctx context.Context, r *NodeFeatureDiscoveryReconciler, instanc
 	}
 
 	// wait until job is finished and then delete it
-	err := wait.Poll(RetryInterval, time.Minute*3, func() (done bool, err error) {
+	err := wait.PollUntilContextTimeout(ctx, RetryInterval, time.Minute*3, false, func(ctx context.Context) (done bool, err error) {
 		job, err := r.getJob(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
 		if err != nil {
 			return false, err
@@ -414,7 +414,7 @@ func deployPrune(ctx context.Context, r *NodeFeatureDiscoveryReconciler, instanc
 
 	// delete job and RBAC objects
 	// Attempt to delete the Job
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteJob(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
 		if err != nil {
 			return false, interpretError(err, "Prune Job")
@@ -426,7 +426,7 @@ func deployPrune(ctx context.Context, r *NodeFeatureDiscoveryReconciler, instanc
 		return err
 	}
 	// Attempt to delete the ServiceAccount
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteServiceAccount(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
 		if err != nil {
 			return false, interpretError(err, "Prune ServiceAccount")
@@ -439,7 +439,7 @@ func deployPrune(ctx context.Context, r *NodeFeatureDiscoveryReconciler, instanc
 	}
 
 	// Attempt to delete the ClusterRole
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteClusterRole(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
 		if err != nil {
 			return false, interpretError(err, "Prune ClusterRole")
@@ -452,7 +452,7 @@ func deployPrune(ctx context.Context, r *NodeFeatureDiscoveryReconciler, instanc
 	}
 
 	// Attempt to delete the ClusterRoleBinding
-	err = wait.Poll(RetryInterval, Timeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, RetryInterval, Timeout, false, func(ctx context.Context) (done bool, err error) {
 		err = r.deleteClusterRoleBinding(ctx, instance.ObjectMeta.Namespace, nfdPruneApp)
 		if err != nil {
 			return false, interpretError(err, "Prune ClusterRoleBinding")
