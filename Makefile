@@ -143,6 +143,12 @@ fmt:
 vet:
 	$(GO_CMD)  vet ./...
 
+TESTS ?= ./...
+
+.PHONY: unit-test
+unit-test: vet ## Run tests.
+	$(GO_CMD) test $(TESTS) -coverprofile cover.out
+
 verify:	verify-gofmt ci-lint
 
 verify-gofmt:
@@ -169,8 +175,9 @@ clean-labels:
 	kubectl get no -o yaml | sed -e '/^\s*nfd.node.kubernetes.io/d' -e '/^\s*feature.node.kubernetes.io/d' | kubectl replace -f -
 
 # Generate code
-generate: controller-gen
+generate: controller-gen mockgen
 	$(CONTROLLER_GEN) object:headerFile="utils/boilerplate.go.txt" paths="./..."
+	$(GO_CMD) generate ./...
 
 # Build the container image
 image:
@@ -212,6 +219,15 @@ site-serve:
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/controller-gen
 controller-gen:
 	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0
+
+.PHONY: mockgen
+mockgen: ## Install mockgen locally.
+	$(GO_CMD) install go.uber.org/mock/mockgen@v0.3.0
+
+GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
+.PHONY: golangci-lint
+golangci-lint: ## Download golangci-lint locally if necessary.
+	@GOBIN=$(PROJECT_DIR)/bin  GO111MODULE=on $(GO_CMD) install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.1
 
 # Download kustomize locally if necessary
 KUSTOMIZE = $(PROJECT_DIR)/bin/kustomize
