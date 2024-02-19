@@ -1,0 +1,14 @@
+registry: local
+build-container-image: node-feature-discovery-operator-build
+
+containers:
+  node-feature-discovery-operator-build: Dockerfile.node-feature-discovery-operator-build
+volumes:
+    - $HOME/.cache/go-build:$HOME/.cache/go-build
+    - $HOME/go/pkg:/go/pkg
+    - $HOME/.cache/golangci-lint:$HOME/.cache/golangci-lint
+    - $HOME/.docker:$HOME/.docker
+env_file:
+  - skipper.env
+env:
+    GOCACHE: "/go/pkg/mod"
