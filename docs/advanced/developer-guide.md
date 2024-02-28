@@ -92,3 +92,29 @@ make clean-labels
 
 This will clean all labels referencing to
 `feature.node.kubernetes.io` and `nfd.node.kubernetes.io`
+
+## Using skipper utility
+
+Skipper is a tool that allows executing any target defined in
+the Makefile in the container enviroment, without any need to install project
+dependencies on the host.
+Skipper is used besides the Makefile, meaning: if somebody does not want
+to use skipper, he can run makefile commands as usual
+In order to use skipper, it must be installed once on the host, along with docker.
+You can use [skipper installation guide](https://github.com/Stratoscale/skipper)
+
+using Makefile commands without skipper:
+
+```bash
+make image
+make build
+make deploy
+```
+
+using Makefile commands with skipper
+
+```bash
+skipper make image
+skipper make build
+skipper make deploy
+```
