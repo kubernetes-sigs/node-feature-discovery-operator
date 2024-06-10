@@ -85,7 +85,7 @@ GOOS=linux
 PACKAGE=sigs.k8s.io/node-feature-discovery-operator
 MAIN_PACKAGE=main.go
 BIN=node-feature-discovery-operator
-LDFLAGS = -ldflags "-s -w -X sigs.k8s.io/node-feature-discovery-operator/pkg/version.version=$(VERSION)"
+LDFLAGS = -ldflags "-s -w -X main.version=$(VERSION)"
 
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 
