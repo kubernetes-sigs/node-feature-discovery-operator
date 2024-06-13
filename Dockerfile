@@ -19,7 +19,6 @@ RUN make build
 # Debug image for running the operator
 FROM ${BASE_IMAGE_DEBUG} as debug
 COPY --from=builder /workspace/node-feature-discovery-operator /
-COPY --from=builder /workspace/build/assets /opt/nfd
 
 # Run as unprivileged user
 USER 65534:65534
@@ -30,7 +29,6 @@ LABEL io.k8s.display-name="node-feature-discovery-operator"
 # Production image for running the operator
 FROM ${BASE_IMAGE_PROD} as prod
 COPY --from=builder /workspace/node-feature-discovery-operator /
-COPY --from=builder /workspace/build/assets /opt/nfd
 
 # Run as unprivileged user
 USER 65534:65534
