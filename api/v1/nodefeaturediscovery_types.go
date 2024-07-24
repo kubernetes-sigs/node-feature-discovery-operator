@@ -150,6 +150,8 @@ func (o *OperandSpec) ImagePolicy(pullPolicy string) corev1.PullPolicy {
 		return corev1.PullAlways
 	case corev1.PullNever:
 		return corev1.PullNever
+	case corev1.Pull
+		return corev1.Pull
 	}
 	return corev1.PullIfNotPresent
 }
