@@ -11,13 +11,15 @@ CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 # Use host networking because 'jekyll serve' is stupid enough to use the
 # same site url than the "host" it binds to. Thus, all the links will be
 # broken if we'd bind to 0.0.0.0
-JEKYLL_VERSION := 3.8
+RUBY_IMAGE_VERSION := 3.1
 JEKYLL_ENV ?= development
-SITE_BUILD_CMD := $(CONTAINER_RUN_CMD) --rm -i \
+SITE_BUILD_CMD := $(CONTAINER_RUN_CMD) --rm -i -u "`id -u`:`id -g`" \
+	$(shell [ -t 0 ] && echo '-t') \
 	-e JEKYLL_ENV=$(JEKYLL_ENV) \
-	--volume="$$PWD/docs:/srv/jekyll":Z \
-	--volume="$$PWD/docs/vendor/bundle:/usr/local/bundle":Z \
-	--network=host jekyll/jekyll:$(JEKYLL_VERSION)
+	--volume="$$PWD/docs:/work" \
+	--volume="$$PWD/docs/vendor/bundle:/usr/local/bundle" \
+	-w /work \
+	--network=host ruby:$(RUBY_IMAGE_VERSION)
 SITE_BASEURL ?=
 SITE_DESTDIR ?= _site
 JEKYLL_OPTS := -d '$(SITE_DESTDIR)' $(if $(SITE_BASEURL),-b '$(SITE_BASEURL)',)
@@ -209,11 +211,11 @@ push-debug:
 
 site-build:
 	@mkdir -p docs/vendor/bundle
-	$(SITE_BUILD_CMD) sh -c '/usr/local/bin/bundle install && "$$BUNDLE_BIN/jekyll" build $(JEKYLL_OPTS)'
+	$(SITE_BUILD_CMD) sh -c "bundle plugin install bundler-override && bundle install && jekyll build $(JEKYLL_OPTS)"
 
 site-serve:
 	@mkdir -p docs/vendor/bundle
-	$(SITE_BUILD_CMD) sh -c '/usr/local/bin/bundle install && "$$BUNDLE_BIN/jekyll" serve $(JEKYLL_OPTS) -H 127.0.0.1'
+	$(SITE_BUILD_CMD) sh -c "bundle plugin install bundler-override && bundle install && jekyll serve $(JEKYLL_OPTS) -H 127.0.0.1"
 
 # Download controller-gen locally if necessary
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/controller-gen
