@@ -26,8 +26,8 @@ spec:
       containers:
         - name: manager
           securityContext:
+            runAsUser: 65534
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
             allowPrivilegeEscalation: false
