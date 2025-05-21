@@ -23,4 +23,4 @@ If your repo has certain guidelines for contribution, put them here ahead of the
 ## Contact Information
 
 - [Slack channel](https://kubernetes.slack.com/messages/sig-node)
-- [Mailing list](https://groups.google.com/forum/#!forum/kubernetes-sig-node)
+- [Mailing list](https://groups.google.com/a/kubernetes.io/g/sig-node)
