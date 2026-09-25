@@ -223,7 +223,7 @@ controller-gen:
 
 .PHONY: mockgen
 mockgen: ## Install mockgen locally.
-	$(GO_CMD) install go.uber.org/mock/mockgen@v0.3.0
+	$(GO_CMD) install go.uber.org/mock/mockgen@v0.6.0
 
 GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
 .PHONY: golangci-lint
