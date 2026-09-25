@@ -219,7 +219,7 @@ site-serve:
 # Download controller-gen locally if necessary
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/controller-gen
 controller-gen:
-	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0
+	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.18.0
 
 .PHONY: mockgen
 mockgen: ## Install mockgen locally.
