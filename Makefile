@@ -233,7 +233,7 @@ golangci-lint: ## Download golangci-lint locally if necessary.
 # Download kustomize locally if necessary
 KUSTOMIZE = $(PROJECT_DIR)/bin/kustomize
 kustomize:
-	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/kustomize/kustomize/v4@v4.5.2
+	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/kustomize/kustomize/v5@v5.8.1
 
 # Generate bundle manifests and metadata, then validate generated files.
 .PHONY: bundle
