@@ -178,7 +178,7 @@ clean-labels:
 # Generate code
 generate: controller-gen mockgen
 	$(CONTROLLER_GEN) object:headerFile="utils/boilerplate.go.txt" paths="./..."
-	$(GO_CMD) generate ./...
+	PATH=$(PROJECT_DIR)/bin:$$PATH $(GO_CMD) generate ./...
 
 # Build the container image
 image:
@@ -223,7 +223,7 @@ controller-gen:
 
 .PHONY: mockgen
 mockgen: ## Install mockgen locally.
-	$(GO_CMD) install go.uber.org/mock/mockgen@v0.6.0
+	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install go.uber.org/mock/mockgen@v0.6.0
 
 GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
 .PHONY: golangci-lint
