@@ -4,7 +4,6 @@
 
 GO_CMD ?= go
 GO_FMT ?= gofmt
-GO_VERSION := $(shell awk '/^go /{print $$2}' go.mod|head -n1)
 CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 
 # Docker base command for working with html documentation.
@@ -66,8 +65,8 @@ IMAGE_EXTRA_TAG_NAMES ?=
 IMAGE_REPO ?= $(IMAGE_REGISTRY)/$(IMAGE_NAME)
 IMAGE_TAG ?= $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
-BUILDER_IMAGE ?= golang:$(GO_VERSION)-bullseye
-BASE_IMAGE_DEBUG ?= debian:buster-slim
+BUILDER_IMAGE ?= golang:1.26-trixie
+BASE_IMAGE_DEBUG ?= debian:bookworm-slim
 BASE_IMAGE_PROD ?= gcr.io/distroless/base
 
 IMAGE_TAG_RBAC_PROXY ?= gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
