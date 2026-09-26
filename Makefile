@@ -69,7 +69,6 @@ BUILDER_IMAGE ?= golang:1.26-trixie
 BASE_IMAGE_DEBUG ?= debian:bookworm-slim
 BASE_IMAGE_PROD ?= gcr.io/distroless/base
 
-IMAGE_TAG_RBAC_PROXY ?= gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd"
@@ -120,8 +119,6 @@ clean-manifests = (cd config/manager && $(KUSTOMIZE) edit set image controller=r
 deploy: kustomize
 	cd $(PROJECT_DIR)/config/manager && \
 		$(KUSTOMIZE) edit set image controller=${IMAGE_TAG}
-	cd $(PROJECT_DIR)/config/default && \
-		$(KUSTOMIZE) edit set image kube-rbac-proxy=${IMAGE_TAG_RBAC_PROXY}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 	@$(call clean-manifests)
 
