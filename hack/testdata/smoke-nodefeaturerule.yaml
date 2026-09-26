@@ -1,0 +1,20 @@
+# NodeFeatureRule used by hack/kind-smoke.sh. It matches on every Linux node
+# (every kernel has a major version of at least 1), so its label and its
+# extended resource must show up on every node once nfd-master processes it.
+# It uses the Ge operator on purpose: CRDs older than NFD v0.19.0 reject it,
+# so applying the rule fails when the operand CRDs are stale.
+apiVersion: nfd.k8s-sigs.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: nfd-operator-smoke
+spec:
+  rules:
+    - name: "nfd-operator smoke"
+      labels:
+        "nfd-operator-smoke": "true"
+      extendedResources:
+        example.com/nfd-operator-smoke: "1"
+      matchFeatures:
+        - feature: kernel.version
+          matchExpressions:
+            major: {op: Ge, value: ["1"]}
