@@ -235,13 +235,41 @@ KUSTOMIZE = $(PROJECT_DIR)/bin/kustomize
 kustomize:
 	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/kustomize/kustomize/v5@v5.8.1
 
+# Download operator-sdk locally if necessary.
+# v1.37.0 is the last release with the go.kubebuilder.io/v3 plugin that
+# PROJECT declares; v1.38.0 removed the go/v2 and go/v3 layouts.
+# The binary is checked against the SHA-256 from that release's checksums.txt,
+# pinned here so a changed download is rejected. Update the sums with the
+# version.
+OPERATOR_SDK_VERSION ?= v1.37.0
+OPERATOR_SDK_SHA256_linux_amd64 = 20da1fcba9ef70b1e23283ae820a2c3387b529f04ce09cf318597b33f5d59a52
+OPERATOR_SDK_SHA256_linux_arm64 = df746275d76c0570f00de57128a063e1118dd67c7235a12cb84d7e0ade93098a
+OPERATOR_SDK_SHA256_darwin_amd64 = ca3e4028cd62f21f4ed988907b884be530098e7c40523e89046dd8c5b0178eb9
+OPERATOR_SDK_SHA256_darwin_arm64 = 2a58cd10865655937c3a298368b45379937e18be205f8cb429a4a1c51a5f92af
+OPERATOR_SDK_PLATFORM = $(shell $(GO_CMD) env GOOS)_$(shell $(GO_CMD) env GOARCH)
+OPERATOR_SDK_SHA256 = $(OPERATOR_SDK_SHA256_$(OPERATOR_SDK_PLATFORM))
+OPERATOR_SDK = $(PROJECT_DIR)/bin/operator-sdk
+.PHONY: operator-sdk
+operator-sdk:
+	@test -x $(OPERATOR_SDK) && $(OPERATOR_SDK) version | grep -q '"$(OPERATOR_SDK_VERSION)"' || { \
+		set -e; \
+		test -n "$(OPERATOR_SDK_SHA256)" || { echo "no pinned operator-sdk checksum for $(OPERATOR_SDK_PLATFORM)" >&2; exit 1; }; \
+		mkdir -p $(PROJECT_DIR)/bin; \
+		curl -sSfL -o $(OPERATOR_SDK).download https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OPERATOR_SDK_PLATFORM); \
+		sum=$$( (sha256sum $(OPERATOR_SDK).download 2>/dev/null || shasum -a 256 $(OPERATOR_SDK).download) | cut -d' ' -f1); \
+		if [ "$$sum" != "$(OPERATOR_SDK_SHA256)" ]; then \
+			rm -f $(OPERATOR_SDK).download; \
+			echo "operator-sdk checksum mismatch: got $$sum, want $(OPERATOR_SDK_SHA256)" >&2; exit 1; \
+		fi; \
+		chmod +x $(OPERATOR_SDK).download; mv -f $(OPERATOR_SDK).download $(OPERATOR_SDK); }
+
 # Generate bundle manifests and metadata, then validate generated files.
 .PHONY: bundle
-bundle: manifests kustomize
-	operator-sdk generate kustomize manifests -q
+bundle: manifests kustomize operator-sdk
+	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG)
-	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(BUNDLE_VERSION) $(BUNDLE_METADATA_OPTS)
-	operator-sdk bundle validate ./bundle
+	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(BUNDLE_VERSION) $(BUNDLE_METADATA_OPTS)
+	$(OPERATOR_SDK) bundle validate ./bundle
 
 # Build the bundle image.
 .PHONY: bundle-build
