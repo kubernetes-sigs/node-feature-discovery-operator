@@ -136,7 +136,16 @@ var _ = Describe("SetGCDeploymentAsDesired", func() {
 		nfdCR := nfdv1.NodeFeatureDiscovery{
 			Spec: nfdv1.NodeFeatureDiscoverySpec{
 				Operand: nfdv1.OperandSpec{
-					Image: "test-image",
+					Image:          "test-image",
+					GCNodeSelector: map[string]string{"gc-label": "gc-label"},
+					GCTolerations: []corev1.Toleration{
+						{
+							Key:      "key1",
+							Value:    "value1",
+							Operator: corev1.TolerationOpEqual,
+							Effect:   corev1.TaintEffectNoSchedule,
+						},
+					},
 				},
 			},
 		}

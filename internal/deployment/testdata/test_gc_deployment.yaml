@@ -23,6 +23,13 @@ spec:
       serviceAccountName: nfd-gc
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
+      tolerations:
+      - effect: NoSchedule
+        key: key1
+        value: value1
+        operator: Equal
+      nodeSelector:
+        gc-label: gc-label
       containers:
         - name: nfd-gc
           env:
