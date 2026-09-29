@@ -4,7 +4,6 @@
 
 GO_CMD ?= go
 GO_FMT ?= gofmt
-GO_VERSION := $(shell awk '/^go /{print $$2}' go.mod|head -n1)
 CONTAINER_RUN_CMD ?= docker run -u "`id -u`:`id -g`"
 
 # Docker base command for working with html documentation.
@@ -66,11 +65,10 @@ IMAGE_EXTRA_TAG_NAMES ?=
 IMAGE_REPO ?= $(IMAGE_REGISTRY)/$(IMAGE_NAME)
 IMAGE_TAG ?= $(IMAGE_REPO):$(IMAGE_TAG_NAME)
 IMAGE_EXTRA_TAGS := $(foreach tag,$(IMAGE_EXTRA_TAG_NAMES),$(IMAGE_REPO):$(tag))
-BUILDER_IMAGE ?= golang:$(GO_VERSION)-bullseye
-BASE_IMAGE_DEBUG ?= debian:buster-slim
+BUILDER_IMAGE ?= golang:1.26-trixie
+BASE_IMAGE_DEBUG ?= debian:bookworm-slim
 BASE_IMAGE_PROD ?= gcr.io/distroless/base
 
-IMAGE_TAG_RBAC_PROXY ?= gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd"
@@ -94,11 +92,8 @@ PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 all: build
 
 # Run tests
-ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin
 test: generate fmt vet manifests
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.0/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); $(GO_CMD) test ./... -coverprofile cover.out
+	$(GO_CMD) test ./... -coverprofile cover.out
 go_mod:
 	@$(GO_CMD) mod download
 
@@ -124,8 +119,6 @@ clean-manifests = (cd config/manager && $(KUSTOMIZE) edit set image controller=r
 deploy: kustomize
 	cd $(PROJECT_DIR)/config/manager && \
 		$(KUSTOMIZE) edit set image controller=${IMAGE_TAG}
-	cd $(PROJECT_DIR)/config/default && \
-		$(KUSTOMIZE) edit set image kube-rbac-proxy=${IMAGE_TAG_RBAC_PROXY}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 	@$(call clean-manifests)
 
@@ -133,9 +126,12 @@ deploy: kustomize
 undeploy:
 	$(KUSTOMIZE) build config/default | kubectl delete -f -
 
-# Generate manifests e.g. CRD, RBAC etc.
+# Generate manifests e.g. CRD etc.
+# No rbac generator: the operator's RBAC is maintained by hand in config/rbac
+# (and the Helm chart), and nothing consumes a role generated from the
+# +kubebuilder:rbac markers, so generating one only leaves an orphan file.
 manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
 fmt:
@@ -179,7 +175,7 @@ clean-labels:
 # Generate code
 generate: controller-gen mockgen
 	$(CONTROLLER_GEN) object:headerFile="utils/boilerplate.go.txt" paths="./..."
-	$(GO_CMD) generate ./...
+	PATH=$(PROJECT_DIR)/bin:$$PATH $(GO_CMD) generate ./...
 
 # Build the container image
 image:
@@ -220,29 +216,57 @@ site-serve:
 # Download controller-gen locally if necessary
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/controller-gen
 controller-gen:
-	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0
+	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.18.0
 
 .PHONY: mockgen
 mockgen: ## Install mockgen locally.
-	$(GO_CMD) install go.uber.org/mock/mockgen@v0.3.0
+	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install go.uber.org/mock/mockgen@v0.6.0
 
 GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
 .PHONY: golangci-lint
 golangci-lint: ## Download golangci-lint locally if necessary.
-	@GOBIN=$(PROJECT_DIR)/bin  GO111MODULE=on $(GO_CMD) install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
+	@GOBIN=$(PROJECT_DIR)/bin  GO111MODULE=on $(GO_CMD) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.4
 
 # Download kustomize locally if necessary
 KUSTOMIZE = $(PROJECT_DIR)/bin/kustomize
 kustomize:
-	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/kustomize/kustomize/v4@v4.5.2
+	@GOBIN=$(PROJECT_DIR)/bin GO111MODULE=on $(GO_CMD) install sigs.k8s.io/kustomize/kustomize/v5@v5.8.1
+
+# Download operator-sdk locally if necessary.
+# v1.37.0 is the last release with the go.kubebuilder.io/v3 plugin that
+# PROJECT declares; v1.38.0 removed the go/v2 and go/v3 layouts.
+# The binary is checked against the SHA-256 from that release's checksums.txt,
+# pinned here so a changed download is rejected. Update the sums with the
+# version.
+OPERATOR_SDK_VERSION ?= v1.37.0
+OPERATOR_SDK_SHA256_linux_amd64 = 20da1fcba9ef70b1e23283ae820a2c3387b529f04ce09cf318597b33f5d59a52
+OPERATOR_SDK_SHA256_linux_arm64 = df746275d76c0570f00de57128a063e1118dd67c7235a12cb84d7e0ade93098a
+OPERATOR_SDK_SHA256_darwin_amd64 = ca3e4028cd62f21f4ed988907b884be530098e7c40523e89046dd8c5b0178eb9
+OPERATOR_SDK_SHA256_darwin_arm64 = 2a58cd10865655937c3a298368b45379937e18be205f8cb429a4a1c51a5f92af
+OPERATOR_SDK_PLATFORM = $(shell $(GO_CMD) env GOOS)_$(shell $(GO_CMD) env GOARCH)
+OPERATOR_SDK_SHA256 = $(OPERATOR_SDK_SHA256_$(OPERATOR_SDK_PLATFORM))
+OPERATOR_SDK = $(PROJECT_DIR)/bin/operator-sdk
+.PHONY: operator-sdk
+operator-sdk:
+	@test -x $(OPERATOR_SDK) && $(OPERATOR_SDK) version | grep -q '"$(OPERATOR_SDK_VERSION)"' || { \
+		set -e; \
+		test -n "$(OPERATOR_SDK_SHA256)" || { echo "no pinned operator-sdk checksum for $(OPERATOR_SDK_PLATFORM)" >&2; exit 1; }; \
+		mkdir -p $(PROJECT_DIR)/bin; \
+		curl -sSfL -o $(OPERATOR_SDK).download https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OPERATOR_SDK_PLATFORM); \
+		sum=$$( (sha256sum $(OPERATOR_SDK).download 2>/dev/null || shasum -a 256 $(OPERATOR_SDK).download) | cut -d' ' -f1); \
+		if [ "$$sum" != "$(OPERATOR_SDK_SHA256)" ]; then \
+			rm -f $(OPERATOR_SDK).download; \
+			echo "operator-sdk checksum mismatch: got $$sum, want $(OPERATOR_SDK_SHA256)" >&2; exit 1; \
+		fi; \
+		chmod +x $(OPERATOR_SDK).download; mv -f $(OPERATOR_SDK).download $(OPERATOR_SDK); }
 
 # Generate bundle manifests and metadata, then validate generated files.
 .PHONY: bundle
-bundle: manifests kustomize
-	operator-sdk generate kustomize manifests -q
+bundle: manifests kustomize operator-sdk
+	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG)
-	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(BUNDLE_VERSION) $(BUNDLE_METADATA_OPTS)
-	operator-sdk bundle validate ./bundle
+	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle -q --overwrite --version $(BUNDLE_VERSION) $(BUNDLE_METADATA_OPTS)
+	$(OPERATOR_SDK) bundle validate ./bundle
 
 # Build the bundle image.
 .PHONY: bundle-build
